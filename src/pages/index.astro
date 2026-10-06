@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bodega Ejemplo · demo de chiq.es</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style is:global>
+:root{--bg:#ebe8e3;--ink:#141011;--wine:#6e1432;--mute:#857d78;--line:rgba(20,16,17,.14);--hud:#857d78}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body.oscuro{--ink:#f4efe8;--line:rgba(244,239,232,.3);--hud:rgba(244,239,232,.72)}
+header a,header .burger,.hud,.rail span{transition:color .6s,border-color .6s,background .6s}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+#fotos{position:fixed;inset:0;z-index:1;overflow:hidden;background:#1a1210}
+#fotos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity,filter}
+#fotos .sombra{position:absolute;inset:0;background:radial-gradient(ellipse 70% 45% at 50% 50%,rgba(10,6,6,.32),transparent 75%),linear-gradient(180deg,rgba(10,6,6,.5),rgba(10,6,6,.18) 45%,rgba(10,6,6,.55))}
+#escarcha{position:fixed;inset:0;z-index:2;pointer-events:none;-webkit-backdrop-filter:blur(var(--b,0px)) saturate(1.2);backdrop-filter:blur(var(--b,0px)) saturate(1.2);background:rgba(235,232,227,var(--a,0))}
+canvas#gl{position:fixed;inset:0;width:100vw;height:100vh;z-index:3;pointer-events:none}
+.grain{position:fixed;inset:-50%;width:200%;height:200%;z-index:5;pointer-events:none;opacity:.08;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation:grain .9s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:22px clamp(18px,3vw,40px)}
+.logo{font-family:'Instrument Serif',serif;font-size:32px;letter-spacing:-.02em;color:var(--ink);text-decoration:none;line-height:1}
+nav{display:flex;gap:26px;align-items:center}
+nav a{color:var(--ink);text-decoration:none;font-size:14px;position:relative}
+nav a:not(.btn)::after{content:'';position:absolute;left:0;right:100%;bottom:-3px;height:1px;background:currentColor;transition:right .45s cubic-bezier(.7,0,.2,1)}
+nav a:not(.btn):hover::after{right:0}
+.btn{border:1px solid var(--ink);border-radius:999px;padding:9px 18px;font-size:13px}
+.btn:hover{background:var(--ink);color:#141011}
+.burger{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;background:transparent}
+.burger i{display:block;width:14px;height:1px;background:var(--ink);box-shadow:0 5px 0 var(--ink);transform:translateY(-2px)}
+.hud{position:fixed;z-index:15;color:var(--hud);pointer-events:none;line-height:1.7}
+.hud.tl{top:90px;left:clamp(18px,3vw,40px)}.hud.tr{top:90px;right:clamp(18px,3vw,40px);text-align:right}
+.hud.bl{bottom:26px;left:clamp(18px,3vw,40px)}.hud.br{bottom:26px;right:clamp(18px,3vw,40px);text-align:right}
+.hud .ink{color:var(--ink)}
+.rail{position:fixed;z-index:15;right:clamp(18px,3vw,40px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.rail span{width:16px;height:1px;background:var(--line)}
+.rail span.on{width:40px;background:#a3456a}
+.nota{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:26px;color:var(--hud);pointer-events:none}
+main{position:relative;z-index:10}
+/* vuelo */
+#vuelo{height:520vh;position:relative}
+.pin{position:sticky;top:0;height:100vh;overflow:hidden}
+.beat{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(18px,7vw,120px);will-change:opacity,transform}
+.beat1{align-items:center;text-align:center;color:#f4efe8}
+.beat1 h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(48px,8.6vw,138px);line-height:.93;letter-spacing:-.035em;max-width:13ch;text-shadow:0 2px 40px rgba(0,0,0,.25)}
+.beat1 h1 em{font-style:italic;color:#f0b9cb}
+.beat1 .cue{position:absolute;bottom:60px;left:50%;transform:translateX(-50%);color:rgba(244,239,232,.8)}
+.beat1 .cue::after{content:'';display:block;width:1px;height:48px;background:#f4efe8;margin:12px auto 0;animation:cue 2.2s cubic-bezier(.7,0,.2,1) infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+.beat2{align-items:flex-start;max-width:none}
+.beat2 .caja{max-width:470px}
+.beat2 p.l{font-family:'Instrument Serif',serif;font-size:clamp(30px,3.4vw,52px);line-height:1.02;letter-spacing:-.02em}
+.beat2 p.l em{font-style:italic;color:var(--wine)}
+.beat2 .mono{color:var(--mute);margin-top:22px;display:block}
+.medio{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);color:#f4efe8;text-align:center;opacity:0}
+.medio .mono{color:rgba(244,239,232,.85);font-size:12px}
+/* pasos */
+section.scene{min-height:100vh;display:flex;align-items:center;padding:0 clamp(18px,7vw,120px);position:relative}
+.step{max-width:600px}
+.step .n{display:flex;gap:14px;align-items:center;color:var(--mute)}
+.step .n b{color:var(--wine);font-weight:500}
+.step .n::after{content:'';width:64px;height:1px;background:rgba(20,16,17,.14)}
+.step h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(42px,6.2vw,98px);line-height:.96;letter-spacing:-.03em;margin:24px 0;color:#141011}
+.step h2 em{font-style:italic;color:var(--wine)}
+.step p{font-size:clamp(16px,1.3vw,19px);line-height:1.55;color:#3a3334;max-width:38ch}
+.cta{display:inline-flex;align-items:center;gap:14px;margin-top:34px;font-size:15px;color:#141011;text-decoration:none}
+.cta .ar{width:46px;height:46px;border-radius:50%;border:1px solid #141011;display:grid;place-items:center;font-size:16px;transition:all .5s cubic-bezier(.7,0,.2,1)}
+.cta:hover .ar{background:var(--wine);border-color:var(--wine);color:#fff;transform:rotate(-45deg)}
+.tag{display:inline-block;margin-top:34px;padding:7px 13px;border:1px dashed var(--mute);border-radius:999px;color:var(--mute)}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em}
+.w>*{display:inline-block;transform:translateY(110%) rotate(4deg);transform-origin:left bottom;transition:transform 1.1s cubic-bezier(.16,.84,.24,1)}
+.in .w>*{transform:none}
+.fade{opacity:0;transform:translateY(22px);transition:opacity 1.1s .45s,transform 1.1s .45s cubic-bezier(.16,.84,.24,1)}
+.in .fade{opacity:1;transform:none}
+/* galería */
+.gal{height:320vh;position:relative}
+.gal-in{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.gal-head{padding:0 clamp(18px,7vw,120px);display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px}
+.gal-head h3{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(36px,4.4vw,66px);letter-spacing:-.025em;line-height:1;color:#141011}
+.track{display:flex;gap:26px;padding:0 clamp(18px,7vw,120px);will-change:transform}
+.panel{flex:0 0 min(430px,80vw);height:min(54vh,470px);border-radius:20px;background:rgba(255,255,255,.42);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.75);box-shadow:0 40px 80px -40px rgba(20,16,17,.35);padding:28px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;color:#141011;text-decoration:none;transition:transform .6s cubic-bezier(.16,.84,.24,1)}
+.panel:hover{transform:translateY(-8px)}
+.panel h4{font-family:'Instrument Serif',serif;font-weight:400;font-size:48px;letter-spacing:-.025em;line-height:1;margin-bottom:12px}
+.panel p{font-size:15px;color:#3a3334;max-width:30ch;line-height:1.5}
+.panel .idx{position:absolute;left:28px;top:28px;color:var(--mute)}
+.panel .new{position:absolute;right:28px;top:28px;color:var(--wine)}
+.panel .ph{position:absolute;left:0;right:0;top:0;height:52%;background-size:cover;background-position:center;opacity:.9;mask-image:linear-gradient(#000 40%,transparent)}
+footer{position:relative;z-index:10;padding:140px clamp(18px,7vw,120px) 40px;display:grid;gap:56px;background:var(--bg);color:#141011}
+footer .big{font-family:'Instrument Serif',serif;font-size:clamp(40px,6vw,96px);letter-spacing:-.03em;line-height:.95;max-width:14ch}
+footer .big em{font-style:italic;color:var(--wine)}
+footer .cols{display:flex;flex-wrap:wrap;gap:40px 80px;justify-content:space-between;border-top:1px solid rgba(20,16,17,.14);padding-top:28px;color:var(--mute)}
+footer .cols a{color:#141011;text-decoration:none;display:block;font-size:14px;line-height:2}
+#pre{position:fixed;inset:0;z-index:60;background:#141011;color:#f4efe8;display:grid;place-items:center;transition:opacity .9s .2s,visibility .9s .2s}
+#pre.out{opacity:0;visibility:hidden}
+#menu{position:fixed;inset:0;z-index:40;background:#141011;color:#f4efe8;clip-path:circle(0% at calc(100% - 62px) 43px);transition:clip-path 1s cubic-bezier(.7,0,.2,1);display:flex;flex-direction:column;justify-content:center;padding:0 clamp(18px,7vw,120px)}
+#menu.open{clip-path:circle(160% at calc(100% - 62px) 43px)}
+#menu a{font-family:'Instrument Serif',serif;font-size:clamp(42px,6.4vw,96px);color:#f4efe8;text-decoration:none;line-height:1.08;display:flex;gap:26px;align-items:baseline;transition:color .3s,padding .5s cubic-bezier(.16,.84,.24,1)}
+#menu a:hover{color:#d88aa6;padding-left:18px}
+#menu a small{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8d8580}
+#menu .seal{position:absolute;bottom:32px;left:clamp(18px,7vw,120px);color:#8d8580}
+#menu .close{position:absolute;top:22px;right:clamp(18px,3vw,40px);color:#f4efe8;background:none;border:1px solid #4a4244;border-radius:999px;padding:10px 18px;cursor:pointer}
+@media (max-width:860px){nav a{display:none}.hud.tr,.rail,.nota{display:none}.step h2{font-size:44px}}
+
+footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width:30ch}
+</style>
+</head>
+<body class="oscuro">
+<div id="pre"><div class="mono" id="preTxt">chiq ░░░░░░░░░░░░ 000</div></div>
+<div id="fotos" aria-hidden="true">
+  <img id="f1" src="https://images.unsplash.com/photo-1543418219-44e30b057fea?w=2000&q=75" alt="">
+  <img id="f2" src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=2000&q=75" alt="" style="opacity:0">
+  <div class="sombra" id="sombra"></div>
+</div>
+<div id="escarcha"></div>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="grain"></div>
+
+<header>
+  <a class="logo" href="/">Bodega Ejemplo</a>
+  <nav aria-label="Principal">
+    <a href="/">Historia</a><a href="/mercado/">El mercado en datos</a><a href="/como-esta-hecha/">Cómo está hecha</a>
+    <button class="burger" id="burger" aria-label="Abrir menú"><i></i></button>
+  </nav>
+</header>
+<div class="nota mono">Demo de chiq.es · Astro y motor propio WebGL2 (<span id="motorKB" class="ink">…</span>) · Bodega Ejemplo es ficticia</div>
+<div class="hud tl mono"><span class="ink">Bodega Ejemplo</span><br>Demo · bodega ficticia</div>
+<div class="hud tr mono">Datos del mercado<br><span class="ink">MAPA · 2025</span></div>
+<div class="hud bl mono"><span id="hudIdx" class="ink">[00/05]</span>&nbsp; <span id="hudName">APERTURA</span></div>
+<div class="hud br mono">Scroll <span id="hudPct" class="ink">000%</span></div>
+<div class="rail" id="rail"><span class="on"></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<main>
+  <section id="vuelo" data-name="APERTURA">
+    <div class="pin">
+      <div class="beat beat1" id="beat1">
+        <p class="mono" style="color:rgba(244,239,232,.8);margin-bottom:34px">Bodega Ejemplo — una bodega ficticia</p>
+        <h1>Cada botella empieza <em>en la cepa.</em></h1>
+        <div class="cue mono">Scroll</div>
+      </div>
+      <div class="medio" id="medio"><span class="mono">Del campo al dato</span></div>
+      <div class="beat beat2" id="beat2" style="opacity:0">
+        <div class="caja">
+          <p class="l">Una web de bodega que cuenta su historia <em>y enseña sus datos.</em></p>
+          <span class="mono">Demo de chiq.es · Astro, datos y tienda sin cabeza</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="scene" data-name="EL MERCADO EN DATOS"><div class="step">
+    <div class="n mono fade"><b>01</b> El mercado en datos</div>
+    <h2 class="split">Qué parte del vino compra <em>cada edad.</em></h2>
+    <p class="fade">Datos oficiales del MAPA, con la fuente de cada cifra. Una web de bodega también puede contar el mercado.</p>
+    <a class="cta fade" href="/mercado/"><span class="ar">→</span>Ver el mercado en datos</a>
+  </div></section>
+  <section class="scene" data-name="DE LA LADERA AL MUNDO"><div class="step">
+    <div class="n mono fade"><b>02</b> De la ladera al mundo</div>
+    <h2 class="split">De la ladera <em>al mundo.</em></h2>
+    <p class="fade">Cada mercado con su página y su idioma, generadas desde el mismo contenido.</p>
+    <span class="tag mono fade">Historia ficticia</span>
+  </div></section>
+  <section class="scene" data-name="ALREDEDOR DEL CLIENTE"><div class="step">
+    <div class="n mono fade"><b>03</b> Alrededor del cliente</div>
+    <h2 class="split">Enoturismo, club y tienda, <em>conectados.</em></h2>
+    <p class="fade">Cuando el cliente es el dato, cada visita, cada envío y cada socio del club alimentan lo mismo.</p>
+    <span class="tag mono fade">Ecosistema</span>
+  </div></section>
+  <section class="scene" data-name="CADA BOTELLA"><div class="step">
+    <div class="n mono fade"><b>04</b> Cada botella</div>
+    <h2 class="split">Cada botella, <em>con su ficha.</em></h2>
+    <p class="fade">La tienda vive en PrestaShop y la web la lee por su API. Así también un asistente de IA entiende cada vino.</p>
+    <a class="cta fade" href="/como-esta-hecha/"><span class="ar">→</span>Cómo está hecha</a>
+  </div></section>
+  <section class="scene" data-name="SIN CABEZA"><div class="step">
+    <div class="n mono fade"><b>05</b> Una web sin cabeza</div>
+    <h2 class="split">Una web <em>sin cabeza.</em></h2>
+    <p class="fade">Astro genera páginas rápidas y legibles. La historia, los datos y la tienda llegan desde donde viven.</p>
+    <a class="cta fade" href="/como-esta-hecha/"><span class="ar">→</span>Ver la arquitectura</a>
+  </div></section>
+
+  <section class="gal" id="gal">
+    <div class="gal-in">
+      <div class="gal-head"><h3>Bodega Ejemplo</h3><span class="mono" style="color:var(--mute)">Desliza →</span></div>
+      <div class="track" id="track">
+        <a class="panel" href="/"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=900&q=60)"></div><span class="idx mono">/01</span><h4>Historia</h4><p>Del viñedo a la botella, contado con scroll.</p></a>
+        <a class="panel" href="/mercado/"><span class="idx mono">/02</span><span class="new mono">Datos reales</span><h4>El mercado</h4><p>Qué parte del vino compra cada edad, con su fuente (MAPA).</p></a>
+        <a class="panel" href="/como-esta-hecha/"><span class="idx mono">/03</span><h4>Cómo está hecha</h4><p>Astro, datos en JSON y la tienda en PrestaShop por API.</p></a>
+        <div class="panel"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1543418219-44e30b057fea?w=900&q=60)"></div><span class="idx mono">/04</span><span class="new mono">Próximamente</span><h4>Tienda</h4><p>Los vinos de la bodega, servidos por PrestaShop.</p></div>
+        <div class="panel"><span class="idx mono">/05</span><span class="new mono">Próximamente</span><h4>Visitas</h4><p>Enoturismo con reserva y su dato.</p></div>
+        <div class="panel"><span class="idx mono">/06</span><span class="new mono">Próximamente</span><h4>Club</h4><p>Socios, envíos y lo que les gusta.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p class="big">Cada botella empieza <em>en la cepa.</em></p>
+  <div class="cols">
+    <div><span class="mono">Bodega Ejemplo</span><a href="/">Historia</a><a href="/mercado/">El mercado en datos</a><a href="/como-esta-hecha/">Cómo está hecha</a></div>
+    <div><span class="mono">La demo</span><span class="pie-t">Bodega Ejemplo es una bodega ficticia. Esta web es una demo de chiq.es y no vende nada.</span></div>
+    <div><span class="mono">Datos</span><span class="pie-t">MAPA · Panel de Consumo Alimentario en Hogares, con la fuente de cada cifra en su gráfico.</span></div>
+    <div><span class="mono">Imágenes</span><span class="pie-t">Fotos de viñedo de Unsplash, provisionales.</span><span class="mono" style="display:block;margin-top:14px">© 2026 chiq.es</span></div>
+  </div>
+</footer>
+
+<div id="menu" aria-hidden="true">
+  <button class="close mono" id="close">Cerrar</button>
+  <a href="/"><small>/01</small>Historia</a><a href="/mercado/"><small>/02</small>El mercado en datos</a>
+  <a href="/como-esta-hecha/"><small>/03</small>Cómo está hecha</a>
+  <div class="seal mono">Demo de chiq.es · Bodega Ejemplo es ficticia</div>
+</div>
+
+<script is:inline src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script is:inline type="module">
+/* ============================================================================================
+   Motor propio de partículas en WebGL2 (sin Three.js). Mismo shader, mismas formas y mismo
+   comportamiento que la maqueta con Three.js; solo cambia la «fontanería» con la tarjeta gráfica.
+   ============================================================================================ */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const tramo = (p, a, b) => clamp((p - a) / (b - a));
+const suave = (x) => x * x * (3 - 2 * x);
+
+/* ---------- texto ---------- */
+document.querySelectorAll('.split').forEach((el) => {
+  const frag = document.createDocumentFragment(); let k = 0;
+  el.childNodes.forEach((n) => n.textContent.split(/(\s+)/).forEach((w) => {
+    if (!w) return;
+    if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(' ')); return; }
+    const o = document.createElement('span'); o.className = 'w';
+    const i = document.createElement(n.nodeType === 1 ? n.tagName.toLowerCase() : 'span');
+    i.textContent = w; i.style.transitionDelay = (k++ * 0.055) + 's'; o.appendChild(i); frag.appendChild(o);
+  }));
+  el.innerHTML = ''; el.appendChild(frag);
+});
+const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && e.target.classList.add('in')), { threshold: 0.35 });
+document.querySelectorAll('section.scene').forEach((s) => io.observe(s));
+const menu = document.getElementById('menu');
+document.getElementById('burger').onclick = () => menu.classList.add('open');
+document.getElementById('close').onclick = () => menu.classList.remove('open');
+const GLIFOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/_·#';
+function descifrar(el, texto) {
+  const ini = performance.now();
+  const paso = (t) => { const p = Math.min(1, (t - ini) / 520), fijas = Math.floor(p * texto.length);
+    el.textContent = texto.split('').map((c, i) => (i < fijas || c === ' ') ? c : GLIFOS[(Math.random() * GLIFOS.length) | 0]).join('');
+    if (p < 1) requestAnimationFrame(paso); };
+  requestAnimationFrame(paso);
+}
+
+/* ---------- formas (idénticas a la maqueta con Three.js) ---------- */
+const N = 16000, R = Math.random;
+const esfera = (c, r) => { const u = R() * 2 - 1, th = R() * Math.PI * 2, s = Math.sqrt(1 - u * u); return [c[0] + r * s * Math.cos(th), c[1] + r * u, c[2] + r * s * Math.sin(th)]; };
+function racimo() {
+  const a = new Float32Array(N * 3), cs = [], filas = [6, 6, 6, 5, 5, 4, 3, 2, 1]; let y = 1.35;
+  filas.forEach((c, f) => { const rad = 0.16 * c; for (let k = 0; k < c; k++) { const an = k / c * Math.PI * 2 + f * 0.7; cs.push([Math.cos(an) * rad, y + (R() - .5) * .06, Math.sin(an) * rad]); } if (c > 2) cs.push([0, y, 0]); y -= 0.31; });
+  for (let i = 0; i < N; i++) { if (i < N * 0.035) { const t = R(); a.set([0.05 * Math.sin(t * 6) + t * 0.12, 1.5 + t * 0.75, 0], i * 3); continue; } a.set(esfera(cs[i % cs.length], 0.2), i * 3); }
+  return a;
+}
+function probetas() {
+  const a = new Float32Array(N * 3), xs = [-1.15, 0, 1.15], lv = [.82, .62, .38];
+  for (let i = 0; i < N; i++) { const k = i % 3, x = xs[k], r = 0.36, th = R() * Math.PI * 2;
+    if (R() < 0.5) a.set([x + Math.cos(th) * r, -1.5 + R() * 3, Math.sin(th) * r], i * 3);
+    else { const rr = Math.sqrt(R()) * r * 0.9; a.set([x + Math.cos(th) * rr, -1.5 + R() * 3 * lv[k], Math.sin(th) * rr], i * 3); } }
+  return a;
+}
+function globo() {
+  const a = new Float32Array(N * 3), r0 = 1.7;
+  for (let i = 0; i < N; i++) { let p;
+    if (R() < 0.45) { const an = (R() * 9) | 0, t = R() * Math.PI * 2;
+      if (R() < 0.5) { const lat = (an / 8 - 0.5) * Math.PI; p = [Math.cos(lat) * Math.cos(t) * r0, Math.sin(lat) * r0, Math.cos(lat) * Math.sin(t) * r0]; }
+      else { const lon = an / 9 * Math.PI; p = [Math.cos(t) * Math.cos(lon) * r0, Math.sin(t) * r0, Math.cos(t) * Math.sin(lon) * r0]; } }
+    else p = esfera([0, 0, 0], r0 * (0.97 + R() * 0.06));
+    a.set(p, i * 3); }
+  return a;
+}
+function red() {
+  const a = new Float32Array(N * 3), hubs = [], C = [0, 0, 0];
+  for (let k = 0; k < 5; k++) { const t = k / 5 * Math.PI * 2 - Math.PI / 2; hubs.push([Math.cos(t) * 2, Math.sin(t) * 1.35, Math.sin(t * 2) * 0.7]); }
+  const ar = []; hubs.forEach((h, k) => { ar.push([h, C]); ar.push([h, hubs[(k + 1) % 5]]); }); const nodos = [C, ...hubs];
+  for (let i = 0; i < N; i++) {
+    if (R() < 0.6) { const e = ar[i % ar.length], t = R(); a.set([0, 1, 2].map((d) => e[0][d] + (e[1][d] - e[0][d]) * t + (R() - .5) * .035), i * 3); }
+    else { const nd = nodos[i % nodos.length]; a.set(esfera(nd, nd === C ? 0.46 : 0.22), i * 3); } }
+  return a;
+}
+function botella() {
+  const a = new Float32Array(N * 3), perfil = (y) => y < 0.3 ? 0.64 : y < 0.95 ? 0.21 + 0.43 * (0.5 + 0.5 * Math.cos((y - 0.3) / 0.65 * Math.PI)) : (y > 1.6 ? 0.25 : 0.21);
+  for (let i = 0; i < N; i++) { const th = R() * Math.PI * 2;
+    if (R() < 0.06) { const rr = Math.sqrt(R()) * 0.64; a.set([Math.cos(th) * rr, -1.6, Math.sin(th) * rr], i * 3); continue; }
+    const y = -1.6 + R() * 3.35, r = perfil(y); a.set([Math.cos(th) * r, y, Math.sin(th) * r], i * 3); }
+  return a;
+}
+function web() {
+  const a = new Float32Array(N * 3), W = 3.8, H = 2.4, ry = -0.45, rx = 0.12;
+  const bl = [[-1.7, 0.72, 1.5, 0.55], [-0.05, 0.72, 1.75, 0.55], [-1.7, 0.02, 1.0, 1.05], [-0.55, 0.02, 1.0, 1.05], [0.6, 0.02, 1.1, 1.05]];
+  for (let i = 0; i < N; i++) { let x, y; const p = R();
+    if (p < 0.3) { const t = R() * 2 * (W + H); if (t < W) { x = -W / 2 + t; y = H / 2; } else if (t < W + H) { x = W / 2; y = H / 2 - (t - W); } else if (t < 2 * W + H) { x = W / 2 - (t - W - H); y = -H / 2; } else { x = -W / 2; y = -H / 2 + (t - 2 * W - H); } }
+    else if (p < 0.38) { x = -W / 2 + R() * W; y = H / 2 - 0.3; }
+    else if (p < 0.42) { const d = (R() * 3) | 0, th = R() * Math.PI * 2; x = -W / 2 + 0.22 + d * 0.17 + Math.cos(th) * 0.05; y = H / 2 - 0.15 + Math.sin(th) * 0.05; }
+    else { const b = bl[i % bl.length]; x = b[0] + R() * b[2]; y = b[1] - R() * b[3]; }
+    const z = (R() - .5) * 0.05, x1 = x * Math.cos(ry) + z * Math.sin(ry), z1 = -x * Math.sin(ry) + z * Math.cos(ry);
+    a.set([x1, y * Math.cos(rx) - z1 * Math.sin(rx), y * Math.sin(rx) + z1 * Math.cos(rx)], i * 3); }
+  return a;
+}
+
+/* ---------- el motor: WebGL2 directo ---------- */
+const FOV = 34, DIST = 9.5, ESCALA_FOTO = 1.45;
+const VERT = `
+  uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uVel, uFoto;
+  attribute vec3 aFrom, aTo, aCol; attribute float aRnd; varying float vA, vGlow; varying vec3 vCol;
+  void main(){
+    float t = smoothstep(0.0, 1.0, clamp((uT - aRnd * 0.3) / 0.7, 0.0, 1.0));
+    vec3 p = mix(aFrom, aTo, t);
+    float mid = sin(3.14159 * t);
+    vec3 n = vec3(sin(p.y * 2.3 + uTime * 0.9 + aRnd * 6.28), cos(p.x * 1.9 + uTime * 0.7 + aRnd * 3.1), sin(p.z * 2.1 + uTime * 0.8 + aRnd * 1.7));
+    p += n * ((0.012 + mid * 0.62 + uVel * 0.08) * (1.0 - uFoto * 0.9));
+    vec4 mv = uMV * vec4(p, 1.0);
+    gl_Position = uProj * mv;
+    gl_PointSize = uSize * (0.55 + aRnd * 0.9) * (1.0 + mid * 0.7 + uFoto * 0.5) / -mv.z;
+    vA = 0.45 + 0.55 * aRnd; vGlow = clamp(mid + uVel * 0.4, 0.0, 1.0); vCol = aCol;
+  }`;
+const FRAG = `
+  precision highp float;
+  uniform float uAlpha, uFoto; varying float vA, vGlow; varying vec3 vCol;
+  void main(){
+    float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard;
+    float s = smoothstep(0.5, 0.05, d);
+    vec3 vino = vec3(0.40, 0.06, 0.18), rosa = vec3(0.86, 0.46, 0.60);
+    vec3 col = mix(mix(vino, rosa, vGlow * 0.85 + (1.0 - vA) * 0.25), vCol * 1.15, uFoto);
+    gl_FragColor = vec4(col, s * mix(vA, 1.0, uFoto) * uAlpha);
+  }`;
+
+function crearMotor(canvas, n) {
+  const gl = canvas.getContext('webgl2', { alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'high-performance' });
+  if (!gl) return null;
+  const sh = (tipo, src) => { const s = gl.createShader(tipo); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG)); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  const vao = gl.createVertexArray(); gl.bindVertexArray(vao);
+  const buffers = {};
+  const atributo = (nombre, datos, tam) => {
+    const b = gl.createBuffer(), loc = gl.getAttribLocation(prog, nombre);
+    gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, datos, gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, tam, gl.FLOAT, false, 0, 0); buffers[nombre] = b;
+  };
+  const u = {}; ['uProj', 'uMV', 'uT', 'uTime', 'uSize', 'uVel', 'uFoto', 'uAlpha'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
+  gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND);
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  let dpr = 1;
+  return {
+    atributo,
+    subir(nombre, datos) { gl.bindBuffer(gl.ARRAY_BUFFER, buffers[nombre]); gl.bufferSubData(gl.ARRAY_BUFFER, 0, datos); },
+    tamano() {
+      dpr = Math.min(devicePixelRatio, 2);
+      canvas.width = Math.round(innerWidth * dpr); canvas.height = Math.round(innerHeight * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      const f = 1 / Math.tan((FOV * Math.PI / 180) / 2), a = innerWidth / innerHeight, near = 0.1, far = 100;
+      gl.uniformMatrix4fv(u.uProj, false, new Float32Array([f / a, 0, 0, 0, 0, f, 0, 0, 0, 0, (far + near) / (near - far), -1, 0, 0, (2 * far * near) / (near - far), 0]));
+      gl.uniform1f(u.uSize, 44 * dpr);
+    },
+    /** Grupo: posición x, rotación X e Y (orden XYZ, como Three.js) y escala; la cámara está en z = DIST. */
+    dibujar({ x, rx, ry, s, t, tiempo, vel, foto, alfa }) {
+      const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
+      // M = T · Rx · Ry · S, y la vista desplaza -DIST en z (columna a columna).
+      gl.uniformMatrix4fv(u.uMV, false, new Float32Array([
+        cy * s, sx * sy * s, -cx * sy * s, 0,
+        0, cx * s, sx * s, 0,
+        sy * s, -sx * cy * s, cx * cy * s, 0,
+        x, 0, -DIST, 1]));
+      gl.uniform1f(u.uT, t); gl.uniform1f(u.uTime, tiempo); gl.uniform1f(u.uVel, vel); gl.uniform1f(u.uFoto, foto); gl.uniform1f(u.uAlpha, alfa);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.POINTS, 0, n);
+    },
+  };
+}
+
+/* La forma 0 son las uvas de la foto: cada partícula nace en un píxel oscuro del racimo, con su color. */
+function desdeFoto(img) {
+  const colores = new Float32Array(N * 3), pos = new Float32Array(N * 3);
+  const Wc = 320, Hc = Math.round(320 * innerHeight / innerWidth);
+  const c = document.createElement('canvas'); c.width = Wc; c.height = Hc; const ctx = c.getContext('2d');
+  const s = Math.max(Wc / img.naturalWidth, Hc / img.naturalHeight);
+  ctx.drawImage(img, (Wc - img.naturalWidth * s) / 2, (Hc - img.naturalHeight * s) / 2, img.naturalWidth * s, img.naturalHeight * s);
+  const d = ctx.getImageData(0, 0, Wc, Hc).data, cand = [];
+  for (let y = 0; y < Hc; y++) for (let x = 0; x < Wc; x++) { const k = (y * Wc + x) * 4, l = (0.3 * d[k] + 0.59 * d[k + 1] + 0.11 * d[k + 2]) / 255; if (l < 0.3 && d[k + 2] >= d[k + 1]) cand.push(k / 4); }
+  const hMundo = 2 * Math.tan((FOV / 2) * Math.PI / 180) * DIST, wMundo = hMundo * innerWidth / innerHeight;
+  for (let i = 0; i < N; i++) {
+    const id = cand.length > 800 ? cand[(R() * cand.length) | 0] : (R() * Wc * Hc) | 0, x = id % Wc, y = (id / Wc) | 0, k = id * 4;
+    pos.set([((x + R()) / Wc - 0.5) * wMundo * ESCALA_FOTO, -((y + R()) / Hc - 0.5) * hMundo * ESCALA_FOTO, (R() - .5) * 0.05], i * 3);
+    colores.set([d[k] / 255, d[k + 1] / 255, d[k + 2] / 255], i * 3);
+  }
+  return { pos, colores };
+}
+
+const formas = [racimo(), racimo(), probetas(), globo(), red(), botella(), web()];
+const motor = crearMotor(document.getElementById('gl'), N);
+const rnd = new Float32Array(N); for (let i = 0; i < N; i++) rnd[i] = R();
+let segmento = -1;
+if (motor) {
+  motor.atributo('aFrom', formas[0].slice(), 3);
+  motor.atributo('aTo', formas[1].slice(), 3);
+  motor.atributo('aCol', new Float32Array(N * 3).fill(0.4), 3);
+  motor.atributo('aRnd', rnd, 1);
+  motor.tamano();
+  addEventListener('resize', () => motor.tamano());
+}
+const imgUvas = new Image(); imgUvas.crossOrigin = 'anonymous';
+imgUvas.onload = () => { try { const r = desdeFoto(imgUvas); formas[0] = r.pos; motor?.subir('aCol', r.colores); segmento = -1; } catch (e) { console.warn('Sin muestreo de la foto:', e); } };
+imgUvas.src = 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=1200&q=70';
+document.getElementById('motorKB').textContent = (crearMotor.toString().length / 1024 + (VERT.length + FRAG.length) / 1024).toFixed(1) + ' KB';
+
+/* ---------- scroll (igual que la otra maqueta) ---------- */
+let lenis = null; try { lenis = new Lenis({ lerp: 0.085, smoothWheel: true }); } catch (e) {}
+const vuelo = document.getElementById('vuelo'), f1 = document.getElementById('f1'), f2 = document.getElementById('f2'), sombra = document.getElementById('sombra');
+const fotos = document.getElementById('fotos'), escarcha = document.getElementById('escarcha');
+const b1 = document.getElementById('beat1'), b2 = document.getElementById('beat2'), medio = document.getElementById('medio');
+const pasos = [...document.querySelectorAll('section.scene')];
+const gal = document.getElementById('gal'), track = document.getElementById('track');
+const railSpans = [...document.querySelectorAll('#rail span')];
+const hudIdx = document.getElementById('hudIdx'), hudName = document.getElementById('hudName'), hudPct = document.getElementById('hudPct');
+let raton = [0, 0]; addEventListener('pointermove', (e) => { raton = [e.clientX / innerWidth - 0.5, e.clientY / innerHeight - 0.5]; });
+let m = 0, activo = 0, ultimo = scrollY, vel = 0, oscuro = true, uFoto = 1;
+
+function objetivoM(y) {
+  const finVuelo = vuelo.offsetTop + vuelo.offsetHeight - innerHeight;
+  if (y <= finVuelo) return suave(tramo(y / finVuelo, 0.76, 0.98));
+  const anc = [[finVuelo, 1], ...pasos.map((s, i) => [s.offsetTop + s.offsetHeight / 2 - innerHeight / 2, i + 2])];
+  for (let i = 0; i < anc.length - 1; i++) if (y < anc[i + 1][0]) return anc[i][1] + (y - anc[i][0]) / (anc[i + 1][0] - anc[i][0]);
+  return 6;
+}
+function vueloVisual(y) {
+  const p = clamp(y / (vuelo.offsetTop + vuelo.offsetHeight - innerHeight));
+  const a = suave(tramo(p, 0, 0.46));
+  f1.style.transform = `scale(${1.02 + a * 1.9}) translateY(${a * -4}%)`;
+  f1.style.transformOrigin = '50% 78%';
+  f1.style.opacity = 1 - suave(tramo(p, 0.38, 0.5));
+  const b = suave(tramo(p, 0.4, 0.68));
+  f2.style.opacity = suave(tramo(p, 0.38, 0.5)) * (1 - suave(tramo(p, 0.74, 0.86)));
+  f2.style.transform = `scale(${1.25 + b * (ESCALA_FOTO - 1.25)})`;
+  const e1 = Math.sin(Math.PI * tramo(p, 0.36, 0.54)), e2 = tramo(p, 0.72, 0.9);
+  escarcha.style.setProperty('--b', (e1 * 22 + e2 * 14) + 'px');
+  escarcha.style.setProperty('--a', (e1 * 0.12 + suave(e2) * 1).toFixed(3));
+  sombra.style.opacity = 1 - tramo(p, 0.6, 0.8);
+  fotos.style.visibility = p >= 0.999 ? 'hidden' : 'visible';
+  b1.style.opacity = 1 - suave(tramo(p, 0.08, 0.22)); b1.style.transform = `translateY(${-tramo(p, 0.05, 0.25) * 60}px)`;
+  medio.style.opacity = Math.sin(Math.PI * tramo(p, 0.5, 0.74)) * 0.95;
+  b2.style.opacity = suave(tramo(p, 0.9, 1)); b2.style.transform = `translateY(${(1 - tramo(p, 0.9, 1)) * 30}px)`;
+  uFoto = 1 - suave(tramo(p, 0.8, 0.97));
+  const osc = p < 0.84; if (osc !== oscuro) { oscuro = osc; document.body.classList.toggle('oscuro', osc); }
+  return suave(tramo(p, 0.7, 0.8));
+}
+function cuadro(t) {
+  lenis?.raf(t);
+  const y = scrollY; vel += (Math.abs(y - ultimo) / 40 - vel) * 0.1; ultimo = y;
+  const aparece = vueloVisual(y);
+  m += (objetivoM(y) - m) * (m < 1.02 ? 0.2 : 0.07);
+  const i = Math.min(5, Math.floor(m)), f = m - i;
+  if (motor && i !== segmento) { segmento = i; motor.subir('aFrom', formas[i]); motor.subir('aTo', formas[i + 1]); }
+  const ancho = innerWidth > 860, k = clamp(m);
+  const galIni = gal.offsetTop - innerHeight, desv = clamp((y - galIni) / (innerHeight * 0.7));
+  motor?.dibujar({
+    x: !ancho ? 0 : m <= 1 ? k * 1.5 : 1.5 + clamp(m - 1) * 0.7,
+    s: ancho ? 1 + 0.1 * k - 0.1 * clamp(m - 1) : 0.72,
+    ry: (Math.sin(t / 4200) * 0.55 + raton[0] * 0.5) * k,
+    rx: raton[1] * 0.22 * k,
+    t: m >= 6 ? 1 : f, tiempo: t / 1000, vel: Math.min(1, vel), foto: uFoto,
+    alfa: aparece * (ancho ? 1 : (m > 1.5 ? 0.35 : 1)) * (1 - desv * 0.9),
+  });
+  const act = Math.max(0, Math.round(Math.min(m, 6)) - 1);
+  if (act !== activo) { activo = act; railSpans.forEach((s, j) => s.classList.toggle('on', j === act)); hudIdx.textContent = `[0${act}/05]`; descifrar(hudName, act === 0 ? 'APERTURA' : pasos[act - 1].dataset.name); }
+  hudPct.textContent = String(Math.round(y / (document.documentElement.scrollHeight - innerHeight) * 100)).padStart(3, '0') + '%';
+  const pg = clamp((y - gal.offsetTop) / (gal.offsetHeight - innerHeight));
+  track.style.transform = `translate3d(${-pg * (track.scrollWidth - innerWidth + 40)}px,0,0)`;
+  requestAnimationFrame(cuadro);
+}
+
+/* ---------- precarga ---------- */
+const pre = document.getElementById('pre'), preTxt = document.getElementById('preTxt'), t0 = performance.now();
+(function carga(t) {
+  const p = Math.min(1, Math.max(0, (t - t0) / 1600)), n = Math.round(p * 12);
+  preTxt.textContent = 'chiq ' + '▓'.repeat(n) + '░'.repeat(12 - n) + ' ' + String(Math.round(p * 100)).padStart(3, '0');
+  if (p < 1 || !f1.complete) requestAnimationFrame(carga);
+  else { pre.classList.add('out'); requestAnimationFrame(cuadro); }
+})(t0);
+</script>
+</body>
+</html>

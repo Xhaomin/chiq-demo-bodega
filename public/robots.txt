@@ -1,0 +1,3 @@
+# Demo de chiq.es: no se indexa.
+User-agent: *
+Disallow: /

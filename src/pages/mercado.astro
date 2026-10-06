@@ -1,0 +1,749 @@
+---
+// Los datos salen del modelo de evidencia de chiq.es (datos/evidencia → web/src/data/generado), sin escribir cifras a mano.
+import capitulo from '../data/capitulos/e2-brecha.json';
+import lineas from '../data/graficos/brecha-litros-persona-menos35.json';
+import apiladas from '../data/graficos/cuota-volumen-edad.json';
+
+const DATOS = {
+  capitulo,
+  graficos: { 'brecha-litros-persona-menos35': lineas, 'cuota-volumen-edad': apiladas },
+  generado_por: 'chiq.es · modelo de evidencia, exportación v2',
+};
+const DATOS_JSON = JSON.stringify(DATOS).replace(/</g, '\\u003c');
+---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>El mercado en datos · Bodega Ejemplo · demo de chiq.es</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style is:global>
+:root{--bg:#ebe8e3;--ink:#141011;--wine:#6e1432;--rosa:#a3456a;--mute:#857d78;--gris-texto:#6b635f;--line:rgba(20,16,17,.14);--hud:#6b635f;
+  --t0:#33081a;--t1:#7a1a3e;--t2:#b35a80;--t3:#d493ad;--nota:#2f5bd3}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--bg)}
+body{color:var(--ink);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+canvas#gl{position:fixed;inset:0;width:100vw;height:100vh;z-index:3;pointer-events:none}
+.grain{position:fixed;inset:-50%;width:200%;height:200%;z-index:5;pointer-events:none;opacity:.07;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation:grain .9s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}20%{transform:translate(-3%,2%)}40%{transform:translate(2%,-3%)}60%{transform:translate(-2%,-1%)}80%{transform:translate(3%,3%)}100%{transform:translate(0,0)}}
+/* carcasa (igual que la home) */
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:22px clamp(18px,3vw,40px);transition:color .6s}
+.logo{font-family:'Instrument Serif',serif;font-size:32px;letter-spacing:-.02em;color:var(--ink);text-decoration:none;line-height:1}
+nav{display:flex;gap:26px;align-items:center}
+nav a{color:var(--ink);text-decoration:none;font-size:14px;position:relative}
+nav a:not(.btn)::after{content:'';position:absolute;left:0;right:100%;bottom:-3px;height:1px;background:currentColor;transition:right .45s cubic-bezier(.7,0,.2,1)}
+nav a:not(.btn):hover::after,nav a[aria-current]::after{right:0}
+.btn{border:1px solid var(--ink);border-radius:999px;padding:9px 18px;font-size:13px}
+.btn:hover{background:var(--ink);color:var(--bg)}
+.burger{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;cursor:pointer;background:transparent}
+.burger i{display:block;width:14px;height:1px;background:var(--ink);box-shadow:0 5px 0 var(--ink);transform:translateY(-2px)}
+header::before{content:'';position:absolute;inset:0;background:rgba(235,232,227,.8);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);opacity:0;transition:opacity .5s;z-index:-1}
+/* en lectura (tras la escena) la cabecera se vuelve opaca y el HUD de arriba se retira: el texto no pasa por debajo */
+body.lectura header::before{opacity:1}
+body.lectura header{padding-top:14px;padding-bottom:14px}
+.hud.tl,.hud.tr{transition:opacity .5s,color .6s}
+body.lectura .hud.tl,body.lectura .hud.tr{opacity:0}
+body.oscuro header::before{background:rgba(20,16,17,.8);border-color:rgba(244,239,232,.12)}
+body.oscuro header{--ink:#f4efe8;--line:rgba(244,239,232,.3)}
+body.oscuro .hud{--hud:rgba(244,239,232,.72);--ink:#f4efe8}
+.hud{position:fixed;z-index:15;color:var(--hud);pointer-events:none;line-height:1.7;transition:color .6s}
+.hud.tl{top:90px;left:clamp(18px,3vw,40px)}.hud.tr{top:90px;right:clamp(18px,3vw,40px);text-align:right}
+.hud.bl{bottom:26px;left:clamp(18px,3vw,40px)}.hud.br{bottom:26px;right:clamp(18px,3vw,40px);text-align:right}
+.hud .ink{color:var(--ink)}
+.rail{position:fixed;z-index:15;right:clamp(18px,3vw,40px);top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.rail span{width:16px;height:1px;background:var(--line);transition:width .5s cubic-bezier(.16,.84,.24,1),background .5s}
+.rail span.on{width:40px;background:var(--rosa)}
+main{position:relative;z-index:10}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em}
+.w>*{display:inline-block;transform:translateY(110%) rotate(4deg);transform-origin:left bottom;transition:transform 1.1s cubic-bezier(.16,.84,.24,1)}
+.in .w>*{transform:none}
+.fade{opacity:0;transform:translateY(22px);transition:opacity 1.1s .35s,transform 1.1s .35s cubic-bezier(.16,.84,.24,1)}
+.in .fade{opacity:1;transform:none}
+.pad{padding:0 clamp(18px,7vw,120px)}
+.estado{display:inline-flex;align-items:center;gap:6px;border:1px solid currentColor;border-radius:999px;padding:3px 9px;color:var(--wine);white-space:nowrap}
+/* apertura */
+#apertura{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:140px;padding-bottom:110px}
+#apertura .caja{max-width:min(760px,58vw)}
+.kicker{color:var(--gris-texto);display:flex;gap:14px;align-items:center}
+.kicker b{color:var(--wine);font-weight:500}
+.kicker::after{content:'';width:64px;height:1px;background:var(--line)}
+#apertura h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(60px,9.4vw,156px);line-height:.9;letter-spacing:-.035em;margin:26px 0 34px}
+#apertura h1 em,h2 em,.gancho-t em{font-style:italic;color:var(--wine)}
+.respuesta{font-family:'Instrument Serif',serif;font-size:clamp(24px,2.3vw,34px);line-height:1.18;letter-spacing:-.01em;max-width:30ch}
+.linea-respuesta{margin-top:22px;color:var(--gris-texto);display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;line-height:1.6}
+.linea-respuesta a{color:var(--ink)}
+.cue{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);color:var(--gris-texto);text-align:center}
+.cue::after{content:'';display:block;width:1px;height:44px;background:var(--ink);margin:12px auto 0;animation:cue 2.2s cubic-bezier(.7,0,.2,1) infinite}
+@keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+/* escena fijada */
+#escena{height:560vh;position:relative}
+#escena .pin{position:sticky;top:0;height:100vh;overflow:hidden}
+.anio-caja{position:absolute;left:clamp(18px,7vw,120px);top:50%;transform:translateY(-50%);max-width:min(460px,34vw)}
+.anio-caja .pregunta{color:var(--gris-texto);line-height:1.7;max-width:46ch}
+.anio{font-family:'Instrument Serif',serif;font-size:clamp(110px,13vw,210px);line-height:.85;letter-spacing:-.04em;margin:18px 0 20px;font-variant-numeric:lining-nums}
+.anio em{font-style:italic;color:var(--wine)}
+.rupturas-escena{list-style:none;display:grid;gap:6px;min-height:40px}
+.rupturas-escena li{color:var(--gris-texto);line-height:1.5;opacity:0;transform:translateY(8px);transition:opacity .6s,transform .6s cubic-bezier(.16,.84,.24,1)}
+.rupturas-escena li.si{opacity:1;transform:none}
+.rupturas-escena li b{color:var(--wine);font-weight:500}
+#etiquetas{position:fixed;inset:0;z-index:12;pointer-events:none;opacity:0}
+#etiquetas .et{position:absolute;transform:translate(-50%,0);text-align:center;width:120px}
+#etiquetas .et .v{font-family:'Instrument Serif',serif;font-size:clamp(26px,2.6vw,40px);line-height:1;letter-spacing:-.02em;display:block;font-variant-numeric:tabular-nums}
+#etiquetas .et .n{color:var(--gris-texto);display:block;margin-top:8px;line-height:1.5}
+#etiquetas .et i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+#etiquetas .et .d{display:block;margin-top:6px;color:var(--gris-texto);font-size:10px;opacity:.8}
+.sin-movimiento #etiquetas .et .d{display:none}
+.leyenda-escena{color:var(--gris-texto);margin-top:14px}
+.sin-movimiento .leyenda-escena{display:none}
+.leyenda-escena .marca{display:inline-block;width:22px;height:0;border-top:2px dotted #2a2122;margin-right:8px;vertical-align:3px}
+.decorativa{position:absolute;right:clamp(18px,3vw,40px);bottom:clamp(70px,11vh,120px);color:var(--gris-texto);max-width:30ch;text-align:right;line-height:1.6}
+/* gráficos */
+section.bloque{padding-top:120px;padding-bottom:40px}
+.n{display:flex;gap:14px;align-items:center;color:var(--gris-texto)}
+.n b{color:var(--wine);font-weight:500}
+.n::after{content:'';width:64px;height:1px;background:var(--line)}
+h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(34px,3.7vw,58px);line-height:1;letter-spacing:-.025em;margin:22px 0 22px;max-width:24ch}
+.afirmacion{font-size:clamp(17px,1.3vw,20px);line-height:1.55;max-width:60ch;color:#2b2425}
+.afirmacion .estado{margin-left:8px;vertical-align:1px}
+.panel{margin-top:34px;border-radius:20px;background:rgba(255,255,255,.42);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.75);box-shadow:0 40px 80px -40px rgba(20,16,17,.25);padding:clamp(16px,2.4vw,32px)}
+.leyenda{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:14px;color:#2b2425;margin-bottom:10px;list-style:none}
+.leyenda li{display:flex;align-items:center;gap:8px}
+.leyenda .m{display:inline-block;width:18px;height:2px;border-radius:2px}
+.leyenda .m.b{width:12px;height:12px;border-radius:3px}
+.leyenda .m.h{width:10px;height:10px;border-radius:50%;background:transparent!important;border:1.5px solid var(--gris-texto)}
+.leyenda .m.p{height:0;border-top:2px dotted var(--gris-texto);background:transparent!important}
+.leyenda .ast{font-family:'JetBrains Mono',monospace;color:var(--wine);width:18px;text-align:center}
+.lienzo{position:relative}
+.lienzo svg{display:block;width:100%;height:auto;overflow:visible}
+.lienzo svg text{font-family:'Inter Tight',sans-serif}
+.lienzo .eje text{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--gris-texto);letter-spacing:.04em}
+.lienzo .valor{font-size:14px;font-weight:500;fill:var(--ink);font-variant-numeric:tabular-nums}
+.lienzo .rup text{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--gris-texto);letter-spacing:.06em;text-transform:uppercase}
+.tip{position:absolute;pointer-events:none;background:#141011;color:#f4efe8;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5;min-width:180px;opacity:0;transition:opacity .15s;z-index:4;box-shadow:0 12px 30px -12px rgba(0,0,0,.5)}
+.tip b{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;font-weight:500;display:block;margin-bottom:4px;color:#d8cfc8}
+.tip .f{display:flex;justify-content:space-between;gap:14px}
+.tip .f span:first-child{display:flex;align-items:center;gap:6px;color:#d8cfc8}
+.tip i{display:inline-block;width:8px;height:8px;border-radius:50%}
+.tip small{display:block;color:#b8aea7;font-size:12px}
+figcaption{margin-top:18px;color:var(--gris-texto);font-size:14px;line-height:1.6}
+figcaption .hud-f{color:var(--gris-texto)}
+.rupturas{margin:8px 0 0 18px}
+.rupturas .magnitud{color:#3a3334}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;font-size:14px}
+summary{cursor:pointer;color:var(--gris-texto);list-style:none;display:flex;align-items:center;gap:10px}
+summary::before{content:'+';font-family:'JetBrains Mono',monospace;color:var(--wine);width:12px}
+details[open] summary::before{content:'−'}
+table{border-collapse:collapse;margin-top:12px;font-size:14px;width:100%;font-variant-numeric:tabular-nums}
+caption{text-align:left;color:var(--gris-texto);font-size:13px;margin-bottom:8px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+th:first-child,td:first-child{text-align:left}
+thead th{font-weight:500;color:var(--gris-texto);font-size:13px}
+td small{display:block;color:var(--gris-texto);font-size:12px}
+.tabla-scroll{overflow-x:auto}
+.procedencia dl{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr);gap:6px 16px;margin-top:12px}
+.procedencia dt{color:var(--gris-texto)}
+.procedencia dd{overflow-wrap:anywhere}
+.procedencia code{font-family:'JetBrains Mono',monospace;font-size:12px}
+.procedencia ul{margin:0;padding-left:16px}
+.ficha{display:inline-flex;align-items:center;gap:12px;margin-top:18px;color:var(--ink);text-decoration:none;font-size:15px}
+.ficha .ar,.cta .ar{width:40px;height:40px;border-radius:50%;border:1px solid currentColor;display:grid;place-items:center;transition:all .5s cubic-bezier(.7,0,.2,1)}
+.ficha:hover .ar{background:var(--wine);border-color:var(--wine);color:#fff;transform:rotate(-45deg)}
+/* cautelas */
+#cautelas{padding-top:110px;padding-bottom:120px}
+#cautelas ul{list-style:none;margin-top:10px;max-width:78ch;counter-reset:c}
+#cautelas li{counter-increment:c;display:grid;grid-template-columns:48px 1fr;gap:12px;padding:16px 0;border-top:1px solid var(--line);font-size:16px;line-height:1.55;color:#2b2425}
+#cautelas li::before{content:counter(c,decimal-leading-zero);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.12em;color:var(--wine);padding-top:4px}
+#cautelas li.sin-control{color:var(--wine)}
+/* gancho */
+#gancho{position:relative;background:#141011;color:#f4efe8;padding-top:clamp(110px,16vh,180px);padding-bottom:clamp(110px,16vh,180px)}
+#gancho .n{color:#a59c96}#gancho .n::after{background:rgba(244,239,232,.25)}
+.gancho-t{font-family:'Instrument Serif',serif;font-size:clamp(44px,6.6vw,108px);line-height:.95;letter-spacing:-.03em;max-width:15ch;margin:26px 0 40px}
+#gancho .gancho-t em{color:#e59ab7}
+.cta{display:inline-flex;align-items:center;gap:16px;color:#f4efe8;text-decoration:none;font-size:17px}
+.cta .ar{width:58px;height:58px;font-size:18px;border-color:#f4efe8}
+.cta:hover .ar{background:#e59ab7;border-color:#e59ab7;color:#141011;transform:rotate(-45deg)}
+.siguiente{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;padding-top:40px;padding-bottom:40px;font-size:15px;border-top:1px solid var(--line)}
+.siguiente a{color:var(--ink)}
+footer{position:relative;z-index:10;padding:120px clamp(18px,7vw,120px) 40px;display:grid;gap:56px;background:var(--bg)}
+footer .big{font-family:'Instrument Serif',serif;font-size:clamp(40px,6vw,96px);letter-spacing:-.03em;line-height:.95;max-width:14ch}
+footer .big em{font-style:italic;color:var(--wine)}
+footer .cols{display:flex;flex-wrap:wrap;gap:40px 80px;justify-content:space-between;border-top:1px solid var(--line);padding-top:28px;color:var(--gris-texto)}
+footer .cols a,footer .cols button{color:var(--ink);text-decoration:none;display:block;font-size:14px;line-height:2;background:none;border:0;font-family:inherit;cursor:pointer;text-align:left}
+#menu{position:fixed;inset:0;z-index:40;background:#141011;color:#f4efe8;clip-path:circle(0% at calc(100% - 62px) 43px);transition:clip-path 1s cubic-bezier(.7,0,.2,1);display:flex;flex-direction:column;justify-content:center;padding:0 clamp(18px,7vw,120px)}
+#menu.open{clip-path:circle(160% at calc(100% - 62px) 43px)}
+#menu a{font-family:'Instrument Serif',serif;font-size:clamp(42px,6.4vw,96px);color:#f4efe8;text-decoration:none;line-height:1.08;display:flex;gap:26px;align-items:baseline;transition:color .3s,padding .5s cubic-bezier(.16,.84,.24,1)}
+#menu a:hover{color:#d88aa6;padding-left:18px}
+#menu a small{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8d8580}
+#menu .seal{position:absolute;bottom:32px;left:clamp(18px,7vw,120px);color:#8d8580}
+#menu .close{position:absolute;top:22px;right:clamp(18px,3vw,40px);color:#f4efe8;background:none;border:1px solid #4a4244;border-radius:999px;padding:10px 18px;cursor:pointer}
+/* notas de maqueta: no son diseño, son preguntas para el autor */
+.nota-m{display:none;margin-top:14px;border:1px dashed var(--nota);color:var(--nota);border-radius:10px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.55;max-width:62ch;background:rgba(47,91,211,.05);text-transform:none;letter-spacing:0}
+.nota-m b{font-weight:500}
+body.notas .nota-m{display:block}
+.nota-flot{position:absolute;z-index:14}
+#conmutador{position:fixed;z-index:30;left:50%;bottom:22px;transform:translateX(-50%);background:#fff;border:1px dashed var(--nota);color:var(--nota);border-radius:999px;padding:9px 16px;cursor:pointer}
+/* sin movimiento (nivel de la spec §4.4.6): texto y cifras, sin motor ni scroll fijado */
+.sin-movimiento #escena{height:auto;padding:120px 0 40px}
+.sin-movimiento #escena .pin{position:relative;height:auto;overflow:visible}
+.sin-movimiento .anio-caja{position:relative;left:auto;top:auto;transform:none;max-width:none;padding:0 clamp(18px,7vw,120px)}
+.sin-movimiento #etiquetas{position:relative;inset:auto;opacity:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:30px clamp(18px,7vw,120px)}
+.sin-movimiento #etiquetas .et{position:relative;transform:none;width:auto;left:auto!important;top:auto!important;text-align:left}
+.sin-movimiento .rupturas-escena li{opacity:1;transform:none}
+.sin-movimiento .decorativa,.sin-movimiento .cue{display:none}
+@media (max-width:860px){
+  nav a{display:none}.hud.tr,.hud.tl,.rail{display:none}
+  .kicker::after{display:none}
+  #apertura .caja{max-width:none}
+  .anio-caja{top:96px;transform:none;max-width:none;right:clamp(18px,7vw,120px)}
+  .anio{font-size:96px;margin:10px 0 12px}
+  .anio-caja .pregunta{font-size:10px}
+  .rupturas-escena{min-height:0}
+  .leyenda-escena{margin-top:8px}
+  #etiquetas .et .d{font-size:9px;letter-spacing:.02em;white-space:nowrap}
+  #etiquetas .et{width:84px}#etiquetas .et .n{font-size:9px;letter-spacing:.06em}
+  .decorativa{display:none}
+  .sin-movimiento #etiquetas{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (prefers-reduced-motion:reduce){.grain{animation:none}.w>*{transform:none;transition:none}.fade{opacity:1;transform:none;transition:none}}
+
+footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width:30ch}
+#conmutador{display:none!important}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <a class="logo" href="/">Bodega Ejemplo</a>
+  <nav aria-label="Principal">
+    <a href="/">Historia</a><a href="/mercado/" aria-current="page">El mercado en datos</a><a href="/como-esta-hecha/">Cómo está hecha</a>
+    <button class="burger" id="burger" aria-label="Abrir menú"><i></i></button>
+  </nav>
+</header>
+<div class="hud tl mono"><span class="ink" id="hudCap"></span><br><span id="hudFuente"></span></div>
+<div class="hud tr mono">Datos actualizados<br><span class="ink" id="hudAct"></span></div>
+<div class="hud bl mono"><span id="hudIdx" class="ink">[01/06]</span>&nbsp; <span id="hudName">RESPUESTA</span></div>
+<div class="hud br mono">Scroll <span id="hudPct" class="ink">000%</span></div>
+<div class="rail" id="rail" aria-hidden="true"></div>
+<button id="conmutador" class="mono" type="button" aria-pressed="false">Notas de maqueta · no</button>
+
+<main>
+  <article>
+    <section id="apertura" class="pad" data-name="RESPUESTA">
+      <div class="caja">
+        <p class="kicker mono fade"><b>Obs_01</b> <span id="kicker"></span></p>
+        <h1 class="split" id="titulo"></h1>
+        <p class="respuesta fade" id="respuesta"></p>
+        <p class="linea-respuesta mono fade" id="lineaRespuesta"></p>
+      </div>
+      <div class="cue mono">Scroll</div>
+    </section>
+
+    <section id="escena" data-name="ESCENA">
+      <div class="pin">
+        <div class="anio-caja">
+          <p class="pregunta mono" id="escenaPregunta"></p>
+          <p class="anio" aria-hidden="true"><span id="anio"></span></p>
+          <ul class="rupturas-escena mono" id="rupturasEscena"></ul>
+          <p class="leyenda-escena mono"><span class="marca"></span>Nivel de <span id="anioRef"></span> en cada probeta</p>
+        </div>
+        <div id="etiquetas" aria-hidden="true"></div>
+        <p class="decorativa mono" id="decorativa">Escena decorativa · las cifras están en el texto, el gráfico y la tabla</p>
+      </div>
+    </section>
+
+    <div id="graficos"><!-- una sección por gráfico, en el orden del capítulo (CAP.graficos) --></div>
+
+    <section id="cautelas" class="pad" data-name="CAUTELAS" aria-labelledby="cautelas-titulo">
+      <p class="n mono fade"><b>03</b> Antes de leerlo</p>
+      <h2 class="split" id="cautelas-titulo">Qué mide y qué <em>no mide</em> este capítulo</h2>
+      <ul id="listaCautelas"></ul>
+    </section>
+
+    <aside id="gancho" class="pad" data-name="CÓMO SE HACE">
+      <p class="n mono fade"><b>04</b> Cómo se hace</p>
+      <p class="gancho-t split">Estos datos llegan como <em>JSON</em> a la web.</p>
+      <a class="cta fade" href="/como-esta-hecha/"><span class="ar">→</span>Ver la arquitectura</a>
+    </aside>
+
+    <nav class="siguiente pad" aria-label="Seguir">
+      <a href="/como-esta-hecha/">Cómo está hecha →</a>
+      <a href="/">Volver a la historia</a>
+    </nav>
+  </article>
+</main>
+
+<footer>
+  <p class="big">Cada botella empieza <em>en la cepa.</em></p>
+  <div class="cols">
+    <div><span class="mono">Bodega Ejemplo</span><a href="/">Historia</a><a href="/mercado/">El mercado en datos</a><a href="/como-esta-hecha/">Cómo está hecha</a></div>
+    <div><span class="mono">La demo</span><span class="pie-t">Bodega Ejemplo es una bodega ficticia. Esta web es una demo de chiq.es y no vende nada.</span></div>
+    <div><span class="mono">Datos</span><span class="pie-t">MAPA · Panel de Consumo Alimentario en Hogares, con la fuente de cada cifra en su gráfico.</span></div>
+    <div><span class="mono">Imágenes</span><span class="pie-t">Fotos de viñedo de Unsplash, provisionales.</span><span class="mono" style="display:block;margin-top:14px">© 2026 chiq.es</span></div>
+  </div>
+</footer>
+
+<div id="menu" aria-hidden="true">
+  <button class="close mono" id="close">Cerrar</button>
+  <a href="/"><small>/01</small>Historia</a><a href="/mercado/"><small>/02</small>El mercado en datos</a>
+  <a href="/como-esta-hecha/"><small>/03</small>Cómo está hecha</a>
+  <div class="seal mono" id="sello">Demo de chiq.es · Bodega Ejemplo es ficticia</div>
+</div>
+
+<script id="datos-e2" type="application/json" is:inline set:html={DATOS_JSON}></script>
+<script is:inline src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script is:inline type="module">
+/* ============================================================================================
+   Maqueta del capítulo E2. Todo texto con cifra sale de DATOS (contratos grafico.v2 y capitulo.v1
+   imitados por docs/maquetas/capitulo-e2-datos.py). Aquí solo hay maquetación y comportamiento.
+   ============================================================================================ */
+const DATOS = JSON.parse(document.getElementById('datos-e2').textContent);
+const CAP = DATOS.capitulo, G = DATOS.graficos;
+const LIN = G['brecha-litros-persona-menos35'], API = G['cuota-volumen-edad'];
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const tramo = (p, a, b) => clamp((p - a) / (b - a));
+const suave = (x) => x * x * (3 - 2 * x);
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const $ = (id) => document.getElementById(id);
+const SIN_MOV = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (SIN_MOV) document.documentElement.classList.add('sin-movimiento');
+
+/* ---------- piezas del capítulo (las mismas funciones que la plantilla del plan B, Tarea 16) ---------- */
+const periodos = (g) => [...new Set(g.series.flatMap((s) => s.puntos.map((p) => p.periodo)))].sort((a, b) => a - b);
+const todos = [LIN, API];
+const pers = todos.flatMap(periodos), DESDE = Math.min(...pers), HASTA = Math.max(...pers);
+const PERIODO = `${DESDE}–${HASTA}`;
+const sigla = (org) => (org.match(/\(([^)]+)\)/) || [, org])[1];
+const nombreCap = (slug) => { const t = slug.replace(/-/g, ' '); return t[0].toUpperCase() + t.slice(1); };
+const ESTADOS = { C: 'Confirmado', H: 'Hipótesis', F: 'Falta el dato' };
+const estado = (e) => `<span class="estado mono" title="${ESTADOS[e]}">[${e}] ${ESTADOS[e]}</span>`;
+/** Nombres cortos para leyendas y etiquetas: la etiqueta de cada serie sin el prefijo común a todas. */
+function cortas(series) {
+  const et = series.map((s) => s.etiqueta);
+  let k = 0; while (et.every((e) => e[k] === et[0][k])) k++;
+  const pref = et[0].slice(0, k).replace(/\S*$/, '');
+  return et.map((e) => { const c = e.slice(pref.length); return c[0].toUpperCase() + c.slice(1); });
+}
+const conPunto = (t) => (/[.!?…]$/.test(t) ? t : `${t}.`);
+
+$('hudCap').textContent = `Obs_${String(CAP.orden).padStart(2, '0')} / ${nombreCap(CAP.slug)}`;
+$('hudFuente').textContent = `${sigla(LIN.fuente.organismo)} · ${PERIODO}`;
+$('hudAct').textContent = `${sigla(LIN.fuente.organismo)} · ${HASTA}`;
+$('sello').textContent = `Datos actualizados · ${sigla(LIN.fuente.organismo)} ${HASTA}`;
+$('kicker').textContent = `Estudio · Capítulo ${String(CAP.orden).padStart(2, '0')}${CAP.publicado ? '' : ' · Borrador'}`;
+{ // título fijo: la última palabra en cursiva granate
+  const t = CAP.titulo.texto, i = t.lastIndexOf(' ');
+  $('titulo').innerHTML = `${esc(t.slice(0, i))} <em>${esc(t.slice(i + 1))}.</em>`;
+}
+$('respuesta').textContent = CAP.respuesta.texto;
+// «Ver de dónde sale» lleva al gráfico cuya afirmación es la respuesta directa
+const graficoRespuesta = CAP.graficos.find((id) => G[id].afirmaciones.some((a) => a.id === CAP.respuesta.id));
+$('lineaRespuesta').innerHTML = `<span>${esc(LIN.fuente.organismo)} · ${PERIODO}</span>${estado(CAP.respuesta.estado)}<a href="#g-${graficoRespuesta}">Ver de dónde sale ↓</a>`;
+
+/* ---------- gráficos SVG (en la web se generan al compilar; aquí, al cargar) ---------- */
+const COL_LIN = ['var(--wine)', 'var(--mute)'];
+const COL_API = ['var(--t0)', 'var(--t1)', 'var(--t2)', 'var(--t3)'];
+const RUPT = { base: 'Cambio de base INE', recalibracion: 'Recalibración MAPA', metodo: 'Cambio de método', nomenclatura: 'Cambio de nombres' };
+const fmt = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 });
+function escalaBonita(max, marcas = 5) {
+  const bruto = max / marcas, pot = 10 ** Math.floor(Math.log10(bruto));
+  const paso = [1, 2, 2.5, 5, 10].map((m) => m * pot).find((p) => p >= bruto);
+  const tope = Math.ceil(max / paso) * paso;
+  return { tope, marcas: Array.from({ length: Math.round(tope / paso) + 1 }, (_, i) => i * paso) };
+}
+const punto = (s, per) => s.puntos.find((p) => p.periodo === per);
+
+function bloque(g, num, sec) {
+  const nombres = cortas(g.series), cols = g.tipo === 'lineas' ? COL_LIN : COL_API;
+  const hayEmp = g.series.some((s) => s.puntos.some((p) => p.empalme));
+  const af = g.afirmaciones[0];
+  const leyenda = g.series.map((s, i) => `<li><span class="m ${g.tipo === 'lineas' ? '' : 'b'}" style="background:${cols[i]}"></span>${esc(nombres[i])}</li>`).join('')
+    + (hayEmp && g.tipo === 'lineas' ? `<li><span class="m h"></span><span class="m p"></span>Valor en la otra base de población (años de empalme)</li>` : '')
+    + (hayEmp && g.tipo === 'apiladas' ? `<li><span class="ast">*</span>Año con las dos bases de población; el valor en la otra base, en la tabla</li>` : '');
+  // Magnitud de cada ruptura, agrupada por serie: «Menor de 35 años: −14,8 % en 2022 y −22,5 % en 2023».
+  const magn = (per) => g.series.flatMap((s, i) => s.rupturas.filter((r) => r.periodo === per && r.magnitud)
+    .map((r) => `${nombres[i]}: ${r.magnitud.map((m) => `${m.texto} en ${m.periodo}`).join(' y ')}`));
+  const rupturas = g.rupturas.map((r) => { const m = magn(r.periodo);
+    return `<li>Ruptura ${r.periodo}: ${esc(conPunto(r.nota))}${m.length ? `<span class="magnitud"> Diferencia entre bases (nueva frente a anterior): ${esc(m.join('; '))}.</span>` : ''}</li>`; }).join('');
+  const pers = periodos(g);
+  const tabla = `<div class="tabla-scroll"><table><caption>${esc(g.pregunta)} (${esc(g.unidad)})</caption><thead><tr><th scope="col">Año</th>${nombres.map((n) => `<th scope="col">${esc(n)}</th>`).join('')}</tr></thead><tbody>`
+    + pers.map((per) => `<tr><th scope="row">${per}</th>${g.series.map((s) => { const p = punto(s, per);
+      return `<td>${p ? esc(p.texto) : '—'}${p?.empalme ? `<small>${esc(p.empalme.texto)} en base ${esc(p.empalme.base)}</small>` : ''}</td>`; }).join('')}</tr>`).join('')
+    + `</tbody></table></div>`;
+  const proc = g.series.flatMap((s, i) => s.puntos.map((p) => `<dt>${esc(nombres[i])} · ${p.periodo}</dt><dd><ul>`
+    + p.procedencia.map((c) => `<li><code>${esc(c.fichero)}</code> · hoja «${esc(c.hoja)}» · fila ${c.fila} · columna ${c.columna} · SHA-256 <code>${esc(c.sha256.slice(0, 12))}…</code></li>`).join('')
+    + (p.empalme ? p.empalme.procedencia.map((c) => `<li>En base ${esc(p.empalme.base)}: <code>${esc(c.fichero)}</code> · fila ${c.fila} · columna ${c.columna}</li>`).join('') : '')
+    + `</ul>Base de población: ${esc(p.base)}</dd>`)).join('');
+  const provisional = g.series.some((s) => s.provisional)
+    ? `` : '';
+  const covid = g.tipo === 'lineas'
+    ? `` : '';
+  sec.innerHTML = `
+    <p class="n mono fade"><b>0${num}</b> ${esc(sec.dataset.name[0] + sec.dataset.name.slice(1).toLowerCase())}</p>
+    <h2 class="split">${esc(g.pregunta)}</h2>
+    <p class="afirmacion fade">${esc(af.texto)}${estado(af.estado)}</p>
+    <figure class="panel fade" id="grafico-${g.id}" aria-labelledby="t-${g.id}">
+      <ul class="leyenda">${leyenda}</ul>
+      <div class="lienzo" data-grafico="${g.id}"></div>
+      <figcaption>
+        <span class="hud-f mono" id="t-${g.id}">${esc(g.fuente.organismo)} · ${esc(g.unidad)} · ${pers[0]}–${pers.at(-1)}</span>
+        <ul class="rupturas">${rupturas}</ul>
+      </figcaption>
+      <details><summary class="mono">Tabla de datos</summary>${tabla}</details>
+      <details class="procedencia" data-evento-abrir="procedencia_abierta" data-prop-grafico="${g.id}"><summary class="mono">Procedencia de cada cifra</summary>
+        <dl><dt>Universo</dt><dd>${esc(g.universo.descripcion)}</dd><dt>Fuente</dt><dd><a href="${esc(g.fuente.url)}" rel="noopener">${esc(g.fuente.organismo)} · ${esc(g.fuente.titulo)}</a></dd>
+        <dt>Licencia de la fuente</dt><dd>${esc(g.fuente.licencia ?? 'Pendiente de verificar [F]')}</dd>${proc}<dt>Revisado</dt><dd>${esc(g.revisado)}</dd></dl></details>
+      <a class="ficha" href="#"><span class="ar">→</span>Ficha del gráfico, tabla y CSV</a>
+    </figure>${covid}${provisional}`;
+}
+CAP.graficos.forEach((id, i) => {
+  const sec = document.createElement('section');
+  sec.className = 'bloque pad'; sec.id = `g-${id}`; sec.dataset.name = G[id].unidad.toUpperCase();
+  $('graficos').appendChild(sec); bloque(G[id], i + 1, sec);
+});
+
+/** Tooltip común: se coloca junto al puntero dentro del lienzo. */
+function tooltip(lienzo) {
+  const tip = document.createElement('div'); tip.className = 'tip'; lienzo.appendChild(tip);
+  return {
+    ver(html, x, y) { tip.innerHTML = html; tip.style.opacity = 1;
+      const w = tip.offsetWidth, W = lienzo.clientWidth; tip.style.left = `${Math.min(W - w, Math.max(0, x + 16))}px`; tip.style.top = `${Math.max(0, y - 20)}px`; },
+    ocultar() { tip.style.opacity = 0; },
+  };
+}
+const filaTip = (col, nombre, p) => `<div class="f"><span><i style="background:${col}"></i>${esc(nombre)}</span><span>${esc(p.texto)}</span></div>${p.empalme ? `<small>${esc(p.empalme.texto)} en base ${esc(p.empalme.base)}</small>` : ''}`;
+
+function dibujarLineas(g) {
+  const lienzo = document.querySelector(`[data-grafico="${g.id}"]`), W = lienzo.clientWidth, estrecho = W < 560;
+  const H = estrecho ? 300 : 420, M = { t: 30, r: estrecho ? 44 : 64, b: 36, l: estrecho ? 26 : 34 };
+  const pers = periodos(g), nombres = cortas(g.series);
+  const x = (per) => M.l + (pers.indexOf(per) / (pers.length - 1)) * (W - M.l - M.r);
+  const vals = g.series.flatMap((s) => s.puntos.flatMap((p) => (p.empalme ? [p.valor, p.empalme.valor] : [p.valor])));
+  const { tope, marcas } = escalaBonita(Math.max(...vals), 5);
+  const y = (v) => H - M.b - (v / tope) * (H - M.t - M.b);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="t-${g.id}"><title>${esc(g.pregunta)}</title><desc>${esc(g.afirmaciones[0].texto)}</desc><g class="eje">`;
+  marcas.forEach((m) => { s += `<line x1="${M.l}" x2="${W - M.r}" y1="${y(m)}" y2="${y(m)}" stroke="rgba(20,16,17,${m === 0 ? .3 : .1})"/><text x="${M.l - 8}" y="${y(m) + 4}" text-anchor="end">${fmt.format(m)}</text>`; });
+  pers.forEach((per, i) => { if (!estrecho || i % 3 === 0 || i === pers.length - 1) s += `<text x="${x(per)}" y="${H - M.b + 22}" text-anchor="middle">${per}</text>`; });
+  s += `</g><g class="rup">`;
+  g.rupturas.forEach((r) => { const xr = (x(r.periodo) + x(r.periodo - 1)) / 2;
+    s += `<line x1="${xr}" x2="${xr}" y1="${M.t - 8}" y2="${H - M.b}" stroke="var(--wine)" stroke-opacity=".45" stroke-dasharray="3 4"/>${estrecho ? '' : `<text x="${xr + 6}" y="${M.t - 2}">${esc(RUPT[r.tipo])} · ${r.periodo}</text>`}`; });
+  s += `</g>`;
+  g.series.forEach((se, i) => {
+    const col = COL_LIN[i], tramos = [];
+    se.puntos.forEach((p, k) => { const prev = se.puntos[k - 1]; if (!prev || prev.base !== p.base) tramos.push([]); tramos.at(-1).push(p); });
+    tramos.forEach((t) => { s += `<path d="${t.map((p, k) => `${k ? 'L' : 'M'}${x(p.periodo)},${y(p.valor)}`).join('')}" fill="none" stroke="${col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`; });
+    // empalme: continuación en la base anterior, punteada y con puntos huecos
+    const emp = se.puntos.filter((p) => p.empalme);
+    if (emp.length) { const ultimo = [...se.puntos].reverse().find((p) => p.base === emp[0].empalme.base && p.periodo < emp[0].periodo);
+      const cad = [ultimo ? [ultimo.periodo, ultimo.valor] : null, ...emp.map((p) => [p.periodo, p.empalme.valor])].filter(Boolean);
+      s += `<path d="${cad.map(([a, v], k) => `${k ? 'L' : 'M'}${x(a)},${y(v)}`).join('')}" fill="none" stroke="${col}" stroke-width="1.5" stroke-dasharray="1.5 4" stroke-linecap="round"/>`;
+      emp.forEach((p) => { s += `<circle cx="${x(p.periodo)}" cy="${y(p.empalme.valor)}" r="4" fill="var(--bg)" stroke="${col}" stroke-width="1.5"><title>${p.periodo} · ${esc(nombres[i])} en base ${esc(p.empalme.base)}: ${esc(p.empalme.texto)} ${esc(g.unidad)}</title></circle>`; }); }
+    const a = se.puntos[0], b = se.puntos.at(-1);
+    [a, b].forEach((p, k) => { s += `<circle cx="${x(p.periodo)}" cy="${y(p.valor)}" r="5" fill="${col}" stroke="#f3f1ee" stroke-width="2"/>`
+      + `<text class="valor" x="${x(p.periodo) + (k ? 10 : 2)}" y="${y(p.valor) + (k ? 5 : -12)}" text-anchor="start">${esc(p.texto)}</text>`; });
+  });
+  s += `<line id="cruz-${g.id}" y1="${M.t}" y2="${H - M.b}" stroke="var(--ink)" stroke-opacity=".35" visibility="hidden"/><rect x="${M.l}" y="${M.t}" width="${W - M.l - M.r}" height="${H - M.t - M.b}" fill="transparent"/></svg>`;
+  lienzo.innerHTML = s;
+  const tip = tooltip(lienzo), cruz = lienzo.querySelector(`#cruz-${g.id}`), zona = lienzo.querySelector('rect');
+  zona.addEventListener('pointermove', (e) => {
+    const r = lienzo.getBoundingClientRect(), px = e.clientX - r.left;
+    const per = pers.reduce((m, p) => (Math.abs(x(p) - px) < Math.abs(x(m) - px) ? p : m), pers[0]);
+    cruz.setAttribute('x1', x(per)); cruz.setAttribute('x2', x(per)); cruz.setAttribute('visibility', 'visible');
+    tip.ver(`<b>${per}</b>${g.series.map((se, i) => filaTip(COL_LIN[i], nombres[i], punto(se, per))).join('')}`, x(per), e.clientY - r.top);
+  });
+  zona.addEventListener('pointerleave', () => { cruz.setAttribute('visibility', 'hidden'); tip.ocultar(); });
+}
+
+function dibujarApiladas(g) {
+  const lienzo = document.querySelector(`[data-grafico="${g.id}"]`), W = lienzo.clientWidth, estrecho = W < 560;
+  const H = estrecho ? 320 : 420, M = { t: 30, r: estrecho ? 8 : 20, b: 36, l: estrecho ? 30 : 38 };
+  const pers = periodos(g), nombres = cortas(g.series), n = pers.length;
+  const holgura = estrecho ? 44 : 70, barra = estrecho ? 14 : 24, hueco = 2;
+  const x = (i) => M.l + holgura + (i / (n - 1)) * (W - M.l - M.r - 2 * holgura);
+  const y = (v) => H - M.b - (v / 100) * (H - M.t - M.b);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-labelledby="t-${g.id}"><title>${esc(g.pregunta)}</title><desc>${esc(g.afirmaciones[0].texto)}</desc><g class="eje">`;
+  [0, 25, 50, 75, 100].forEach((m) => { s += `<line x1="${M.l}" x2="${W - M.r}" y1="${y(m)}" y2="${y(m)}" stroke="rgba(20,16,17,${m === 0 ? .3 : .1})"/><text x="${M.l - 8}" y="${y(m) + 4}" text-anchor="end">${m}${estrecho ? '' : ' %'}</text>`; });
+  pers.forEach((per, i) => { const emp = g.series.some((se) => punto(se, per)?.empalme);
+    if (!estrecho || i % 3 === 0 || i === n - 1) s += `<text x="${x(i)}" y="${H - M.b + 22}" text-anchor="middle">${estrecho ? String(per).slice(2) : per}${emp ? '<tspan fill="var(--wine)">*</tspan>' : ''}</text>`; });
+  s += `</g><g class="rup">`;
+  g.rupturas.forEach((r) => { const i = pers.indexOf(r.periodo), xr = (x(i) + x(i - 1)) / 2;
+    s += `<line x1="${xr}" x2="${xr}" y1="${M.t - 8}" y2="${H - M.b}" stroke="var(--wine)" stroke-opacity=".45" stroke-dasharray="3 4"/>${estrecho ? '' : `<text x="${xr + 6}" y="${M.t - 2}">${esc(RUPT[r.tipo])} · ${r.periodo}</text>`}`; });
+  s += `</g>`;
+  pers.forEach((per, i) => {
+    let acum = 0; s += `<g class="col" data-i="${i}">`;
+    g.series.forEach((se, k) => { const p = punto(se, per); const v0 = acum, v1 = acum + p.valor; acum = v1;
+      const top = y(v1) + (k === g.series.length - 1 ? 0 : hueco / 2), bot = y(v0) - (k === 0 ? 0 : hueco / 2), h = Math.max(0, bot - top), xa = x(i) - barra / 2;
+      s += k === g.series.length - 1
+        ? `<path d="M${xa},${bot}V${top + 4}Q${xa},${top} ${xa + 4},${top}H${xa + barra - 4}Q${xa + barra},${top} ${xa + barra},${top + 4}V${bot}Z" fill="${COL_API[k]}"/>`
+        : `<rect x="${xa}" y="${top}" width="${barra}" height="${h}" fill="${COL_API[k]}"/>`; });
+    s += `<rect x="${x(i) - (W - M.l - M.r) / n / 2}" y="${M.t}" width="${(W - M.l - M.r) / n}" height="${H - M.t - M.b}" fill="transparent" data-zona="${i}"/></g>`;
+  });
+  // etiquetas directas selectivas: el tramo más joven (abajo) y el mayor (arriba), en el primer y el último año
+  if (!estrecho) [0, n - 1].forEach((i) => { const per = pers[i], ult = i === n - 1;
+    [0, g.series.length - 1].forEach((k) => { const p = punto(g.series[k], per);
+      const base = g.series.slice(0, k).reduce((a, se) => a + punto(se, per).valor, 0);
+      const yv = k === 0 ? Math.min(y(base + p.valor / 2), y(0) - 6) : y(base + p.valor / 2);
+      s += `<text class="valor" x="${x(i) + (ult ? 1 : -1) * (barra / 2 + 10)}" y="${yv + 5}" text-anchor="${ult ? 'start' : 'end'}">${esc(p.texto)}</text>`; }); });
+  s += `</svg>`;
+  lienzo.innerHTML = s;
+  const tip = tooltip(lienzo);
+  lienzo.querySelectorAll('[data-zona]').forEach((z) => {
+    z.addEventListener('pointermove', (e) => { const i = +z.dataset.zona, per = pers[i], r = lienzo.getBoundingClientRect();
+      lienzo.querySelectorAll('.col').forEach((c) => c.style.opacity = +c.dataset.i === i ? 1 : .45);
+      tip.ver(`<b>${per}</b>${[...g.series].reverse().map((se) => filaTip(COL_API[g.series.indexOf(se)], nombres[g.series.indexOf(se)], punto(se, per))).join('')}`, e.clientX - r.left, e.clientY - r.top); });
+    z.addEventListener('pointerleave', () => { lienzo.querySelectorAll('.col').forEach((c) => c.style.opacity = 1); tip.ocultar(); });
+  });
+}
+const dibujar = () => { dibujarLineas(LIN); dibujarApiladas(API); };
+dibujar();
+let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(dibujar, 150); });
+
+/* ---------- cautelas: las de la respuesta y las de las afirmaciones, sin repetir ---------- */
+{
+  const lista = [...new Set([...CAP.respuesta.cautelas, ...todos.flatMap((g) => g.afirmaciones.flatMap((a) => a.cautelas))])];
+  const sinControl = todos.flatMap((g) => g.afirmaciones.flatMap((a) => a.sin_control.map((s) => `Sin contraste con el informe publicado: ${s.serie}, ${s.periodo}. ${s.motivo}`)));
+  $('listaCautelas').innerHTML = lista.map((t) => `<li>${esc(t)}</li>`).join('') + sinControl.map((t) => `<li class="sin-control">${esc(t)}</li>`).join('');
+}
+
+/* ---------- escena: textos de la escena desde el gráfico apilado ---------- */
+const PERS_E = periodos(API), NOMBRES_E = cortas(API.series);
+$('escenaPregunta').textContent = API.pregunta;
+$('anioRef').textContent = PERS_E[0];
+$('escena').dataset.name = `${PERS_E[0]} → ${PERS_E.at(-1)}`;
+$('rupturasEscena').innerHTML = API.rupturas.map((r) => `<li data-p="${r.periodo}" title="${esc(r.nota)}"><b>${r.periodo}</b> · Ruptura · ${esc(RUPT[r.tipo])}</li>`).join('');
+const etiquetas = $('etiquetas');
+etiquetas.innerHTML = API.series.map((se, k) => `<div class="et" data-k="${k}"><span class="v" data-v></span><span class="n mono"><i style="background:${COL_API[k]}"></i>${esc(NOMBRES_E[k])}</span><span class="d mono">${PERS_E[0]} · ${esc(se.puntos[0].texto)}</span></div>`).join('');
+const valEt = [...etiquetas.querySelectorAll('[data-v]')];
+function mostrarAnio(idx) {
+  const per = PERS_E[idx];
+  $('anio').innerHTML = idx === PERS_E.length - 1 ? `<em>${per}</em>` : String(per);
+  API.series.forEach((se, k) => { valEt[k].textContent = punto(se, per).texto; });
+  document.querySelectorAll('#rupturasEscena li').forEach((li) => li.classList.toggle('si', per >= +li.dataset.p));
+}
+if (SIN_MOV) {
+  $('anio').textContent = `${PERS_E[0]} → ${PERS_E.at(-1)}`;
+  API.series.forEach((se, k) => { valEt[k].textContent = `${se.puntos[0].texto} → ${se.puntos.at(-1).texto}`; });
+} else mostrarAnio(0);
+
+/* ---------- texto partido y menú (igual que la home) ---------- */
+document.querySelectorAll('.split').forEach((el) => {
+  const frag = document.createDocumentFragment(); let k = 0;
+  el.childNodes.forEach((n) => n.textContent.split(/(\s+)/).forEach((w) => {
+    if (!w) return;
+    if (/^\s+$/.test(w)) { frag.appendChild(document.createTextNode(' ')); return; }
+    const o = document.createElement('span'); o.className = 'w';
+    const i = document.createElement(n.nodeType === 1 ? n.tagName.toLowerCase() : 'span');
+    i.textContent = w; i.style.transitionDelay = (k++ * 0.05) + 's'; o.appendChild(i); frag.appendChild(o);
+  }));
+  el.innerHTML = ''; el.appendChild(frag);
+});
+const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && e.target.classList.add('in')), { threshold: 0.12 });
+document.querySelectorAll('#apertura, section.bloque, #cautelas, #gancho').forEach((s) => io.observe(s));
+const menu = $('menu');
+$('burger').onclick = () => menu.classList.add('open');
+$('close').onclick = () => menu.classList.remove('open');
+addEventListener('keydown', (e) => { if (e.key === 'Escape') menu.classList.remove('open'); });
+$('conmutador').onclick = (e) => { const on = document.body.classList.toggle('notas'); e.currentTarget.textContent = `Notas de maqueta · ${on ? 'sí' : 'no'}`; e.currentTarget.setAttribute('aria-pressed', on); };
+const GLIFOS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/_·#';
+function descifrar(el, texto) {
+  if (SIN_MOV) { el.textContent = texto; return; }
+  const ini = performance.now();
+  const paso = (t) => { const p = Math.min(1, (t - ini) / 520), fijas = Math.floor(p * texto.length);
+    el.textContent = texto.split('').map((c, i) => (i < fijas || c === ' ') ? c : GLIFOS[(Math.random() * GLIFOS.length) | 0]).join('');
+    if (p < 1) requestAnimationFrame(paso); };
+  requestAnimationFrame(paso);
+}
+
+/* ============================================================================================
+   Motor de partículas: el mismo de la home (WebGL2 directo) con dos cambios para el capítulo:
+   el scroll lleva la escena año a año (cada cambio se anima y reposa) y el color va por tramo, con líquido y vidrio.
+   ============================================================================================ */
+const N = innerWidth > 860 ? 16000 : 8000;
+const FOV = 34, DIST = 9.5;
+function mulberry32(a) { return () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const K = API.series.length, SEP = 0.95, RADIO = 0.3, ALTO = 3, SUELO = -1.5;
+const XS = Array.from({ length: K }, (_, j) => (j - (K - 1) / 2) * SEP);
+/** Probetas: cada partícula tiene su altura fija (semilla). Un 26 % dibuja el vidrio y un 4 % la marca del nivel de
+ * referencia (2016). El resto es líquido si su altura queda bajo el nivel del año y, si no, forma el anillo de la
+ * superficie a ese nivel. Entre años el líquido no se mueve: solo sube o baja el anillo, en vertical, sin saltos
+ * laterales. `tipo`: 0 líquido o superficie, 1 vidrio, 2 marca de referencia. */
+function probetasNivel(niveles, referencia, semilla) {
+  const R = mulberry32(semilla), pos = new Float32Array(N * 3), liq = new Float32Array(N), tipo = new Uint8Array(N);
+  for (let i = 0; i < N; i++) {
+    const j = i % K, th = R() * Math.PI * 2, t = R(), u = R(), rr = Math.sqrt(R()), x0 = XS[j];
+    let r = RADIO, y = SUELO + u * ALTO, l = 0;
+    if (t < 0.04) { r = rr * RADIO; y = SUELO; tipo[i] = 1; }
+    else if (t < 0.07) { r = RADIO * 1.05; y = SUELO + ALTO; tipo[i] = 1; }
+    else if (t < 0.11) { r = RADIO * 1.03; y = SUELO + referencia[j] * ALTO + (rr - 0.5) * 0.012; tipo[i] = 2; }
+    else if (t < 0.3) tipo[i] = 1;
+    else if (u < niveles[j]) { r = rr * RADIO * 0.9; l = 1; }
+    else { r = RADIO * (0.9 + 0.08 * rr); y = SUELO + niveles[j] * ALTO + (rr - 0.5) * 0.02; }
+    pos.set([x0 + Math.cos(th) * r, y, Math.sin(th) * r], i * 3); liq[i] = l;
+  }
+  return { pos, liq, tipo };
+}
+// Escala común a las cuatro probetas y a todos los años: la llena es la mayor parte de toda la serie.
+const MAXIMO = Math.max(...API.series.flatMap((se) => se.puntos.map((p) => p.valor)));
+const NIVELES = PERS_E.map((per) => API.series.map((se) => punto(se, per).valor / MAXIMO * 0.94));
+const FORMAS = NIVELES.map((niveles) => probetasNivel(niveles, NIVELES[0], 11));
+
+const VERT = `
+  uniform mat4 uProj, uMV; uniform float uT, uTime, uSize;
+  attribute vec3 aFrom, aTo, aCol; attribute float aRnd; varying float vA, vLiq, vJ, vMov;
+  void main(){
+    // Capítulo: todas las partículas cambian a la vez, sin dispersión ni temblor por la velocidad del scroll
+    float t = smoothstep(0.0, 1.0, uT);
+    vec3 p = mix(aFrom, aTo, t);
+    float liq = mix(aCol.x, aCol.y, t);
+    p.x += sin(p.y * 2.3 + uTime * 0.5 + aRnd * 6.28) * 0.003;
+    p.z += cos(p.x * 1.9 + uTime * 0.4 + aRnd * 3.1) * 0.003;
+    vec4 mv = uMV * vec4(p, 1.0);
+    gl_Position = uProj * mv;
+    gl_PointSize = uSize * (0.55 + aRnd * 0.9) / -mv.z;
+    vA = 0.45 + 0.55 * aRnd; vLiq = liq; vJ = aCol.z; vMov = step(0.001, distance(aFrom, aTo)) * sin(3.14159 * t);
+  }`;
+const FRAG = `
+  precision highp float;
+  uniform float uAlpha; uniform vec3 uC0, uC1, uC2, uC3; varying float vA, vLiq, vJ, vMov;
+  void main(){
+    float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard;
+    float s = smoothstep(0.5, 0.05, d);
+    vec3 c = vJ < 0.17 ? uC0 : (vJ < 0.5 ? uC1 : (vJ < 0.84 ? uC2 : uC3));
+    vec3 vidrio = vJ < -1.5 ? vec3(0.16, 0.13, 0.13) : vec3(0.36, 0.32, 0.32);
+    // superficie: el color del tramo, más claro; brilla un poco mientras se mueve
+    vec3 sup = mix(c, vec3(0.86, 0.46, 0.60), 0.25 + 0.4 * vMov);
+    vec3 col = vJ < -0.5 ? vidrio : mix(sup, c, vLiq);
+    float a = vJ < -1.5 ? 0.55 : (vJ < -0.5 ? 0.2 : mix(0.08 + 0.1 * vMov, vA, vLiq));
+    gl_FragColor = vec4(col, s * a * uAlpha);
+  }`;
+const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
+
+/** Modelo-vista: T · Rx · Ry · S y la cámara en z = DIST (como en la home). */
+function matrizMV({ x, y = 0, rx, ry, s }) {
+  const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
+  return new Float32Array([cy * s, sx * sy * s, -cx * sy * s, 0, 0, cx * s, sx * s, 0, sy * s, -sx * cy * s, cx * cy * s, 0, x, y, -DIST, 1]);
+}
+function matrizProy() {
+  const f = 1 / Math.tan((FOV * Math.PI / 180) / 2), a = innerWidth / innerHeight, near = 0.1, far = 100;
+  return new Float32Array([f / a, 0, 0, 0, 0, f, 0, 0, 0, 0, (far + near) / (near - far), -1, 0, 0, (2 * far * near) / (near - far), 0]);
+}
+/** Posición en pantalla de un punto del mundo (para las etiquetas HTML bajo cada probeta). */
+function proyectar(p, mv) {
+  const P = matrizProy(), e = [0, 1, 2, 3].map((r) => mv[r] * p[0] + mv[4 + r] * p[1] + mv[8 + r] * p[2] + mv[12 + r]);
+  const c = [0, 1, 2, 3].map((r) => P[r] * e[0] + P[4 + r] * e[1] + P[8 + r] * e[2] + P[12 + r] * e[3]);
+  return [(c[0] / c[3] * 0.5 + 0.5) * innerWidth, (0.5 - c[1] / c[3] * 0.5) * innerHeight];
+}
+
+function crearMotor(canvas, n) {
+  const gl = canvas.getContext('webgl2', { alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'high-performance' });
+  if (!gl) return null;
+  const sh = (tipo, src) => { const s = gl.createShader(tipo); gl.shaderSource(s, src); gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG)); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  gl.bindVertexArray(gl.createVertexArray());
+  const buffers = {}, u = {};
+  ['uProj', 'uMV', 'uT', 'uTime', 'uSize', 'uAlpha', 'uC0', 'uC1', 'uC2', 'uC3'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
+  const css = getComputedStyle(document.documentElement);
+  ['uC0', 'uC1', 'uC2', 'uC3'].forEach((k, i) => gl.uniform3fv(u[k], hex(css.getPropertyValue(`--t${i}`).trim())));
+  gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND);
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  return {
+    atributo(nombre, datos, tam) { const b = gl.createBuffer(), loc = gl.getAttribLocation(prog, nombre);
+      gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, datos, gl.DYNAMIC_DRAW);
+      gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, tam, gl.FLOAT, false, 0, 0); buffers[nombre] = b; },
+    subir(nombre, datos) { gl.bindBuffer(gl.ARRAY_BUFFER, buffers[nombre]); gl.bufferSubData(gl.ARRAY_BUFFER, 0, datos); },
+    tamano() { const dpr = Math.min(devicePixelRatio, 2);
+      canvas.width = Math.round(innerWidth * dpr); canvas.height = Math.round(innerHeight * dpr);
+      gl.viewport(0, 0, canvas.width, canvas.height); gl.uniformMatrix4fv(u.uProj, false, matrizProy()); gl.uniform1f(u.uSize, 40 * dpr); },
+    dibujar({ mv, t, tiempo, alfa }) {
+      gl.uniformMatrix4fv(u.uMV, false, mv); gl.uniform1f(u.uT, t); gl.uniform1f(u.uTime, tiempo);
+      gl.uniform1f(u.uAlpha, alfa);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
+      if (alfa > 0.002) gl.drawArrays(gl.POINTS, 0, n);
+    },
+  };
+}
+
+/* ---------- scroll: apertura → escena fijada (2016 → 2025) → gráficos ---------- */
+const secciones = [...document.querySelectorAll('[data-name]')];
+$('rail').innerHTML = secciones.map((_, i) => `<span${i ? '' : ' class="on"'}></span>`).join('');
+const railSpans = [...$('rail').children];
+const esc0 = $('escena');
+let activo = -1, idxAnio = 0;
+function hudSeccion(y) {
+  const medio = y + innerHeight * 0.5;
+  let act = 0; secciones.forEach((s, i) => { if (s.offsetTop <= medio) act = i; });
+  if (act !== activo) { activo = act; railSpans.forEach((s, j) => s.classList.toggle('on', j === act));
+    $('hudIdx').textContent = `[${String(act + 1).padStart(2, '0')}/${String(secciones.length).padStart(2, '0')}]`; descifrar($('hudName'), secciones[act].dataset.name); }
+  $('hudPct').textContent = String(Math.round(y / (document.documentElement.scrollHeight - innerHeight) * 100)).padStart(3, '0') + '%';
+  const g = $('gancho'), osc = g.offsetTop <= y + 60 && g.offsetTop + g.offsetHeight > y + 60;
+  document.body.classList.toggle('oscuro', osc);
+  document.body.classList.toggle('lectura', y > esc0.offsetTop + esc0.offsetHeight - innerHeight * 0.4);
+}
+
+if (SIN_MOV) {
+  addEventListener('scroll', () => hudSeccion(scrollY), { passive: true }); hudSeccion(scrollY);
+} else {
+  const motor = crearMotor($('gl'), N);
+  const rnd = new Float32Array(N); { const R = mulberry32(7); for (let i = 0; i < N; i++) rnd[i] = R(); }
+  const col = new Float32Array(N * 3);
+  const colores = (a, b) => { for (let i = 0; i < N; i++) col.set([FORMAS[a].liq[i], FORMAS[b].liq[i], FORMAS[a].tipo[i] ? -FORMAS[a].tipo[i] : (i % K) / (K - 1)], i * 3); return col; };
+  if (motor) {
+    motor.atributo('aFrom', FORMAS[0].pos, 3); motor.atributo('aTo', FORMAS[1].pos, 3);
+    motor.atributo('aCol', colores(0, 1), 3); motor.atributo('aRnd', rnd, 1);
+    motor.tamano(); addEventListener('resize', () => motor.tamano());
+  }
+  let lenis = null; try { lenis = new Lenis({ lerp: 0.085, smoothWheel: true }); } catch (e) {}
+  let raton = [0, 0]; addEventListener('pointermove', (e) => { raton = [e.clientX / innerWidth - 0.5, e.clientY / innerHeight - 0.5]; });
+  let estado = 0, segmento = -1, pose = 0;
+  function cuadro(t) {
+    lenis?.raf(t);
+    const y = scrollY;
+    const ini = esc0.offsetTop, recorrido = esc0.offsetHeight - innerHeight;
+    const entrada = suave(tramo(y, ini - innerHeight * 0.9, ini));          // apertura → escena
+    const pe = clamp((y - ini) / recorrido);                                  // avance dentro de la escena
+    const salida = tramo(y, ini + recorrido, ini + recorrido + innerHeight * 0.7);
+    pose += (entrada - pose) * 0.12;
+    // El scroll elige el año (entero); la escena se desliza hasta él y reposa: un paso visible por año
+    const objetivo = Math.round(tramo(pe, 0.06, 0.86) * (PERS_E.length - 1));
+    estado += (objetivo - estado) * 0.06;
+    const i = Math.min(PERS_E.length - 2, Math.floor(estado)), f = estado - i;
+    if (motor && i !== segmento) { segmento = i; motor.subir('aFrom', FORMAS[i].pos); motor.subir('aTo', FORMAS[i + 1].pos); motor.subir('aCol', colores(i, i + 1)); }
+    if (objetivo !== idxAnio) { idxAnio = objetivo; mostrarAnio(objetivo); }
+    const ancho = innerWidth > 860;
+    // en móvil las cuatro probetas caben a lo ancho: escala según el ancho visible a la distancia de la cámara
+    const anchoVisible = 2 * Math.tan((FOV / 2) * Math.PI / 180) * DIST * innerWidth / innerHeight;
+    const cabe = anchoVisible * 0.86 / (2 * (XS[K - 1] + RADIO));
+    const o = {
+      x: ancho ? 2.1 + (1.15 - 2.1) * pose : 0,
+      y: ancho ? 0 : -0.55 * pose - 0.2,
+      s: ancho ? 0.74 + 0.3 * pose : Math.min(0.76, cabe),
+      ry: (Math.sin(t / 5200) * 0.28 + raton[0] * 0.25) * (1 - pose * 0.7),
+      rx: 0.1 + raton[1] * 0.1 * (1 - pose * 0.7),
+    };
+    const mv = matrizMV(o);
+    const alfa = (ancho ? 1 : 0.16 + 0.84 * pose) * (1 - salida);
+    motor?.dibujar({ mv, t: f, tiempo: t / 1000, alfa });
+    // etiquetas HTML bajo cada probeta, en la posición proyectada
+    const vis = pose * (1 - salida);
+    etiquetas.style.opacity = vis;
+    if (vis > 0.01) etiquetas.querySelectorAll('.et').forEach((el, j) => { const [sx, sy] = proyectar([XS[j], SUELO - 0.14, 0], mv); el.style.left = `${sx}px`; el.style.top = `${sy}px`; });
+    hudSeccion(y);
+    requestAnimationFrame(cuadro);
+  }
+  requestAnimationFrame(cuadro);
+}
+</script>
+</body>
+</html>

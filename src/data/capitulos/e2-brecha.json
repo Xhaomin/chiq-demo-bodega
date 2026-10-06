@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "id": "e2-brecha",
+  "slug": "brecha-generacional",
+  "orden": 1,
+  "utm_campaign": "brecha-generacional",
+  "titulo": {
+    "texto": "El reto es generacional",
+    "afirmacion": null,
+    "estado": null
+  },
+  "respuesta": {
+    "id": "brecha-consumo-pc-menos35",
+    "texto": "Los hogares cuyo responsable de compra tiene menos de 35 años compraron 1,45 litros de vino por persona en 2025, frente a 3,22 en 2016 (−55 %).",
+    "estado": "C",
+    "cautelas": [
+      "Compra para el hogar según la edad del responsable de compra; no es consumo individual ni incluye hostelería.",
+      "Entre 2016 y 2025 cambia la base de población del INE (2022). En 2022 y 2023 hay datos con las dos bases, y el gráfico da la diferencia entre ellas.",
+      "Desde junio de 2024 el MAPA recalculó el panel por cambios de codificación de producto (código de barras, QR); magnitud sin estimar [F].",
+      "2020 y 2021 son años de COVID. El MAPA atribuye a la covid-19 y a los confinamientos el crecimiento de la compra de vino para casa en 2020 (informe de 2021, cap. 4.4.1, sobre el total de hogares). Por eso la tendencia no se mide desde ni hasta 2020 y 2021."
+    ]
+  },
+  "graficos": [
+    "cuota-volumen-edad",
+    "brecha-litros-persona-menos35"
+  ],
+  "publicado": null,
+  "revisado": "2026-09-29"
+}
