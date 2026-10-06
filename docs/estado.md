@@ -1,8 +1,8 @@
 # Estado de la demo · Bodega Ejemplo (ficticia)
 
-Última actualización: 06/10/2026. Demo de chiq.es: una web de bodega **ficticia** hecha con Astro, para enseñar a las
-bodegas cómo cuenta su historia y sus datos una web «sin cabeza». Todos los datos de la bodega son ficticios y la
-página lo dice. Se publicará en `https://demo.chiq.es` (sin indexar).
+Última actualización: 07/10/2026. Demo de chiq.es: una web de bodega **ficticia** hecha con Astro, para enseñar a las
+bodegas cómo una web puede acompañar al cliente y contar la historia del vino de forma inmersiva. Todos los datos de la
+bodega son ficticios y la página lo dice. Se publicará en `https://demo.chiq.es` (sin indexar).
 
 ## Cómo se trabaja
 
@@ -14,56 +14,55 @@ npm run build
 Vista previa: servir `dist/` (en el PC del autor, la configuración `demo-bodega` de `.claude/launch.json` de
 `estudio-vino`, puerto 8767). Para probar las escenas en el navegador integrado, la pestaña tiene que estar al frente:
 en segundo plano no corre `requestAnimationFrame` y las partículas no avanzan. En pantallas táctiles no hay Lenis
-(scroll nativo).
+(scroll nativo). Las maquetas de `docs/maquetas/premium/` se sirven con la configuración `maquetas-premium` (puerto 8768).
 
 ## Páginas
 
 | Ruta | Contenido |
 |---|---|
-| `/` | Vuelo sobre el viñedo (fotos de Unsplash provisionales) → racimo de partículas → ocho escenas fijas |
+| `/` | Vuelo sobre el viñedo (fotos de Unsplash provisionales) → racimo de moléculas → cinco escenas del recorrido del cliente → carrusel |
 | `/mercado/` | La escena de probetas y los gráficos del capítulo E2 de chiq.es, con los JSON reales del modelo (`src/data/capitulos`, `src/data/graficos`) |
 | `/como-esta-hecha/` | Esquema de la arquitectura: historia, datos y PrestaShop por API → Astro → Caddy, Coolify y Cloudflare |
 
 ## La home (`src/pages/index.astro`)
 
-Salió de la maqueta `docs/maquetas/home-vuelo-particulas-webgl2.html` de `estudio-vino`. Datos en
-`src/data/bodega.json`.
+Es la maqueta D (`docs/maquetas/premium/d-moleculas.html`, elegida por el autor el 07/10/2026) con el vuelo de entrada y
+el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorrido del cliente en la cabecera
+(Descubre, Prueba, Visita, Llévatelo, Quédate). Datos en `src/data/bodega.json`.
 
-- `PLAN`: una entrada por escena, en el orden de las secciones; `n` es el número de pasos (años, vinos…). De ahí salen
-  `formas`, `escenaDe` (escena de cada forma) e `inicio` (primera forma de cada escena).
-- Cada escena es una sección `larga` con su parte `.fijo` pegada: una escena de un paso reposa en su forma toda la
-  sección; una larga reparte sus pasos y el scroll salta al más cercano (`objetivoM`).
-- Motor WebGL2 propio: `uCalma` (sin dispersión entre pasos de la misma escena, salvo las marcadas `disperso`),
-  `aCol` y `aCol2` (color propio por partícula al principio y al final del tramo; `uTinteA/B` dicen si la forma lo
-  tiene) y `uFoto` (colores de la foto del racimo). Las formas con color salen de `conColor(f)`.
-- Cifras sobre las formas: `ETIQ[forma]`, etiquetas HTML proyectadas con la misma cámara (`proyectar`) y separadas si
-  se pisan; `pm` es su posición en el móvil. Las listas `.datos` siguen en el HTML para lectores de pantalla y sin WebGL.
-- Móvil (< 860 px): texto arriba y forma abajo; la ladera se aparta y cada escena puede crecer o subir con `movil` en
-  su entrada de `PLAN`.
-- El carril lateral se genera con una raya por escena.
+- `PLAN`: una entrada por escena, en el orden de las secciones; `n` es el número de pasos y `vista` dónde se coloca la
+  forma en el ancho (`d`) y en el móvil (`m`). De ahí salen `formas`, `escenaDe` e `inicio`. Las dos primeras formas
+  (la foto y el racimo) son la apertura y tienen su propia vista (`VISTA_APERTURA`).
+- Cada escena es una sección con su parte `.fijo` pegada: una escena de un paso reposa en su forma toda la sección; una
+  larga reparte sus pasos y el scroll salta al más cercano (`objetivoM`).
+- Motor WebGL2 propio: moléculas de vino en 3D (puntos suaves, más grandes y opacos al azar), `uCalma` (sin dispersión
+  entre pasos de la misma escena), `aCol` y `aCol2` (color propio por partícula; solo lo usa la bodega) y `uFoto`
+  (colores de la foto del racimo).
+- El ratón **gira** la forma (no la deforma), con un giro lento de fondo; en las escenas de varios pasos, menos.
+- Cifras sobre las formas: `ETIQ[forma]`, etiquetas HTML proyectadas con la misma cámara (`proyectar`), con un halo de
+  papel y separadas si se pisan; `pm` es su posición en el móvil. Las listas `.datos` siguen en el HTML para lectores
+  de pantalla y sin WebGL.
+- Sin botones falsos: lo que aún no existe dice «próximamente» (reservas, tienda) y la última escena enlaza a «Cómo
+  está hecha».
 
-| # | Escena | Forma | Estado |
+| # | Paso | Escena | Forma |
 |---|---|---|---|
-| 01 | Cada añada, su propia historia | Probetas por marca como las de E2, 2016–2025 (10 pasos) | Hecha |
-| 02 | La ladera | Cuatro bancales con muro y cepas en vaso; variedad, parcela y año | Hecha |
-| 03 | Del racimo a la botella | Racimo → depósito → barricas → botella (4 pasos sin dispersión, `bodega.json` → `elaboracion`) | Hecha |
-| 04 | En la copa | Rueda de cata de tres vinos (3 pasos) | Hecha |
-| 05 | Cada botella | Botella con precio, stock y formato | Hecha |
-| 06 | El ensamblaje | Tres parcelas que bajan en corrientes a la copa del Reserva (`vinos[].ensamblaje`) | Hecha |
-| 07 | La visita | Bodega moderna de hormigón de frente (lamas en diagonal, mirador, cipreses), inventada e inspirada en arquitectura real, sin nombre ni logotipo (`visitas`) | Hecha |
-| 08 | La tienda | Dos copas que brindan → ventana de la tienda con los tres vinos y su precio (2 pasos con dispersión); al final, «Cómo está hecha» | Hecha |
-
-Las cifras de 03 no se escriben a mano: las toneladas salen de hectáreas × kg/ha y las 186.000 botellas, de sumar las
-cuatro marcas de 2025.
+| — | Apertura | Vuelo y «Cuatro parcelas, un vino» | La foto se acerca hasta las uvas, que se vuelven el racimo de moléculas |
+| 01 | Descubre | La ladera | Relieve de moléculas con las hileras de viña; en el segundo paso se juntan las cuatro parcelas (`terruno.parcelas`; su sitio en el relieve, `SITIO`) |
+| 02 | Prueba | Lo que hay en la copa | La rueda de cata de los tres vinos (3 pasos) |
+| 03 | Visita | Ven a vernos | La bodega de hormigón con sus colores (lamas en vino, mirador, portón, cipreses), inventada (`visitas`) |
+| 04 | Llévatelo | Llévatelo a casa | La botella con precio, stock y formato |
+| 05 | Quédate | El sello de la casa | Sello con las iniciales en relieve (`iniciales`), que se ve en 3D al girar |
+| — | Final | Carrusel | Historia, El mercado, Cómo está hecha y lo que vendrá (tienda, visitas, club) |
 
 ## Pendiente
 
 1. **Publicar en `demo.chiq.es`** con Coolify, desde este repositorio público y su `Dockerfile` (Caddy, puerto 8080).
 2. Fotos de Unsplash provisionales; en la web final, fotogramas propios.
 
-## Hecho el 06/10/2026 (segunda sesión)
+## Historial
 
-- Escenas 03, 06, 07 y 08, cada una elegida en maqueta por el autor.
-- `/mercado/`: los gráficos no se dibujan sin anchura (con la pestaña oculta salían rectángulos de anchura negativa) y
-  el rótulo ya no dice «Borrador».
-- Las cifras de cuatro dígitos llevan separador (2.500, 1.240), como el resto de la página.
+- 07/10/2026: la home pasa a la maqueta D (recorrido del cliente, moléculas en 3D, ladera en relieve); fuera las
+  probetas, los bancales, la elaboración, el ensamblaje y el brindis. Maquetas A, B, C y D en `docs/maquetas/premium/`.
+- 06/10/2026: escenas 03, 06, 07 y 08 de la home anterior; `/mercado/` sin rectángulos de anchura negativa ni
+  «Borrador»; cifras de cuatro dígitos con separador.
