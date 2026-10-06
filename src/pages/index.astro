@@ -9,13 +9,14 @@ const enLetra = (n: number, femenino = false) => [femenino ? 'Una' : 'Un', 'Dos'
 const CUANTAS = enLetra(B.terruno.parcelas.length, true);
 const V = B.vinos[0];
 const DESDE = Math.min(...B.terruno.parcelas.map((p) => p.plantada));
-// El carrusel final: una foto por sección (Unsplash, provisionales y sin personas) que lleva a su escena.
+// El carrusel final: una imagen por sección que lleva a su escena. Las fotos son de Unsplash (provisionales y sin
+// personas); la de la cata es el render de su rueda de moléculas.
+const unsplash = (id: string) => `https://images.unsplash.com/photo-${id}?w=900&h=1100&fit=crop&q=70`;
 const GALERIA = [
-  { paso: 'Descubre', titulo: 'La ladera', ancla: '#descubre', foto: '1767731415567-3acdb94de881', texto: `${CUANTAS} parcelas al ${B.terruno.orientacion}, entre ${B.terruno.altitud_min} y ${B.terruno.altitud_max} metros.` },
-  { paso: 'Prueba', titulo: 'La cata', ancla: '#prueba', foto: '1630369160812-26c7604cbd8c', texto: `${enLetra(B.vinos.length)} vinos y lo que hay en cada copa.` },
-  { paso: 'Visita', titulo: 'La bodega', ancla: '#visita', foto: '1561906814-23da9a8bfee0', texto: `Visitas ${B.visitas.dias}, con ${B.visitas.cata}.` },
-  { paso: 'Llévatelo', titulo: 'La tienda', ancla: '#tienda', foto: '1554230561-31bdc707b537', texto: 'Cada vino con su ficha, su precio y su stock.' },
-  { paso: 'Quédate', titulo: 'El club', ancla: '#club', foto: '1785724290111-f8b9901e7aee', texto: 'Cada añada antes que nadie y una visita al año.' },
+  { paso: 'Descubre', titulo: 'La ladera', ancla: '#descubre', imagen: unsplash('1767731415567-3acdb94de881'), texto: `${CUANTAS} parcelas al ${B.terruno.orientacion}, entre ${B.terruno.altitud_min} y ${B.terruno.altitud_max} metros.` },
+  { paso: 'Prueba', titulo: 'La cata', ancla: '#prueba', imagen: '/img/cata-3d.webp', claro: true, texto: `${enLetra(B.vinos.length)} vinos y lo que hay en cada copa.` },
+  { paso: 'Visita', titulo: 'La bodega', ancla: '#visita', imagen: unsplash('1561906814-23da9a8bfee0'), texto: `Visitas ${B.visitas.dias}, con ${B.visitas.cata}.` },
+  { paso: 'Llévatelo y quédate', titulo: 'Tienda y club', ancla: '#tienda', imagen: unsplash('1554230561-31bdc707b537'), texto: 'Cada vino con su ficha, y para los socios, cada añada antes que nadie.' },
 ];
 // El menú: las secciones de una web de bodega, que llevan a su parte de la home.
 const MENU = [['/', 'Historia'], ['#prueba', 'Los vinos'], ['#visita', 'Visitas'], ['#tienda', 'Tienda'], ['#club', 'Club']];
@@ -41,7 +42,7 @@ body.oscuro{--ink:#f4efe8;--linea:rgba(244,239,232,.3);--hud:rgba(244,239,232,.7
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
 /* el vuelo: la foto del viñedo, que se acerca hasta las uvas */
 #fotos{position:fixed;inset:0;z-index:1;overflow:hidden;background:#1a1210}
-#fotos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity,filter;transform-origin:50% 72%}
+#fotos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity,filter;transform-origin:62% 72%}
 #fotos .sombra{position:absolute;inset:0;background:radial-gradient(ellipse 70% 45% at 50% 50%,rgba(10,6,6,.32),transparent 75%),linear-gradient(180deg,rgba(10,6,6,.5),rgba(10,6,6,.18) 45%,rgba(10,6,6,.55))}
 #escarcha{position:fixed;inset:0;z-index:2;pointer-events:none;-webkit-backdrop-filter:blur(var(--b,0px)) saturate(1.2);backdrop-filter:blur(var(--b,0px)) saturate(1.2);background:rgba(242,237,229,var(--a,0))}
 canvas#gl{position:fixed;inset:0;width:100vw;height:100vh;z-index:3;pointer-events:none}
@@ -114,6 +115,9 @@ p.cuerpo{font-size:17px;line-height:1.72;color:var(--tinta2);max-width:34ch}
 .panel p{font-size:15px;color:rgba(244,239,232,.85);max-width:28ch;line-height:1.5}
 .panel .idx{position:absolute;left:30px;top:30px;color:rgba(244,239,232,.85)}
 .gal-head h3 em{font-style:italic;color:var(--vino)}
+.panel.claro{background:#f2ede5;color:#1a1414;box-shadow:0 40px 80px -40px rgba(20,16,17,.3),inset 0 0 0 1px rgba(26,20,20,.08)}
+.panel.claro::after{background:linear-gradient(180deg,rgba(242,237,229,0) 58%,rgba(242,237,229,.94) 80%)}
+.panel.claro p{color:rgba(26,20,20,.7)}.panel.claro .idx{color:rgba(26,20,20,.5)}
 footer{position:relative;z-index:10;padding:140px clamp(18px,8vw,140px) 40px;display:grid;gap:56px;background:var(--papel);color:#1a1414}
 footer .big{font-family:'Newsreader',serif;font-weight:300;font-size:clamp(40px,6vw,96px);letter-spacing:-.03em;line-height:.95;max-width:14ch}
 footer .big em{font-style:italic;color:var(--vino)}
@@ -152,7 +156,7 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
 <body class="oscuro">
 <div id="pre"><div class="mono" id="preTxt">bodega ░░░░░░░░░░░░ 000</div></div>
 <div id="fotos" aria-hidden="true">
-  <img id="f1" src="https://images.unsplash.com/photo-1543418219-44e30b057fea?w=2000&q=75" alt="">
+  <img id="f1" src="https://images.unsplash.com/photo-1567072629554-20e689de2400?w=2400&q=75" alt="">
   <img id="f2" src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=2600&q=75" alt="" style="opacity:0">
   <div class="sombra" id="sombra"></div>
 </div>
@@ -225,7 +229,7 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <div class="gal-in">
       <div class="gal-head"><h3>El <em>recorrido.</em></h3><span class="mono" style="color:var(--tinta3)">Desliza →</span></div>
       <div class="track" id="track">{GALERIA.map((g, k) => (
-        <a class="panel" href={g.ancla}><div class="ph" style={`background-image:url(https://images.unsplash.com/photo-${g.foto}?w=900&h=1100&fit=crop&q=70)`}></div>
+        <a class={g.claro ? 'panel claro' : 'panel'} href={g.ancla}><div class="ph" style={`background-image:url(${g.imagen})`}></div>
           <span class="idx mono">/0{k + 1} · {g.paso}</span><h4>{g.titulo}</h4><p>{g.texto}</p></a>))}
       </div>
     </div>
@@ -288,21 +292,28 @@ function racimo() {
   for (let i = 0; i < N; i++) { if (i < N * 0.035) { const t = R(); a.set([0.05 * Math.sin(t * 6) + t * 0.12, 1.5 + t * 0.75, 0], i * 3); continue; } a.set(esfera(cs[i % cs.length], 0.2), i * 3); }
   return a;
 }
-/* La ladera: un relieve de moléculas, con las hileras de viña siguiendo el terreno, visto desde arriba. Con parcelas, tres
-   de cada diez moléculas se juntan en las hileras de una de ellas y la marcan. Su sitio en el relieve es de la maqueta. */
+/* La ladera: un relieve con sus cepas en hileras, visto desde arriba. Cada molécula elige un punto del terreno y se va a
+   la cepa más cercana (FILA entre hileras, CEPA entre cepas): al tronco o a la copa. Con parcelas, algo más de una de
+   cada cuatro moléculas se va a las cepas de una parcela, que se ven más frondosas. Su sitio en el relieve es de la maqueta. */
 const SITIO = { 'El Cerro': [0.35, -0.25], 'La Hoya': [-0.6, 0.3], 'La Cuesta': [-1.35, -0.45], 'Los Llanos': [1.4, 0.55] };
 const PARCELAS = B.terruno.parcelas.map((p, k) => { const s = SITIO[p.nombre] || [k * 0.8 - 1.2, 0]; return { ...p, x: s[0], z: s[1] }; });
-const INCL = 0.55;
+const INCL = 0.38;
 const altura = (x, z) => 0.95 * Math.exp(-((x - 0.35) ** 2 / 1.1 + (z + 0.15) ** 2 / 0.7)) + 0.42 * Math.exp(-((x + 1.25) ** 2 / 0.35 + (z - 0.55) ** 2 / 0.45)) + 0.05 * Math.sin(2.6 * x + 1.3 * z);
 const enLadera = (x, z, dy = 0) => giroX([x, -0.75 + altura(x, z) + dy, z], INCL);
+const FILA = 0.21, CEPA = 0.14;
 function ladera(conParcelas) {
   const a = new Float32Array(N * 3), np = PARCELAS.length;
-  for (let i = 0; i < N; i++) { const g = U1[i]; let x, z, dy = 0;
-    if (conParcelas && g < 0.3) { const p = PARCELAS[i % np], dz = Math.round((U3[i] * 2 - 1) * 0.24 * 16) / 16;   // la parcela: sus hileras, más juntas
-      z = p.z + dz + (U4[i] - 0.5) * 0.008; x = p.x + (U2[i] * 2 - 1) * 0.36 * Math.sqrt(Math.max(0, 1 - (dz / 0.26) ** 2)); dy = 0.02; }
-    else if (g < 0.74) { z = Math.round((U3[i] * 2 - 1) * 1.5 * 8) / 8 + (U4[i] - 0.5) * 0.012; const xm = 2.3 * Math.sqrt(Math.max(0, 1 - (z / 1.55) ** 2)); x = (U2[i] * 2 - 1) * xm; }   // hileras
-    else { const ph = U2[i] * Math.PI * 2, r = Math.sqrt(U3[i]); x = Math.cos(ph) * 2.3 * r; z = Math.sin(ph) * 1.5 * r; }   // suelo
-    a.set(enLadera(x, z, dy), i * 3); }
+  for (let i = 0; i < N; i++) { const g = U1[i], ph = U2[i] * Math.PI * 2, r = Math.sqrt(U3[i]);
+    if (g < 0.18) { a.set(enLadera(Math.cos(ph) * 2.3 * r, Math.sin(ph) * 1.5 * r), i * 3); continue; }   // el suelo
+    let x, z;
+    if (conParcelas && g < 0.46) { const p = PARCELAS[i % np]; x = p.x + Math.cos(ph) * r * 0.36; z = p.z + Math.sin(ph) * r * 0.26; }
+    else { x = Math.cos(ph) * 2.3 * r; z = Math.sin(ph) * 1.5 * r; }
+    const cz = Math.round(z / FILA) * FILA, cx = Math.round(x / CEPA) * CEPA, base = -0.75 + altura(cx, cz), parte = U4[i];
+    let q;
+    if (parte < 0.2) { const h = parte / 0.2 * 0.1; q = [cx + Math.sin(h * 60 + cx * 9) * 0.004, base + h, cz]; }   // el tronco, algo retorcido
+    else { const a1 = U1[(i * 7) % N] * Math.PI * 2, a2 = Math.acos(2 * U2[(i * 13) % N] - 1), rr = Math.cbrt(U3[(i * 17) % N]);   // la copa, en vaso
+      q = [cx + Math.sin(a2) * Math.cos(a1) * rr * 0.065, base + 0.13 + Math.cos(a2) * rr * 0.05, cz + Math.sin(a2) * Math.sin(a1) * rr * 0.048]; }
+    a.set(giroX(q, INCL), i * 3); }
   return a;
 }
 /* Rueda de cata: una porción por aroma, hasta su intensidad (el borde es el 10). Entre vinos solo cambia el radio. */
@@ -358,26 +369,29 @@ function botella() {
     const y = -1.6 + U3[i] * 3.35, r = perfil(y); a.set([Math.cos(th) * r, y, Math.sin(th) * r], i * 3); }
   return a;
 }
-/* El sello en relieve: la cara, las iniciales levantadas, dos aros y el canto. Al girar con el ratón se ve la profundidad. */
+/* El sello en relieve: la cara de vino, las iniciales levantadas en oro, dos aros y el canto. Al girar con el ratón se ve
+   la profundidad y el oro brilla con sus dos tonos. */
+const ORO = [rgb('#8a6420'), rgb('#e9c77a')], VINO_SELLO = [[0.36, 0.05, 0.16], [0.52, 0.1, 0.25]];
 function sello() {
   const c = document.createElement('canvas'), W = 600, H = 400; c.width = W; c.height = H; const g = c.getContext('2d');
   g.font = 'italic 500 260px "Newsreader"'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(B.iniciales, W / 2, H / 2);
   const d = g.getImageData(0, 0, W, H).data, letras = [];
   for (let y = 0; y < H; y += 2) for (let x = 0; x < W; x += 2) if (d[(y * W + x) * 4 + 3] > 128) letras.push([(x - W / 2) / 200, -(y - H / 2) / 200]);
-  const a = new Float32Array(N * 3);
+  const a = new Float32Array(N * 3), col = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) { const gg = U1[i], th = U2[i] * Math.PI * 2; let q;
-    if (gg < 0.42 && letras.length) { const p = letras[(U3[i] * letras.length) | 0]; q = [p[0] * 0.95, p[1] * 0.95, 0.16 + (U4[i] - 0.5) * 0.05]; }   // las iniciales, levantadas
+    const oro = gg < 0.42 && letras.length; col.set(oro ? mezcla(ORO[0], ORO[1], U4[(i * 7) % N]) : mezcla(VINO_SELLO[0], VINO_SELLO[1], U4[(i * 7) % N]), i * 3);
+    if (oro) { const p = letras[(U3[i] * letras.length) | 0]; q = [p[0] * 0.95, p[1] * 0.95, 0.16 + (U4[i] - 0.5) * 0.05]; }   // las iniciales, levantadas
     else if (gg < 0.62) { const rr = Math.sqrt(U3[i]) * 1.16; q = [Math.cos(th) * rr, Math.sin(th) * rr, (U4[i] - 0.5) * 0.02]; }   // la cara
     else if (gg < 0.86) { const r = U4[i] < 0.5 ? 1.22 : 1.36; q = [Math.cos(th) * r, Math.sin(th) * r, 0.1]; }   // los aros
     else q = [Math.cos(th) * 1.38, Math.sin(th) * 1.38, -0.12 + U3[i] * 0.22];   // el canto
     a.set(q, i * 3); }
-  return a;
+  return { pos: a, col };
 }
 
 /* ---------- el motor: WebGL2 directo ---------- */
 /* El vuelo es un solo zoom hacia el mismo punto de fuga (ORIGEN_FOTO, como el transform-origin de las fotos): la segunda
    foto entra a escala 1 en P_CRUCE y llega a ESCALA_FOTO en P_FIN, la escala a la que las moléculas toman sus píxeles. */
-const FOV = 34, DIST = 9.5, ESCALA_FOTO = 2.4, ORIGEN_FOTO = [0.5, 0.72], P_CRUCE = 0.4, P_FIN = 0.7;
+const FOV = 34, DIST = 9.5, ESCALA_FOTO = 2.4, ORIGEN_FOTO = [0.62, 0.72], P_CRUCE = 0.4, P_FIN = 0.7;
 const VERT = `
   uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uVel, uFoto, uCalma, uTinteA, uTinteB;
   attribute vec3 aFrom, aTo, aCol, aCol2; attribute float aRnd; varying float vA, vGlow, vTinte; varying vec3 vCol;
@@ -468,7 +482,7 @@ function desdeFoto(img) {
    coloca la forma en el ancho (d) y en el móvil (m): a la derecha del texto o debajo. */
 const BODEGA = bodega();
 const PLAN = [
-  { n: 2, forma: (j) => ladera(j === 1), vista: { d: { x: 2.05, y: -0.25, s: 1 }, m: { x: 0, y: -1.3, s: 0.56 } } },
+  { n: 2, forma: (j) => ladera(j === 1), vista: { d: { x: 2.15, y: -0.3, s: 1.15 }, m: { x: 0, y: -1.35, s: 0.62 } } },
   { n: B.vinos.length, forma: (j) => ruedaVino(j), vista: { d: { x: 2.2, y: 0, s: 1 }, m: { x: 0, y: -1.1, s: 0.5 } } },
   { n: 1, forma: () => BODEGA.pos, color: () => BODEGA.col, vista: { d: { x: 2.05, y: 0, s: 0.98 }, m: { x: 0, y: -1.15, s: 0.56 } } },
   { n: 1, forma: () => botella(), vista: { d: { x: 2.2, y: 0, s: 1 }, m: { x: 0, y: -1.2, s: 0.45 } } },
@@ -480,7 +494,7 @@ const formas = [racimo(), racimo()], escenaDe = [-1, -1], inicio = [], COLORES =
 PLAN.forEach((e, s) => { inicio.push(formas.length); for (let j = 0; j < e.n; j++) { formas.push(e.forma(j)); escenaDe.push(s); COLORES.push(e.color ? e.color(j) : null); } });
 const NF = formas.length - 1;
 let coloresFoto = new Float32Array(N * 3).fill(0.4), segmento = -1;
-document.fonts.load('italic 500 80px "Newsreader"').then(() => { formas[inicio[4]] = sello(); segmento = -1; }, () => {});
+document.fonts.load('italic 500 80px "Newsreader"').then(() => { const s = sello(); formas[inicio[4]] = s.pos; COLORES[inicio[4]] = s.col; segmento = -1; }, () => {});
 const vistaDe = (f, movil) => (escenaDe[f] < 0 ? VISTA_APERTURA[f] : PLAN[escenaDe[f]].vista)[movil ? 'm' : 'd'];
 const motor = crearMotor(document.getElementById('gl'), N);
 const rnd = new Float32Array(N); for (let i = 0; i < N; i++) rnd[i] = R();

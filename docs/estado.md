@@ -51,12 +51,12 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 | # | Paso | Escena | Forma |
 |---|---|---|---|
 | — | Apertura | Vuelo y «Cuatro parcelas, un vino» | La foto se acerca hasta las uvas, que se vuelven el racimo de moléculas |
-| 01 | Descubre | La ladera | Relieve de moléculas con las hileras de viña; en el segundo paso se juntan las cuatro parcelas (`terruno.parcelas`; su sitio en el relieve, `SITIO`) |
+| 01 | Descubre | La ladera | Relieve con cepas en hileras (tronco y copa en vaso; `FILA` y `CEPA`); en el segundo paso las cepas de las cuatro parcelas se ven más frondosas (`terruno.parcelas`; su sitio en el relieve, `SITIO`) |
 | 02 | Prueba | Lo que hay en la copa | La rueda de cata de los tres vinos (3 pasos) |
 | 03 | Visita | Ven a vernos | La bodega de hormigón con sus colores (lamas en vino, mirador, portón, cipreses), inventada (`visitas`) |
 | 04 | Llévatelo | Llévatelo a casa | La botella con precio, stock y formato |
-| 05 | Quédate | El sello de la casa | Sello con las iniciales en relieve (`iniciales`), que se ve en 3D al girar |
-| — | Final | Carrusel | Una foto por sección (Unsplash, provisionales y sin personas): ladera, cata, bodega, tienda y club; cada una lleva a su escena |
+| 05 | Quédate | El sello de la casa | Sello de vino con las iniciales en relieve y en oro (`iniciales`, «CM»), que se ve en 3D al girar |
+| — | Final | Carrusel | Cuatro paneles que llevan a su escena: la ladera, la cata (render de su rueda de moléculas, `public/img/cata-3d.webp`), la bodega y «Tienda y club» (fotos de Unsplash, provisionales y sin personas) |
 
 ## Pendiente
 
@@ -65,6 +65,8 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 
 ## Historial
 
+- 07/10/2026 (noche): primera foto nueva (una vid a contraluz) con el zoom hacia ella; cepas en la ladera; sello «CM»
+  en oro; carrusel de cuatro paneles con el render de la cata; los vinos sin «Ejemplo» en el nombre.
 - 07/10/2026 (tarde): vuelo con zoom continuo y cambio de foco; carrusel con una foto por sección; menú de bodega;
   menos repeticiones de «Bodega Ejemplo» y «ficticia».
 - 07/10/2026: la home pasa a la maqueta D (recorrido del cliente, moléculas en 3D, ladera en relieve); fuera las
