@@ -1,19 +1,24 @@
 {
   "aviso": "Todos los datos de Bodega Ejemplo son ficticios.",
-  "anadas": [
-    { "anio": 2021, "botellas": 182000, "lluvia_mm": 412, "nota": "Fresca y larga" },
-    { "anio": 2022, "botellas": 141000, "lluvia_mm": 298, "nota": "Sequía y calor" },
-    { "anio": 2023, "botellas": 158000, "lluvia_mm": 335, "nota": "Vendimia temprana" },
-    { "anio": 2024, "botellas": 196000, "lluvia_mm": 468, "nota": "La más generosa" }
+  "anios": [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025],
+  "marcas": [
+    { "marca": "Ejemplo Joven", "corto": "Joven", "miles_botellas": [60, 62, 58, 65, 70, 72, 61, 66, 74, 78] },
+    { "marca": "Ejemplo Crianza", "corto": "Crianza", "miles_botellas": [40, 42, 45, 44, 48, 50, 43, 47, 52, 55] },
+    { "marca": "Ejemplo Reserva", "corto": "Reserva", "miles_botellas": [12, 14, 13, 15, 16, 15, 12, 14, 18, 19] },
+    { "marca": "Ejemplo Blanco", "corto": "Blanco", "miles_botellas": [8, 10, 12, 15, 18, 22, 20, 25, 30, 34] }
   ],
-  "mercados": [
-    { "pais": "España", "pct": 54, "lat": 40.4, "lon": -3.7 },
-    { "pais": "Alemania", "pct": 14, "lat": 51.2, "lon": 10.4 },
-    { "pais": "Reino Unido", "pct": 11, "lat": 52.4, "lon": -1.5 },
-    { "pais": "EE. UU.", "pct": 9, "lat": 39.8, "lon": -98.6 },
-    { "pais": "México", "pct": 7, "lat": 23.6, "lon": -102.5 },
-    { "pais": "Japón", "pct": 5, "lat": 36.2, "lon": 138.3 }
-  ],
+  "terruno": {
+    "orientacion": "sur",
+    "altitud_min": 650,
+    "altitud_max": 780,
+    "suelo": "arcillo-calcáreo",
+    "parcelas": [
+      { "nombre": "Los Llanos", "variedad": "Viura", "plantada": 1990 },
+      { "nombre": "La Hoya", "variedad": "Tempranillo", "plantada": 1978 },
+      { "nombre": "La Cuesta", "variedad": "Graciano", "plantada": 2004 },
+      { "nombre": "El Cerro", "variedad": "Garnacha", "plantada": 1952 }
+    ]
+  },
   "canales": [
     { "canal": "Distribución", "pct": 61 },
     { "canal": "Tienda online", "pct": 18 },
@@ -21,19 +26,10 @@
     { "canal": "Visitas", "pct": 9 }
   ],
   "paso_club": "1 de cada 8 visitantes se hace socio del club",
-  "vino": {
-    "nombre": "Ejemplo Crianza 2021",
-    "formato": "75 cl",
-    "precio": "14,50 €",
-    "stock": 1240,
-    "aromas": [
-      { "aroma": "Fruta roja", "intensidad": 8 },
-      { "aroma": "Fruta negra", "intensidad": 6 },
-      { "aroma": "Especias", "intensidad": 5 },
-      { "aroma": "Madera", "intensidad": 4 },
-      { "aroma": "Balsámico", "intensidad": 4 },
-      { "aroma": "Floral", "intensidad": 3 },
-      { "aroma": "Mineral", "intensidad": 2 }
-    ]
-  }
+  "aromas": ["Fruta roja", "Fruta negra", "Fruta blanca", "Cítricos", "Floral", "Especias", "Madera", "Mineral"],
+  "vinos": [
+    { "nombre": "Ejemplo Crianza", "tipo": "Tinto · 14 meses en barrica", "formato": "75 cl", "precio": "14,50 €", "stock": 1240, "cata": [7, 6, 0, 1, 3, 5, 4, 2] },
+    { "nombre": "Ejemplo Reserva", "tipo": "Tinto · 24 meses en barrica", "formato": "75 cl", "precio": "24,00 €", "stock": 480, "cata": [4, 8, 0, 0, 2, 7, 8, 3] },
+    { "nombre": "Ejemplo Blanco", "tipo": "Blanco · sobre lías", "formato": "75 cl", "precio": "11,90 €", "stock": 2100, "cata": [0, 0, 8, 7, 6, 1, 1, 5] }
+  ]
 }

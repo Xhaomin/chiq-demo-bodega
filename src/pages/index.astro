@@ -120,6 +120,11 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
 .datos li{line-height:1.5}
 .datos b{display:inline-block;min-width:7ch;color:var(--wine);font-weight:500;margin-right:10px}
 #etiquetas{position:fixed;inset:0;pointer-events:none;z-index:4}
+section.scene.larga{display:block;padding:0;min-height:0}
+section.larga .fijo{position:sticky;top:0;height:100vh;display:flex;align-items:center;padding:0 clamp(18px,7vw,120px)}
+.step .anio-grande{font-family:'Instrument Serif',serif;font-size:clamp(96px,11vw,180px);line-height:.85;letter-spacing:-.04em;margin:14px 0 4px;color:#141011;max-width:none}
+.step .vino-nombre{font-family:'Instrument Serif',serif;font-size:clamp(36px,4vw,64px);line-height:1;letter-spacing:-.02em;color:var(--wine);margin:4px 0 8px;max-width:none}
+.step .vino-tipo{font-size:11px;color:var(--mute);margin:0}
 .et{position:absolute;left:0;top:0;text-align:center;white-space:nowrap;opacity:0;will-change:transform,opacity}
 .et b{display:block;font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(20px,1.8vw,30px);line-height:1;color:#141011}
 .et span{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-top:4px}
@@ -134,6 +139,11 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
   .cta{margin-top:18px}
   .et b{font-size:19px}
   .hud.tl{display:none}
+  section.larga .fijo{align-items:flex-start;padding-top:92px}
+  .step .anio-grande{font-size:72px;margin:6px 0 0}
+  .step .vino-nombre{font-size:34px}
+  .beat2{justify-content:flex-start;padding-top:104px}
+  .beat2 .caja p.l{font-size:30px}
 }
 </style>
 </head>
@@ -181,18 +191,19 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     </div>
   </section>
 
-  <section class="scene" data-name="LAS AÑADAS"><div class="step">
+  <section class="scene larga" data-name="LAS AÑADAS" data-pasos={B.anios.length} style={`height:${B.anios.length * 70 + 30}vh`}><div class="fijo"><div class="step">
     <div class="n mono fade"><b>01</b> Las añadas</div>
     <h2 class="split">Cada añada, <em>su propia historia.</em></h2>
-    <p class="fade">Cada probeta es una añada y se llena con las botellas que dio. La lluvia del año explica el resto.</p>
-    <ul class="datos mono fade">{B.anadas.map((a) => <li><b>{a.anio}</b>{miles(a.botellas)} botellas · {a.lluvia_mm} mm de lluvia · {a.nota}</li>)}</ul>
-    <span class="tag mono fade">Datos ficticios</span>
-  </div></section>
-  <section class="scene" data-name="AL MUNDO"><div class="step">
-    <div class="n mono fade"><b>02</b> Al mundo</div>
-    <h2 class="split">De la ladera <em>al mundo.</em></h2>
-    <p class="fade">Cada grupo de partículas es un país, del tamaño de su parte de las ventas.</p>
-    <ul class="datos mono fade">{B.mercados.map((m) => <li><b>{m.pct} %</b>{m.pais}</li>)}</ul>
+    <p class="fade">Las botellas de cada marca, año a año. La raya marca {B.anios[0]}.</p>
+    <p class="anio-grande fade" id="anioGrande" aria-hidden="true">{B.anios[0]}</p>
+    <ul class="datos mono fade">{B.marcas.map((x) => <li><b>{x.corto}</b>{B.anios.map((a, i) => `${a} ${x.miles_botellas[i]} mil`).join(' · ')}</li>)}</ul>
+    <span class="tag mono fade">Datos ficticios · miles de botellas</span>
+  </div></div></section>
+  <section class="scene" data-name="LA LADERA"><div class="step">
+    <div class="n mono fade"><b>02</b> La ladera</div>
+    <h2 class="split">Viñas viejas <em>en bancales.</em></h2>
+    <p class="fade">Cuatro parcelas en una ladera orientada al {B.terruno.orientacion}, entre {B.terruno.altitud_min} y {B.terruno.altitud_max} metros, sobre suelo {B.terruno.suelo}.</p>
+    <ul class="datos mono fade">{B.terruno.parcelas.map((p) => <li><b>{p.variedad}</b>{p.nombre} · plantada en {p.plantada}</li>)}</ul>
     <span class="tag mono fade">Datos ficticios</span>
   </div></section>
   <section class="scene" data-name="EL CLIENTE"><div class="step">
@@ -202,18 +213,19 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <ul class="datos mono fade">{B.canales.map((c) => <li><b>{c.pct} %</b>{c.canal}</li>)}<li><b>Club</b>{B.paso_club}</li></ul>
     <span class="tag mono fade">Datos ficticios</span>
   </div></section>
-  <section class="scene" data-name="LA RUEDA DE AROMAS"><div class="step">
+  <section class="scene larga" data-name="EN LA COPA" data-pasos={B.vinos.length} style={`height:${B.vinos.length * 80 + 30}vh`}><div class="fijo"><div class="step">
     <div class="n mono fade"><b>04</b> En la copa</div>
     <h2 class="split">Lo que hay <em>en la copa.</em></h2>
-    <p class="fade">La rueda de aromas del {B.vino.nombre}. Cada porción crece con su intensidad, del 0 al 10.</p>
-    <ul class="datos mono fade">{B.vino.aromas.map((a) => <li><b>{a.intensidad}</b>{a.aroma}</li>)}</ul>
-    <span class="tag mono fade">Datos ficticios</span>
-  </div></section>
+    <p class="vino-nombre fade" id="vinoNombre" aria-live="polite">{B.vinos[0].nombre}</p>
+    <p class="vino-tipo mono fade" id="vinoTipo">{B.vinos[0].tipo}</p>
+    <ul class="datos mono fade">{B.vinos.map((v) => <li><b>{v.nombre}</b>{B.aromas.map((a, i) => `${a} ${v.cata[i]}`).join(' · ')}</li>)}</ul>
+    <span class="tag mono fade">Datos ficticios · cata del 0 al 10</span>
+  </div></div></section>
   <section class="scene" data-name="CADA BOTELLA"><div class="step">
     <div class="n mono fade"><b>05</b> Cada botella</div>
     <h2 class="split">Cada botella, <em>con su ficha.</em></h2>
     <p class="fade">La ficha vive en PrestaShop y la web la lee por su API. Así también un asistente de IA entiende cada vino.</p>
-    <ul class="datos mono fade"><li><b>Vino</b>{B.vino.nombre} · {B.vino.formato}</li><li><b>Precio</b>{B.vino.precio}</li><li><b>Stock</b>{miles(B.vino.stock)} botellas</li></ul>
+    <ul class="datos mono fade"><li><b>Vino</b>{B.vinos[0].nombre} · {B.vinos[0].formato}</li><li><b>Precio</b>{B.vinos[0].precio}</li><li><b>Stock</b>{miles(B.vinos[0].stock)} botellas</li></ul>
     <span class="tag mono fade">Datos ficticios · en la demo, un JSON imita la API</span>
   </div></section>
   <section class="scene" data-name="SIN CABEZA"><div class="step">
@@ -278,8 +290,8 @@ document.querySelectorAll('.split').forEach((el) => {
   }));
   el.innerHTML = ''; el.appendChild(frag);
 });
-const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && e.target.classList.add('in')), { threshold: 0.35 });
-document.querySelectorAll('section.scene').forEach((s) => io.observe(s));
+const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && e.target.closest('section').classList.add('in')), { threshold: 0.35 });
+document.querySelectorAll('section.scene:not(.larga), section.larga .fijo').forEach((s) => io.observe(s));
 const menu = document.getElementById('menu');
 document.getElementById('burger').onclick = () => menu.classList.add('open');
 document.getElementById('close').onclick = () => menu.classList.remove('open');
@@ -350,25 +362,42 @@ function web() {
 
 /* ---------- formas calculadas con los datos de la bodega (ficticios) ---------- */
 const B = JSON.parse(document.getElementById('datos-bodega').textContent);
-/** Una probeta por añada, llena en proporción a sus botellas (la más llena es la añada con más botellas). */
-function probetasDe(anadas) {
-  const a = new Float32Array(N * 3), n = anadas.length, max = Math.max(...anadas.map((x) => x.botellas));
-  const xs = anadas.map((_, k) => (k - (n - 1) / 2) * 1.1), lv = anadas.map((x) => 0.9 * x.botellas / max);
-  for (let i = 0; i < N; i++) { const k = i % n, x = xs[k], r = 0.34, th = R() * Math.PI * 2;
-    if (R() < 0.45) a.set([x + Math.cos(th) * r, -1.5 + R() * 3, Math.sin(th) * r], i * 3);
-    else { const rr = Math.sqrt(R()) * r * 0.9; a.set([x + Math.cos(th) * rr, -1.5 + R() * 3 * lv[k], Math.sin(th) * rr], i * 3); } }
+/* Azar fijo por partícula: entre dos años (o dos vinos) cada partícula conserva su sitio y solo cambia de altura o de radio. */
+const U1 = new Float32Array(N), U2 = new Float32Array(N), U3 = new Float32Array(N), U4 = new Float32Array(N);
+for (let i = 0; i < N; i++) { U1[i] = R(); U2[i] = R(); U3[i] = R(); U4[i] = R(); }
+const MAX_BOT = Math.max(...B.marcas.flatMap((x) => x.miles_botellas));
+const xsMarca = B.marcas.map((_, k) => (k - (B.marcas.length - 1) / 2) * 1.1);
+/** Una probeta por marca, llena en proporción a sus botellas de ese año; un anillo marca el primer año. */
+function probetasAnio(j) {
+  const a = new Float32Array(N * 3), n = B.marcas.length, r = 0.34;
+  const nivel = (v) => -1.5 + 3 * 0.9 * v / MAX_BOT;
+  for (let i = 0; i < N; i++) { const k = i % n, x = xsMarca[k], th = U1[i] * Math.PI * 2, g = U2[i];
+    if (g < 0.38) a.set([x + Math.cos(th) * r, -1.5 + U3[i] * 3, Math.sin(th) * r], i * 3);
+    else if (g < 0.44) a.set([x + Math.cos(th) * r * 1.04, nivel(B.marcas[k].miles_botellas[0]) + (U3[i] - .5) * 0.035, Math.sin(th) * r * 1.04], i * 3);
+    else { const rr = Math.sqrt(U3[i]) * r * 0.9; a.set([x + Math.cos(th) * rr, -1.5 + U4[i] * (nivel(B.marcas[k].miles_botellas[j]) + 1.5), Math.sin(th) * rr], i * 3); } }
   return a;
 }
-/** Globo tenue con un grupo por país, en su latitud y longitud, con partículas en proporción a sus ventas. */
-function globoDe(mercados) {
-  const a = new Float32Array(N * 3), r0 = 1.7, rad = Math.PI / 180, lon0 = mercados[0].lon;
-  const pts = mercados.map((m) => { const la = m.lat * rad, lo = (m.lon - lon0) * rad;
-    return { c: [Math.cos(la) * Math.sin(lo) * r0, Math.sin(la) * r0, Math.cos(la) * Math.cos(lo) * r0], w: m.pct }; });
-  const total = pts.reduce((s, p) => s + p.w, 0); let acum = 0; const cortes = pts.map((p) => (acum += p.w / total));
-  for (let i = 0; i < N; i++) { let p;
-    if (R() < 0.4) p = esfera([0, 0, 0], r0 * (0.98 + R() * 0.04));
-    else { const u = R(), q = pts[Math.max(0, cortes.findIndex((c) => u <= c))]; p = esfera(q.c, (0.06 + 0.42 * Math.sqrt(q.w / total)) * Math.cbrt(R())); }
-    a.set(p, i * 3); }
+/* La ladera: cuatro bancales con su muro de piedra y dos hileras de cepas cada uno, vistos desde abajo y de lado. */
+const BANCALES = B.terruno.parcelas.map((p, k) => ({ y: -1.3 + k * 0.62, z: 0.8 - k * 0.52, w: 1.75 - k * 0.16, p }));
+const giroLadera = (q) => { const ry = -0.32, rx = 0.3, x1 = q[0] * Math.cos(ry) + q[2] * Math.sin(ry), z1 = -q[0] * Math.sin(ry) + q[2] * Math.cos(ry);
+  return [x1, q[1] * Math.cos(rx) - z1 * Math.sin(rx), q[1] * Math.sin(rx) + z1 * Math.cos(rx)]; };
+const CEPAS = BANCALES.flatMap((b) => [-0.11, 0.11].flatMap((dz) => { const n = Math.floor(2 * b.w / 0.32), out = [];
+  for (let c = 0; c < n; c++) out.push({ x: -b.w + 0.16 + c * 0.32 + (dz > 0 ? 0.08 : 0), y: b.y, z: b.z + dz, s: c * 1.7 + b.y * 3 }); return out; }));
+function ladera() {
+  const a = new Float32Array(N * 3), nb = BANCALES.length;
+  for (let i = 0; i < N; i++) { const g = U1[i], u = U2[i], v = U3[i]; let q;
+    if (g < 0.2) { const b = BANCALES[i % nb], alto = b.y === BANCALES[0].y ? 0.3 : 0.6;   // muro de piedra: hiladas irregulares
+      const fila = Math.floor(v * 6), yy = b.y - alto + (fila + 0.5) / 6 * alto + (U4[i] - .5) * 0.04;
+      q = [-b.w + u * 2 * b.w, yy, b.z + 0.24 + Math.sin(u * 40 + fila) * 0.015]; }
+    else if (g < 0.3) { const b = BANCALES[i % nb]; q = [-b.w + u * 2 * b.w, b.y, b.z - 0.24 + v * 0.48]; }   // suelo
+    else { const c = CEPAS[i % CEPAS.length], parte = U4[i];
+      if (parte < 0.32) { const h = u * 0.2; q = [c.x + Math.sin(h * 18 + c.s) * 0.018, c.y + h, c.z + Math.cos(h * 14 + c.s) * 0.012]; }   // tronco retorcido
+      else if (parte < 0.55) { const brazo = Math.floor(v * 3), an = c.s + brazo * 2.1, h = u;   // brazos (cepa en vaso)
+        q = [c.x + Math.cos(an) * 0.1 * h, c.y + 0.2 + 0.12 * h, c.z + Math.sin(an) * 0.08 * h]; }
+      else { const lob = Math.floor(v * 3), an = c.s + lob * 2.1, cx = c.x + Math.cos(an) * 0.09, cz = c.z + Math.sin(an) * 0.07;   // hojas
+        const th = u * Math.PI * 2, ph = Math.acos(2 * U3[(i * 7) % N] - 1), rr = 0.085 * Math.cbrt(U1[(i * 13) % N]);
+        q = [cx + rr * Math.sin(ph) * Math.cos(th), c.y + 0.36 + rr * Math.cos(ph) * 0.8, cz + rr * Math.sin(ph) * Math.sin(th)]; } }
+    a.set(giroLadera(q), i * 3); }
   return a;
 }
 /** El cliente en el centro y un nodo por canal, con tamaño y partículas en proporción a lo que factura. */
@@ -383,34 +412,35 @@ function redDe(canales) {
     else { const v = R(), h = hubs[Math.max(0, cortes.findIndex((c) => v <= c))]; a.set(esfera(h.p, (0.12 + 0.55 * Math.sqrt(h.w)) * Math.cbrt(R())), i * 3); } }
   return a;
 }
-/** Rueda de aromas: una porción por aroma, que llega hasta su intensidad (el borde es el 10). */
-function ruedaDe(aromas) {
-  const a = new Float32Array(N * 3), n = aromas.length, Rm = 1.9, giro = 0.35, sector = Math.PI * 2 / n;
-  for (let i = 0; i < N; i++) { let x, y; const u = R();
-    if (u < 0.12) { const th = R() * Math.PI * 2; x = Math.cos(th) * Rm; y = Math.sin(th) * Rm; }
-    else if (u < 0.2) { const th = ((R() * n) | 0) * sector - Math.PI / 2, r = R() * Rm; x = Math.cos(th) * r; y = Math.sin(th) * r; }
-    else { const k = i % n, th = k * sector - Math.PI / 2 + (0.08 + R() * 0.84) * sector, r = Math.sqrt(R()) * Rm * aromas[k].intensidad / 10;
+/* Rueda de cata: una porción por aroma, hasta su intensidad (el borde es el 10). Entre vinos solo cambia el radio. */
+const GIRO_RUEDA = 0.35, RM = 1.55, SEC = Math.PI * 2 / B.aromas.length;
+function ruedaVino(w) {
+  const a = new Float32Array(N * 3), n = B.aromas.length, cata = B.vinos[w].cata;
+  for (let i = 0; i < N; i++) { let x, y; const u = U1[i];
+    if (u < 0.12) { const th = U2[i] * Math.PI * 2; x = Math.cos(th) * RM; y = Math.sin(th) * RM; }
+    else if (u < 0.2) { const th = Math.floor(U2[i] * n) * SEC - Math.PI / 2, r = U3[i] * RM; x = Math.cos(th) * r; y = Math.sin(th) * r; }
+    else { const k = i % n, th = k * SEC - Math.PI / 2 + (0.08 + U2[i] * 0.84) * SEC, r = Math.sqrt(U3[i]) * RM * Math.max(cata[k], 0.15) / 10;
       x = Math.cos(th) * r; y = Math.sin(th) * r; }
-    const z = (R() - .5) * 0.06;
-    a.set([x, y * Math.cos(giro) - z * Math.sin(giro), y * Math.sin(giro) + z * Math.cos(giro)], i * 3); }
+    const z = (U4[i] - .5) * 0.06;
+    a.set([x, y * Math.cos(GIRO_RUEDA) - z * Math.sin(GIRO_RUEDA), y * Math.sin(GIRO_RUEDA) + z * Math.cos(GIRO_RUEDA)], i * 3); }
   return a;
 }
 
 /* ---------- el motor: WebGL2 directo ---------- */
 const FOV = 34, DIST = 9.5, ESCALA_FOTO = 1.45;
 const VERT = `
-  uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uVel, uFoto;
+  uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uVel, uFoto, uCalma;
   attribute vec3 aFrom, aTo, aCol; attribute float aRnd; varying float vA, vGlow; varying vec3 vCol;
   void main(){
     float t = smoothstep(0.0, 1.0, clamp((uT - aRnd * 0.3) / 0.7, 0.0, 1.0));
     vec3 p = mix(aFrom, aTo, t);
     float mid = sin(3.14159 * t);
     vec3 n = vec3(sin(p.y * 2.3 + uTime * 0.9 + aRnd * 6.28), cos(p.x * 1.9 + uTime * 0.7 + aRnd * 3.1), sin(p.z * 2.1 + uTime * 0.8 + aRnd * 1.7));
-    p += n * ((0.012 + mid * 0.62 + uVel * 0.08) * (1.0 - uFoto * 0.9));
+    p += n * ((0.012 + (mid * 0.62 + uVel * 0.08) * (1.0 - uCalma)) * (1.0 - uFoto * 0.9));
     vec4 mv = uMV * vec4(p, 1.0);
     gl_Position = uProj * mv;
-    gl_PointSize = uSize * (0.55 + aRnd * 0.9) * (1.0 + mid * 0.7 + uFoto * 0.5) / -mv.z;
-    vA = 0.45 + 0.55 * aRnd; vGlow = clamp(mid + uVel * 0.4, 0.0, 1.0); vCol = aCol;
+    gl_PointSize = uSize * (0.55 + aRnd * 0.9) * (1.0 + mid * 0.7 * (1.0 - uCalma) + uFoto * 0.5) / -mv.z;
+    vA = 0.45 + 0.55 * aRnd; vGlow = clamp((mid + uVel * 0.4) * (1.0 - uCalma * 0.8), 0.0, 1.0); vCol = aCol;
   }`;
 const FRAG = `
   precision highp float;
@@ -439,7 +469,7 @@ function crearMotor(canvas, n) {
     gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, datos, gl.DYNAMIC_DRAW);
     gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, tam, gl.FLOAT, false, 0, 0); buffers[nombre] = b;
   };
-  const u = {}; ['uProj', 'uMV', 'uT', 'uTime', 'uSize', 'uVel', 'uFoto', 'uAlpha'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
+  const u = {}; ['uProj', 'uMV', 'uT', 'uTime', 'uSize', 'uVel', 'uFoto', 'uAlpha', 'uCalma'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
   gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND);
   gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   let dpr = 1;
@@ -455,7 +485,7 @@ function crearMotor(canvas, n) {
       gl.uniform1f(u.uSize, 44 * dpr);
     },
     /** Grupo: posición x, rotación X e Y (orden XYZ, como Three.js) y escala; la cámara está en z = DIST. */
-    dibujar({ x, y = 0, rx, ry, s, t, tiempo, vel, foto, alfa }) {
+    dibujar({ x, y = 0, rx, ry, s, t, tiempo, vel, foto, alfa, calma = 0 }) {
       const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
       // M = T · Rx · Ry · S, y la vista desplaza -DIST en z (columna a columna).
       gl.uniformMatrix4fv(u.uMV, false, new Float32Array([
@@ -463,7 +493,7 @@ function crearMotor(canvas, n) {
         0, cx * s, sx * s, 0,
         sy * s, -sx * cy * s, cx * cy * s, 0,
         x, y, -DIST, 1]));
-      gl.uniform1f(u.uT, t); gl.uniform1f(u.uTime, tiempo); gl.uniform1f(u.uVel, vel); gl.uniform1f(u.uFoto, foto); gl.uniform1f(u.uAlpha, alfa);
+      gl.uniform1f(u.uT, t); gl.uniform1f(u.uTime, tiempo); gl.uniform1f(u.uVel, vel); gl.uniform1f(u.uFoto, foto); gl.uniform1f(u.uAlpha, alfa); gl.uniform1f(u.uCalma, calma);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.POINTS, 0, n);
     },
@@ -488,7 +518,17 @@ function desdeFoto(img) {
   return { pos, colores };
 }
 
-const formas = [racimo(), racimo(), probetasDe(B.anadas), globoDe(B.mercados), redDe(B.canales), ruedaDe(B.vino.aromas), botella(), web()];
+/* Plan: una entrada por escena, en el orden de las secciones; las largas tienen un paso por año o por vino. */
+const PLAN = [
+  { n: B.anios.length, forma: (j) => probetasAnio(j) },
+  { n: 1, forma: () => ladera() },
+  { n: 1, forma: () => redDe(B.canales) },
+  { n: B.vinos.length, forma: (j) => ruedaVino(j) },
+  { n: 1, forma: () => botella() },
+  { n: 1, forma: () => web() },
+];
+const formas = [racimo(), racimo()], escenaDe = [-1, -1], inicio = [];
+PLAN.forEach((e, s) => { inicio.push(formas.length); for (let j = 0; j < e.n; j++) { formas.push(e.forma(j)); escenaDe.push(s); } });
 const NF = formas.length - 1;
 const motor = crearMotor(document.getElementById('gl'), N);
 const rnd = new Float32Array(N); for (let i = 0; i < N; i++) rnd[i] = R();
@@ -512,27 +552,24 @@ document.getElementById('motorKB').textContent = (crearMotor.toString().length /
 const miles = (n) => n.toLocaleString('es-ES');
 const giroX = (p, g) => [p[0], p[1] * Math.cos(g) - p[2] * Math.sin(g), p[1] * Math.sin(g) + p[2] * Math.cos(g)];
 const giroWeb = (x, y) => { const ry = -0.45, rx = 0.12, x1 = x * Math.cos(ry), z1 = -x * Math.sin(ry); return [x1, y * Math.cos(rx) - z1 * Math.sin(rx), y * Math.sin(rx) + z1 * Math.cos(rx)]; };
-const ETIQ = (() => {
-  const rad = Math.PI / 180, nA = B.anadas.length, totC = B.canales.reduce((s, c) => s + c.pct, 0), nR = B.vino.aromas.length, sec = Math.PI * 2 / nR;
-  return [
-    B.anadas.map((a, k) => ({ p: [(k - (nA - 1) / 2) * 1.1, -1.95, 0], b: `${Math.round(a.botellas / 1000)} mil`, s: `${a.anio}` })),
-    B.mercados.map((m) => { const la = m.lat * rad, lo = (m.lon - B.mercados[0].lon) * rad, r = 1.7 * 1.22;
-      return { p: [Math.cos(la) * Math.sin(lo) * r, Math.sin(la) * r, Math.cos(la) * Math.cos(lo) * r], b: `${m.pct} %`, s: m.pais, cara: true }; }),
-    [{ p: [0, -0.62, 0], b: 'Cliente', s: 'en el centro' }, ...B.canales.map((c, k) => { const t = k / B.canales.length * Math.PI * 2 - Math.PI / 2, rr = 0.12 + 0.55 * Math.sqrt(c.pct / totC);
-      const h = [Math.cos(t) * 2, Math.sin(t) * 1.35], l = Math.hypot(h[0], h[1]), d = rr + 0.45;
-      return { p: [h[0] + h[0] / l * d, h[1] + h[1] / l * d, Math.sin(t * 2) * 0.5], b: `${c.pct} %`, s: c.canal }; })],
-    B.vino.aromas.map((a, k) => { const th = k * sec - Math.PI / 2 + sec / 2, r = 1.9 * 1.24;
-      return { p: giroX([Math.cos(th) * r, Math.sin(th) * r, 0], 0.35), b: String(a.intensidad), s: a.aroma }; }),
-    [{ p: [0.95, 0.95, 0], b: B.vino.precio, s: 'precio', izq: true }, { p: [0.95, 0.15, 0], b: miles(B.vino.stock), s: 'botellas en stock', izq: true },
-     { p: [0.95, -0.65, 0], b: B.vino.formato, s: B.vino.nombre, izq: true }],
-    [{ p: giroWeb(-1.2, -0.5), b: 'Historia', s: 'Markdown', chip: true }, { p: giroWeb(-0.05, -0.5), b: 'Datos', s: 'JSON', chip: true }, { p: giroWeb(1.15, -0.5), b: 'Tienda', s: 'API', chip: true }],
-  ];
-})();
+/** Etiquetas de cada forma (por su índice en `formas`). */
+const ETIQ = [];
+B.anios.forEach((anio, j) => { ETIQ[inicio[0] + j] = B.marcas.map((x, k) => ({ p: [xsMarca[k], -1.95, 0], b: `${x.miles_botellas[j]} mil`, s: x.corto })); });
+ETIQ[inicio[1]] = BANCALES.map((b) => ({ p: giroLadera([b.w + 0.12, b.y + 0.3, b.z]), b: b.p.variedad, s: `${b.p.nombre} · ${b.p.plantada}`, izq: true }));
+ETIQ[inicio[2]] = (() => { const totC = B.canales.reduce((s, c) => s + c.pct, 0);
+  return [{ p: [0, -0.62, 0], b: 'Cliente', s: 'en el centro' }, ...B.canales.map((c, k) => { const t = k / B.canales.length * Math.PI * 2 - Math.PI / 2, rr = 0.12 + 0.55 * Math.sqrt(c.pct / totC);
+    const h = [Math.cos(t) * 2, Math.sin(t) * 1.35], l = Math.hypot(h[0], h[1]), d = rr + 0.45;
+    return { p: [h[0] + h[0] / l * d, h[1] + h[1] / l * d, Math.sin(t * 2) * 0.5], b: `${c.pct} %`, s: c.canal }; })]; })();
+B.vinos.forEach((v, w) => { ETIQ[inicio[3] + w] = B.aromas.map((a, k) => ({ a, k })).filter(({ k }) => v.cata[k] > 0).map(({ a, k }) => {
+  const th = k * SEC - Math.PI / 2 + SEC / 2, r = RM * 1.24; return { p: giroX([Math.cos(th) * r, Math.sin(th) * r, 0], GIRO_RUEDA), b: String(v.cata[k]), s: a }; }); });
+ETIQ[inicio[4]] = [{ p: [0.95, 0.95, 0], b: B.vinos[0].precio, s: 'precio', izq: true }, { p: [0.95, 0.15, 0], b: miles(B.vinos[0].stock), s: 'botellas en stock', izq: true },
+  { p: [0.95, -0.65, 0], b: B.vinos[0].formato, s: B.vinos[0].nombre, izq: true }];
+ETIQ[inicio[5]] = [{ p: giroWeb(-1.2, -0.5), b: 'Historia', s: 'Markdown', chip: true }, { p: giroWeb(-0.05, -0.5), b: 'Datos', s: 'JSON', chip: true }, { p: giroWeb(1.15, -0.5), b: 'Tienda', s: 'API', chip: true }];
 const capaEtiq = document.getElementById('etiquetas');
-const elsEtiq = ETIQ.map((grupo, k) => grupo.map((e) => {
+const elsEtiq = ETIQ.map((grupo) => (grupo || []).map((e) => {
   const el = document.createElement('div'); el.className = 'et' + (e.izq ? ' izq' : '') + (e.chip ? ' chip' : '');
   el.innerHTML = `<b></b><span></span>`; el.querySelector('b').textContent = e.b; el.querySelector('span').textContent = e.s;
-  capaEtiq.appendChild(el); return { e, el, ancho: 0 };
+  capaEtiq.appendChild(el); return { e, el, ancho: 0, alto: 0 };
 }));
 const medirEtiquetas = () => elsEtiq.flat().forEach((o) => { o.ancho = o.el.offsetWidth; o.alto = o.el.offsetHeight; });
 addEventListener('resize', medirEtiquetas); document.fonts?.ready.then(medirEtiquetas); setTimeout(medirEtiquetas, 800);
@@ -543,26 +580,17 @@ function proyectar(p, { x, y, rx, ry, s }) {
   const Y = sx * sy * s * p[0] + cx * s * p[1] - sx * cy * s * p[2] + y;
   const Zc = -cx * sy * s * p[0] + sx * s * p[1] + cx * cy * s * p[2];
   const f = 1 / Math.tan((FOV * Math.PI / 180) / 2), a = innerWidth / innerHeight, w = DIST - Zc;
-  return { sx: ((f / a) * X / w + 1) / 2 * innerWidth, sy: (1 - f * Y / w) / 2 * innerHeight, frente: Zc };
+  return { sx: ((f / a) * X / w + 1) / 2 * innerWidth, sy: (1 - f * Y / w) / 2 * innerHeight };
 }
 function pintarEtiquetas(m, vista, apagar) {
-  const k = Math.round(m) - 2, cerca = 1 - clamp(Math.abs(m - Math.round(m)) / 0.3), margen = 10, visibles = [];
+  const g0 = Math.round(m), cerca = 1 - clamp(Math.abs(m - g0) / 0.3), margen = 10, visibles = [];
   elsEtiq.forEach((grupo, g) => grupo.forEach((o) => {
-    let op = g === k ? cerca * (1 - apagar) : 0;
-    if (op > 0.01) {
-      const q = proyectar(o.e.p, vista);
-      if (o.e.cara) op *= clamp((q.frente + 0.2) / 0.6);
+    const op = g === g0 ? cerca * (1 - apagar) : 0;
+    if (op > 0.01) { const q = proyectar(o.e.p, vista);
       const izq = o.e.izq ? Math.min(q.sx, innerWidth - margen - o.ancho) : clamp(q.sx - o.ancho / 2, margen, innerWidth - margen - o.ancho);
-      if (op > 0.01) { visibles.push({ o, op, x: izq, y: q.sy - (o.alto || 40) / 2 }); return; }
-    }
+      visibles.push({ o, op, x: izq, y: q.sy - (o.alto || 40) / 2 }); return; }
     if (o.el.style.opacity !== '0') o.el.style.opacity = '0';
   }));
-  // En el globo los países europeos caen juntos: sus etiquetas van en dos columnas, a los lados del globo.
-  if (visibles.length && visibles[0].o.e.cara) {
-    const c = proyectar([0, 0, 0], vista), r = Math.abs(proyectar([0, 1.7, 0], vista).sy - c.sy);
-    visibles.forEach((v) => { const q = proyectar(v.o.e.p, vista), der = q.sx >= c.sx;
-      v.x = der ? Math.min(c.sx + r + 12, innerWidth - margen - v.o.ancho) : Math.max(c.sx - r - 12 - v.o.ancho, margen); v.der = der; });
-  }
   // Las que se pisan bajan hasta dejar hueco (de arriba abajo).
   visibles.sort((a, b) => a.y - b.y).forEach((a, i) => {
     for (let j = 0; j < i; j++) { const b = visibles[j], h = b.o.alto || 40;
@@ -588,8 +616,16 @@ let m = 0, activo = 0, ultimo = scrollY, vel = 0, oscuro = true, uFoto = 1;
 function objetivoM(y) {
   const finVuelo = vuelo.offsetTop + vuelo.offsetHeight - innerHeight;
   if (y <= finVuelo) return suave(tramo(y / finVuelo, 0.76, 0.98));
-  const anc = [[finVuelo, 1], ...pasos.map((s, i) => [s.offsetTop + s.offsetHeight / 2 - innerHeight / 2, i + 2])];
-  for (let i = 0; i < anc.length - 1; i++) if (y < anc[i + 1][0]) return anc[i][1] + (y - anc[i][0]) / (anc[i + 1][0] - anc[i][0]);
+  // Un ancla por forma: en el centro de cada escena corta y repartidas por las largas (un año o un vino cada una).
+  const anc = [[finVuelo, 1]];
+  pasos.forEach((sec, s) => { const n = PLAN[s].n;
+    if (n === 1) anc.push([sec.offsetTop + sec.offsetHeight / 2 - innerHeight / 2, inicio[s]]);
+    else { const a = sec.offsetTop, b = sec.offsetTop + sec.offsetHeight - innerHeight; for (let j = 0; j < n; j++) anc.push([a + (b - a) * j / (n - 1), inicio[s] + j]); } });
+  for (let i = 0; i < anc.length - 1; i++) if (y < anc[i + 1][0]) {
+    const p = (y - anc[i][0]) / (anc[i + 1][0] - anc[i][0]), misma = escenaDe[anc[i][1]] >= 0 && escenaDe[anc[i][1]] === escenaDe[anc[i + 1][1]];
+    // Dentro de una escena larga, el objetivo salta al año (o al vino) más cercano: la escena se desliza hasta él y reposa.
+    return anc[i][1] + (misma ? Math.round(p) : p);
+  }
   return NF;
 }
 function vueloVisual(y) {
@@ -613,6 +649,12 @@ function vueloVisual(y) {
   const osc = p < 0.84; if (osc !== oscuro) { oscuro = osc; document.body.classList.toggle('oscuro', osc); }
   return suave(tramo(p, 0.7, 0.8));
 }
+let formaTexto = -1;
+const anioGrande = document.getElementById('anioGrande'), vinoNombre = document.getElementById('vinoNombre'), vinoTipo = document.getElementById('vinoTipo');
+function textosDeForma(fr) {
+  if (escenaDe[fr] === 0) anioGrande.textContent = B.anios[fr - inicio[0]];
+  if (escenaDe[fr] === 3) { const v = B.vinos[fr - inicio[3]]; vinoNombre.textContent = v.nombre; vinoTipo.textContent = v.tipo; }
+}
 function cuadro(t) {
   lenis?.raf(t);
   const y = scrollY; vel += (Math.abs(y - ultimo) / 40 - vel) * 0.1; ultimo = y;
@@ -620,20 +662,25 @@ function cuadro(t) {
   m += (objetivoM(y) - m) * (m < 1.02 ? 0.2 : 0.07);
   const i = Math.min(NF - 1, Math.floor(m)), f = m - i;
   if (motor && i !== segmento) { segmento = i; motor.subir('aFrom', formas[i]); motor.subir('aTo', formas[i + 1]); }
+  // Entre dos años o dos vinos de la misma escena, sin dispersión: solo se mueve el nivel o el radio.
+  const calma = escenaDe[i] >= 0 && escenaDe[i] === escenaDe[i + 1] ? 1 : 0;
+  const fr = Math.round(Math.min(m, NF)), esc = escenaDe[fr], quieta = esc >= 0 && PLAN[esc].n > 1;
   const ancho = innerWidth > 860, k = clamp(m);
   const galIni = gal.offsetTop - innerHeight, desv = clamp((y - galIni) / (innerHeight * 0.7));
   const vista = {
-    x: !ancho ? 0 : m <= 1 ? k * 1.5 : 1.5 + clamp(m - 1) * 0.7,
-    y: ancho ? 0 : -1.05 * clamp(m - 1),
+    // En el móvil la ladera se aparta a la izquierda (solo cuando está en pantalla) para dejar sitio a las parcelas.
+    x: !ancho ? -0.5 * (1 - clamp(Math.abs(m - inicio[1]))) : m <= 1 ? k * 1.5 : 1.5 + clamp(m - 1) * 0.7,
+    y: ancho ? 0 : -(0.9 * suave(tramo(m, 0.85, 1)) + 0.15 * clamp(m - 1)),
     s: ancho ? 1 + 0.1 * k - 0.1 * clamp(m - 1) : 0.72 - 0.3 * clamp(m - 1),
-    ry: (Math.sin(t / 4200) * 0.55 + raton[0] * 0.5) * k,
-    rx: raton[1] * 0.22 * k,
+    ry: (Math.sin(t / 4200) * 0.55 + raton[0] * 0.5) * k * (quieta ? 0.3 : 1),
+    rx: raton[1] * 0.22 * k * (quieta ? 0.3 : 1),
   };
-  motor?.dibujar({ ...vista, t: m >= NF ? 1 : f, tiempo: t / 1000, vel: Math.min(1, vel), foto: uFoto,
+  motor?.dibujar({ ...vista, t: m >= NF ? 1 : f, tiempo: t / 1000, vel: Math.min(1, vel), foto: uFoto, calma,
     alfa: aparece * (1 - desv * 0.9) });
   if (motor) pintarEtiquetas(m, vista, desv);
-  const act = Math.max(0, Math.round(Math.min(m, NF)) - 1);
-  if (act !== activo) { activo = act; railSpans.forEach((s, j) => s.classList.toggle('on', j === act)); hudIdx.textContent = `[0${act}/0${NF - 1}]`; descifrar(hudName, act === 0 ? 'APERTURA' : pasos[act - 1].dataset.name); }
+  if (fr !== formaTexto) { formaTexto = fr; textosDeForma(fr); }
+  const act = esc + 1;
+  if (act !== activo) { activo = act; railSpans.forEach((s, j) => s.classList.toggle('on', j === act)); hudIdx.textContent = `[0${act}/0${pasos.length}]`; descifrar(hudName, act === 0 ? 'APERTURA' : pasos[act - 1].dataset.name); }
   hudPct.textContent = String(Math.round(y / (document.documentElement.scrollHeight - innerHeight) * 100)).padStart(3, '0') + '%';
   const pg = clamp((y - gal.offsetTop) / (gal.offsetHeight - innerHeight));
   track.style.transform = `translate3d(${-pg * (track.scrollWidth - innerWidth + 40)}px,0,0)`;
