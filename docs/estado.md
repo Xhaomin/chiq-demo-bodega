@@ -43,8 +43,9 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
   papel y separadas si se pisan; `pm` es su posición en el móvil. Las listas `.datos` siguen en el HTML para lectores
   de pantalla y sin WebGL.
 - Sin botones falsos: lo que aún no existe dice «próximamente» (reservas, tienda, club).
-- El vuelo es un solo zoom a ritmo constante hacia el mismo punto de fuga (`ORIGEN_FOTO`) con un cambio de foco de una
-  foto a la otra; la segunda llega a `ESCALA_FOTO` en `P_FIN`, la escala a la que las moléculas toman sus píxeles.
+- El vuelo es un solo zoom a ritmo constante sobre una foto (una cepa vieja con racimos) hacia su racimo central
+  (`OBJETIVO`); `ajustarOrigen` calcula dónde cae en la pantalla (`ORIGEN_FOTO`) y el borde se desenfoca (`#foco`) como en
+  un objetivo. La foto llega a `ESCALA_FOTO` en `P_FIN`, la escala a la que las moléculas toman sus píxeles.
 - El menú son las secciones de una web de bodega (Historia, Los vinos, Visitas, Tienda, Club) y lleva a su parte de la
   home; «Bodega Ejemplo» solo está en el logo y «ficticia», una vez, en el pie.
 
@@ -65,6 +66,8 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 
 ## Historial
 
+- 07/10/2026 (noche, 2): el vuelo pasa a una sola foto (una cepa vieja con racimos) con zoom hasta el racimo central y
+  desenfoque del borde.
 - 07/10/2026 (noche): primera foto nueva (una vid a contraluz) con el zoom hacia ella; cepas en la ladera; sello «CM»
   en oro; carrusel de cuatro paneles con el render de la cata; los vinos sin «Ejemplo» en el nombre.
 - 07/10/2026 (tarde): vuelo con zoom continuo y cambio de foco; carrusel con una foto por sección; menú de bodega;

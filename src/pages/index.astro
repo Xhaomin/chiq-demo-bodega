@@ -42,7 +42,10 @@ body.oscuro{--ink:#f4efe8;--linea:rgba(244,239,232,.3);--hud:rgba(244,239,232,.7
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
 /* el vuelo: la foto del viñedo, que se acerca hasta las uvas */
 #fotos{position:fixed;inset:0;z-index:1;overflow:hidden;background:#1a1210}
-#fotos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity,filter;transform-origin:62% 72%}
+#fotos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity;transform-origin:44% 50%}
+/* el foco: el borde se desenfoca mientras la cámara entra en el racimo, como en un objetivo */
+#foco{position:fixed;inset:0;z-index:2;pointer-events:none;-webkit-backdrop-filter:blur(var(--fb,0px));backdrop-filter:blur(var(--fb,0px));
+  -webkit-mask-image:radial-gradient(ellipse 36% 32% at var(--ox,50%) var(--oy,50%),transparent 30%,#000 100%);mask-image:radial-gradient(ellipse 36% 32% at var(--ox,50%) var(--oy,50%),transparent 30%,#000 100%)}
 #fotos .sombra{position:absolute;inset:0;background:radial-gradient(ellipse 70% 45% at 50% 50%,rgba(10,6,6,.32),transparent 75%),linear-gradient(180deg,rgba(10,6,6,.5),rgba(10,6,6,.18) 45%,rgba(10,6,6,.55))}
 #escarcha{position:fixed;inset:0;z-index:2;pointer-events:none;-webkit-backdrop-filter:blur(var(--b,0px)) saturate(1.2);backdrop-filter:blur(var(--b,0px)) saturate(1.2);background:rgba(242,237,229,var(--a,0))}
 canvas#gl{position:fixed;inset:0;width:100vw;height:100vh;z-index:3;pointer-events:none}
@@ -156,10 +159,10 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
 <body class="oscuro">
 <div id="pre"><div class="mono" id="preTxt">bodega ░░░░░░░░░░░░ 000</div></div>
 <div id="fotos" aria-hidden="true">
-  <img id="f1" src="https://images.unsplash.com/photo-1567072629554-20e689de2400?w=2400&q=75" alt="">
-  <img id="f2" src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=2600&q=75" alt="" style="opacity:0">
+  <img id="f1" src="https://images.unsplash.com/photo-1661437857886-f5190f16a79a?w=2400&q=75" srcset="https://images.unsplash.com/photo-1661437857886-f5190f16a79a?w=1600&q=75 1600w, https://images.unsplash.com/photo-1661437857886-f5190f16a79a?w=2400&q=75 2400w, https://images.unsplash.com/photo-1661437857886-f5190f16a79a?w=3600&q=75 3600w" sizes="250vw" alt="">
   <div class="sombra" id="sombra"></div>
 </div>
+<div id="foco"></div>
 <div id="escarcha"></div>
 <canvas id="gl" aria-hidden="true"></canvas>
 <div id="etiquetas" aria-hidden="true"></div>
@@ -389,9 +392,10 @@ function sello() {
 }
 
 /* ---------- el motor: WebGL2 directo ---------- */
-/* El vuelo es un solo zoom hacia el mismo punto de fuga (ORIGEN_FOTO, como el transform-origin de las fotos): la segunda
-   foto entra a escala 1 en P_CRUCE y llega a ESCALA_FOTO en P_FIN, la escala a la que las moléculas toman sus píxeles. */
-const FOV = 34, DIST = 9.5, ESCALA_FOTO = 2.4, ORIGEN_FOTO = [0.62, 0.72], P_CRUCE = 0.4, P_FIN = 0.7;
+/* El vuelo es un solo zoom sobre la foto de la cepa hacia su racimo central (OBJETIVO, en la foto). ORIGEN_FOTO es ese
+   punto en la pantalla (cambia con el encuadre) y hace de transform-origin; la foto llega a ESCALA_FOTO en P_FIN, la escala
+   a la que las moléculas toman sus píxeles. */
+const FOV = 34, DIST = 9.5, ESCALA_FOTO = 3, OBJETIVO = [0.44, 0.5], ORIGEN_FOTO = [0.44, 0.5], P_FIN = 0.72;
 const VERT = `
   uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uVel, uFoto, uCalma, uTinteA, uTinteB;
   attribute vec3 aFrom, aTo, aCol, aCol2; attribute float aRnd; varying float vA, vGlow, vTinte; varying vec3 vCol;
@@ -509,8 +513,8 @@ if (motor) {
   addEventListener('resize', () => motor.tamano());
 }
 const imgUvas = new Image(); imgUvas.crossOrigin = 'anonymous';
-imgUvas.onload = () => { try { const r = desdeFoto(imgUvas); formas[0] = r.pos; coloresFoto = r.colores; segmento = -1; } catch (e) { console.warn('Sin muestreo de la foto:', e); } };
-imgUvas.src = 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=1200&q=70';
+imgUvas.onload = () => { try { ajustarOrigen(); const r = desdeFoto(imgUvas); formas[0] = r.pos; coloresFoto = r.colores; segmento = -1; } catch (e) { console.warn('Sin muestreo de la foto:', e); } };
+imgUvas.src = 'https://images.unsplash.com/photo-1661437857886-f5190f16a79a?w=1200&q=70';
 document.getElementById('motorKB').textContent = (crearMotor.toString().length / 1024 + (VERT.length + FRAG.length) / 1024).toFixed(1) + ' KB';
 
 /* ---------- cifras sobre la forma: etiquetas HTML proyectadas con la misma cámara que las moléculas ---------- */
@@ -562,7 +566,16 @@ function pintarEtiquetas(m, vista, apagar) {
 /* ---------- scroll ---------- */
 // En pantallas táctiles, scroll nativo: el suavizado no aporta y desplaza los saltos a cada paso.
 let lenis = null; if (!matchMedia('(pointer: coarse)').matches) { try { lenis = new Lenis({ lerp: 0.085, smoothWheel: true }); } catch (e) {} }
-const vuelo = document.getElementById('vuelo'), f1 = document.getElementById('f1'), f2 = document.getElementById('f2'), sombra = document.getElementById('sombra');
+const vuelo = document.getElementById('vuelo'), f1 = document.getElementById('f1'), foco = document.getElementById('foco'), sombra = document.getElementById('sombra');
+/** Dónde cae el racimo en la pantalla con el encuadre de object-fit: cover; el zoom y las moléculas parten de ahí. */
+function ajustarOrigen() {
+  const iw = f1.naturalWidth || imgUvas.naturalWidth || 4, ih = f1.naturalHeight || imgUvas.naturalHeight || 3, k = Math.max(innerWidth / iw, innerHeight / ih);
+  ORIGEN_FOTO[0] = ((innerWidth - iw * k) / 2 + OBJETIVO[0] * iw * k) / innerWidth;
+  ORIGEN_FOTO[1] = ((innerHeight - ih * k) / 2 + OBJETIVO[1] * ih * k) / innerHeight;
+  const ox = `${(ORIGEN_FOTO[0] * 100).toFixed(2)}%`, oy = `${(ORIGEN_FOTO[1] * 100).toFixed(2)}%`;
+  f1.style.transformOrigin = `${ox} ${oy}`; foco.style.setProperty('--ox', ox); foco.style.setProperty('--oy', oy);
+}
+f1.addEventListener('load', ajustarOrigen); addEventListener('resize', ajustarOrigen); if (f1.complete) ajustarOrigen();
 const fotos = document.getElementById('fotos'), escarcha = document.getElementById('escarcha');
 const b1 = document.getElementById('beat1'), b2 = document.getElementById('beat2'), medio = document.getElementById('medio');
 const escenas = [...document.querySelectorAll('section.escena')], pasosNav = [...document.querySelectorAll('.recorrido span')];
@@ -588,18 +601,14 @@ function objetivoM(y) {
 }
 function vueloVisual(y) {
   const p = clamp(y / (vuelo.offsetTop + vuelo.offsetHeight - innerHeight));
-  // Un solo zoom a ritmo constante: la primera foto se acerca y se desenfoca; la segunda llega desenfocada, se enfoca y
-  // sigue acercándose al mismo ritmo, como si la cámara se metiera entre las vides.
-  const r = Math.log(ESCALA_FOTO) / (P_FIN - P_CRUCE), L = r * Math.min(p, P_FIN);
-  f1.style.transform = `scale(${Math.exp(L).toFixed(4)})`;
-  f1.style.opacity = 1 - suave(tramo(p, 0.32, 0.46));
-  f1.style.filter = `blur(${(suave(tramo(p, 0.24, 0.44)) * 10).toFixed(2)}px)`;
-  f2.style.opacity = suave(tramo(p, 0.32, 0.46)) * (1 - suave(tramo(p, 0.74, 0.86)));
-  f2.style.transform = `scale(${Math.exp(Math.max(0, L - r * P_CRUCE)).toFixed(4)})`;
-  f2.style.filter = `blur(${((1 - suave(tramo(p, 0.36, 0.58))) * 12).toFixed(2)}px)`;
-  const e1 = Math.sin(Math.PI * tramo(p, 0.34, 0.5)), e2 = tramo(p, 0.72, 0.9);
-  escarcha.style.setProperty('--b', (e1 * 4 + e2 * 14) + 'px');
-  escarcha.style.setProperty('--a', (e1 * 0.12 + suave(e2) * 1).toFixed(3));
+  // Un solo zoom a ritmo constante hacia el racimo: la cámara se mete en la cepa y el borde se desenfoca, hasta que las
+  // uvas llenan la pantalla y se vuelven moléculas.
+  f1.style.transform = `scale(${Math.exp(Math.log(ESCALA_FOTO) * tramo(p, 0, P_FIN)).toFixed(4)})`;
+  f1.style.opacity = 1 - suave(tramo(p, 0.74, 0.86));
+  foco.style.setProperty('--fb', (suave(tramo(p, 0.06, 0.6)) * 9).toFixed(2) + 'px');
+  const e2 = tramo(p, 0.72, 0.9);
+  escarcha.style.setProperty('--b', (e2 * 14) + 'px');
+  escarcha.style.setProperty('--a', suave(e2).toFixed(3));
   sombra.style.opacity = 1 - tramo(p, 0.6, 0.8);
   fotos.style.visibility = p >= 0.999 ? 'hidden' : 'visible';
   b1.style.opacity = 1 - suave(tramo(p, 0.08, 0.22)); b1.style.transform = `translateY(${-tramo(p, 0.05, 0.25) * 60}px)`;
