@@ -338,7 +338,8 @@ $('hudCap').textContent = `Obs_${String(CAP.orden).padStart(2, '0')} / ${nombreC
 $('hudFuente').textContent = `${sigla(LIN.fuente.organismo)} · ${PERIODO}`;
 $('hudAct').textContent = `${sigla(LIN.fuente.organismo)} · ${HASTA}`;
 $('sello').textContent = `Datos actualizados · ${sigla(LIN.fuente.organismo)} ${HASTA}`;
-$('kicker').textContent = `Estudio · Capítulo ${String(CAP.orden).padStart(2, '0')}${CAP.publicado ? '' : ' · Borrador'}`;
+// En la demo no se dice «Borrador»: el estado de publicación es de chiq.es, no de la bodega.
+$('kicker').textContent = `Estudio · Capítulo ${String(CAP.orden).padStart(2, '0')}`;
 { // título fijo: la última palabra en cursiva granate
   const t = CAP.titulo.texto, i = t.lastIndexOf(' ');
   $('titulo').innerHTML = `${esc(t.slice(0, i))} <em>${esc(t.slice(i + 1))}.</em>`;
@@ -502,7 +503,9 @@ function dibujarApiladas(g) {
     z.addEventListener('pointerleave', () => { lienzo.querySelectorAll('.col').forEach((c) => c.style.opacity = 1); tip.ocultar(); });
   });
 }
-const dibujar = () => { dibujarLineas(LIN); dibujarApiladas(API); };
+// Sin anchura (la pestaña aún no tiene tamaño) los márgenes dejarían rectángulos con anchura negativa; el «resize» dibuja
+// en cuanto la tiene.
+const dibujar = () => { if (document.querySelector('[data-grafico]').clientWidth < 120) return; dibujarLineas(LIN); dibujarApiladas(API); };
 dibujar();
 let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(dibujar, 150); });
 

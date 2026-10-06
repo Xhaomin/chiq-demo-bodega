@@ -2,8 +2,31 @@
 // Los datos de la bodega son ficticios; la forma de cada paso se calcula con ellos en el navegador.
 import B from '../data/bodega.json';
 
-const miles = (n: number) => n.toLocaleString('es-ES');
+// Con separador también en las cifras de cuatro dígitos (2.500), como el resto de la página.
+const miles = (n: number) => n.toLocaleString('es-ES', { useGrouping: 'always' } as Intl.NumberFormatOptions);
 const JSON_BODEGA = JSON.stringify(B).replace(/</g, '\\u003c');
+
+// Del racimo a la botella: un paso por pantalla. Las toneladas y las botellas se calculan, no se escriben.
+const E = B.elaboracion, ultimo = B.anios.length - 1;
+const toneladas = E.hectareas * E.kg_por_ha / 1000;
+const botellas = B.marcas.reduce((s, x) => s + x.miles_botellas[ultimo], 0) * 1000;
+const ELAB = [
+  { corto: 'Vendimia', cifra: `${miles(E.kg_por_ha)} kg/ha`, paso: `La vendimia · ${E.hectareas} ha a mano`,
+    etiquetas: [{ b: `${E.hectareas} ha`, s: `vendimiadas ${E.vendimia}` }, { b: `${miles(E.kg_por_ha)} kg/ha`, s: 'de rendimiento' }, { b: `${miles(toneladas)} t`, s: 'de uva' }] },
+  { corto: 'Depósito', cifra: `${miles(E.litros_deposito)} litros`, paso: `El depósito · ${E.dias_deposito} días`,
+    etiquetas: [{ b: `${miles(E.litros_deposito)} litros`, s: 'de vino' }, { b: `${E.dias_deposito} días`, s: 'en depósito' }] },
+  { corto: 'Crianza', cifra: `${miles(E.barricas)} barricas`, paso: `La crianza · ${E.meses_barrica} meses`,
+    etiquetas: [{ b: miles(E.barricas), s: `barricas de roble ${E.roble}` }, { b: `${E.meses_barrica} meses`, s: 'de crianza' }] },
+  { corto: 'Botella', cifra: miles(botellas), paso: `Botellas en ${B.anios[ultimo]}`,
+    etiquetas: [{ b: miles(botellas), s: `botellas en ${B.anios[ultimo]}`, t: 'suma de las cuatro marcas' }] },
+];
+const JSON_ELAB = JSON.stringify(ELAB).replace(/</g, '\\u003c');
+
+// El ensamblaje: las parcelas que entran en el vino que lo tiene en bodega.json, con su variedad y su año.
+const RESERVA = B.vinos.find((v) => 'ensamblaje' in v) as (typeof B.vinos)[number] & { ensamblaje: { parcela: string; pct: number }[] };
+const ENS = RESERVA.ensamblaje.map((e) => ({ ...e, ...B.terruno.parcelas.find((p) => p.nombre === e.parcela)! }));
+const CUANTAS = ['Una', 'Dos', 'Tres', 'Cuatro', 'Cinco'][ENS.length - 1];
+const lista = (xs: string[]) => new Intl.ListFormat('es', { type: 'conjunction' }).format(xs);
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -134,7 +157,6 @@ section.larga .fijo{position:sticky;top:0;height:100vh;display:flex;align-items:
 .et b{display:block;font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(20px,1.8vw,30px);line-height:1;color:#141011}
 .et span{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-top:4px}
 .et.izq{text-align:left}
-.et.chip{background:rgba(235,232,227,.9);padding:5px 9px 6px;border-radius:10px}
 .con-etiquetas .datos{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
 @media (max-width:860px){
   section.scene{align-items:flex-start;padding-top:92px}
@@ -177,7 +199,7 @@ section.larga .fijo{position:sticky;top:0;height:100vh;display:flex;align-items:
 <div class="hud tr mono">Datos del mercado<br><span class="ink">MAPA · 2025</span></div>
 <div class="hud bl mono"><span id="hudIdx" class="ink">[00/06]</span>&nbsp; <span id="hudName">APERTURA</span></div>
 <div class="hud br mono">Scroll <span id="hudPct" class="ink">000%</span></div>
-<div class="rail" id="rail"><span class="on"></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+<div class="rail" id="rail"></div>
 
 <main>
   <section id="vuelo" data-name="APERTURA">
@@ -212,11 +234,12 @@ section.larga .fijo{position:sticky;top:0;height:100vh;display:flex;align-items:
     <ul class="datos mono fade">{B.terruno.parcelas.map((p) => <li><b>{p.variedad}</b>{p.nombre} · plantada en {p.plantada}</li>)}</ul>
     <span class="tag mono fade">Datos ficticios</span>
   </div></div></section>
-  <section class="scene larga" data-name="EL CLIENTE" data-pasos="1" style="height:170vh"><div class="fijo"><div class="step">
-    <div class="n mono fade"><b>03</b> El cliente</div>
-    <h2 class="split">El cliente es <em>el dato.</em></h2>
-    <p class="fade">Distribución, tienda, club y visitas giran alrededor del mismo cliente. Cada nodo pesa lo que factura.</p>
-    <ul class="datos mono fade">{B.canales.map((c) => <li><b>{c.pct} %</b>{c.canal}</li>)}<li><b>Club</b>{B.paso_club}</li></ul>
+  <section class="scene larga" data-name="EL OFICIO" data-pasos={ELAB.length} style={`height:${ELAB.length * 80 + 30}vh`}><div class="fijo"><div class="step">
+    <div class="n mono fade"><b>03</b> Del racimo a la botella</div>
+    <h2 class="split">El oficio, <em>paso a paso.</em></h2>
+    <p class="vino-nombre fade" id="elabCifra" aria-live="polite">{ELAB[0].cifra}</p>
+    <p class="vino-tipo mono fade" id="elabPaso">{ELAB[0].paso}</p>
+    <ul class="datos mono fade">{ELAB.map((p) => <li><b>{p.corto}</b>{p.etiquetas.map((e) => `${e.b} ${e.s}`).join(' · ')}</li>)}</ul>
     <span class="tag mono fade">Datos ficticios</span>
   </div></div></section>
   <section class="scene larga" data-name="EN LA COPA" data-pasos={B.vinos.length} style={`height:${B.vinos.length * 80 + 30}vh`}><div class="fijo"><div class="step">
@@ -234,11 +257,27 @@ section.larga .fijo{position:sticky;top:0;height:100vh;display:flex;align-items:
     <ul class="datos mono fade"><li><b>Vino</b>{B.vinos[0].nombre} · {B.vinos[0].formato}</li><li><b>Precio</b>{B.vinos[0].precio}</li><li><b>Stock</b>{miles(B.vinos[0].stock)} botellas</li></ul>
     <span class="tag mono fade">Datos ficticios · en la demo, un JSON imita la API</span>
   </div></div></section>
-  <section class="scene larga" data-name="SIN CABEZA" data-pasos="1" style="height:170vh"><div class="fijo"><div class="step">
-    <div class="n mono fade"><b>06</b> Una web sin cabeza</div>
-    <h2 class="split">Una web <em>sin cabeza.</em></h2>
-    <p class="fade">Astro junta la historia, los datos y la tienda en páginas rápidas que Google y la IA leen enteras.</p>
-    <a class="cta fade" href="/como-esta-hecha/"><span class="ar">→</span>Cómo está hecha</a>
+  <section class="scene larga" data-name="EL ENSAMBLAJE" data-pasos="1" style="height:170vh"><div class="fijo"><div class="step">
+    <div class="n mono fade"><b>06</b> El ensamblaje</div>
+    <h2 class="split">{CUANTAS} parcelas, <em>un vino.</em></h2>
+    <p class="fade">{lista(ENS.map((e) => e.parcela))} se vendimian por separado y se juntan en el {RESERVA.nombre}.</p>
+    <ul class="datos mono fade">{ENS.map((e) => <li><b>{e.pct} %</b>{e.variedad} · {e.parcela}</li>)}</ul>
+    <span class="tag mono fade">Datos ficticios</span>
+  </div></div></section>
+  <section class="scene larga" data-name="LA VISITA" data-pasos="1" style="height:170vh"><div class="fijo"><div class="step">
+    <div class="n mono fade"><b>07</b> La visita</div>
+    <h2 class="split">La bodega, <em>abierta.</em></h2>
+    <p class="fade">Visitas {B.visitas.dias}, con {B.visitas.cata}. 1 de cada {B.visitas.socio_uno_de_cada} visitantes se hace socio del club.</p>
+    <ul class="datos mono fade"><li><b>{miles(B.visitas.al_anio)}</b>visitas al año</li><li><b>Club</b>1 de cada {B.visitas.socio_uno_de_cada} visitantes se hace socio</li></ul>
+    <span class="tag mono fade">Datos ficticios · edificio inventado</span>
+  </div></div></section>
+  <section class="scene larga" data-name="LA TIENDA" data-pasos="2" style="height:200vh"><div class="fijo"><div class="step">
+    <div class="n mono fade"><b>08</b> La tienda</div>
+    <h2 class="split">Del brindis <em>a la tienda.</em></h2>
+    <p class="fade">La misma web que cuenta la historia vende el vino. Precio y stock llegan de la tienda por su API.</p>
+    <ul class="datos mono fade">{B.vinos.map((v) => <li><b>{v.precio}</b>{v.nombre} · {v.formato} · {miles(v.stock)} en stock</li>)}</ul>
+    <span class="tag mono fade">Datos ficticios · en la demo, la tienda no vende</span>
+    <div><a class="cta fade" href="/como-esta-hecha/"><span class="ar">→</span>Cómo está hecha</a></div>
   </div></div></section>
 
   <section class="gal" id="gal">
@@ -275,6 +314,7 @@ section.larga .fijo{position:sticky;top:0;height:100vh;display:flex;align-items:
 
 <script is:inline src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 <script id="datos-bodega" type="application/json" is:inline set:html={JSON_BODEGA}></script>
+<script id="pasos-elaboracion" type="application/json" is:inline set:html={JSON_ELAB}></script>
 <script is:inline type="module">
 /* ============================================================================================
    Motor propio de partículas en WebGL2 (sin Three.js). Mismo shader, mismas formas y mismo
@@ -336,32 +376,13 @@ function globo() {
     a.set(p, i * 3); }
   return a;
 }
-function red() {
-  const a = new Float32Array(N * 3), hubs = [], C = [0, 0, 0];
-  for (let k = 0; k < 5; k++) { const t = k / 5 * Math.PI * 2 - Math.PI / 2; hubs.push([Math.cos(t) * 2, Math.sin(t) * 1.35, Math.sin(t * 2) * 0.7]); }
-  const ar = []; hubs.forEach((h, k) => { ar.push([h, C]); ar.push([h, hubs[(k + 1) % 5]]); }); const nodos = [C, ...hubs];
-  for (let i = 0; i < N; i++) {
-    if (R() < 0.6) { const e = ar[i % ar.length], t = R(); a.set([0, 1, 2].map((d) => e[0][d] + (e[1][d] - e[0][d]) * t + (R() - .5) * .035), i * 3); }
-    else { const nd = nodos[i % nodos.length]; a.set(esfera(nd, nd === C ? 0.46 : 0.22), i * 3); } }
-  return a;
-}
+/** Radio de la botella a cada altura: cuerpo, hombro, cuello y boca. */
+const perfilBotella = (y) => y < 0.3 ? 0.64 : y < 0.95 ? 0.21 + 0.43 * (0.5 + 0.5 * Math.cos((y - 0.3) / 0.65 * Math.PI)) : (y > 1.6 ? 0.25 : 0.21);
 function botella() {
-  const a = new Float32Array(N * 3), perfil = (y) => y < 0.3 ? 0.64 : y < 0.95 ? 0.21 + 0.43 * (0.5 + 0.5 * Math.cos((y - 0.3) / 0.65 * Math.PI)) : (y > 1.6 ? 0.25 : 0.21);
+  const a = new Float32Array(N * 3), perfil = perfilBotella;
   for (let i = 0; i < N; i++) { const th = R() * Math.PI * 2;
     if (R() < 0.06) { const rr = Math.sqrt(R()) * 0.64; a.set([Math.cos(th) * rr, -1.6, Math.sin(th) * rr], i * 3); continue; }
     const y = -1.6 + R() * 3.35, r = perfil(y); a.set([Math.cos(th) * r, y, Math.sin(th) * r], i * 3); }
-  return a;
-}
-function web() {
-  const a = new Float32Array(N * 3), W = 3.8, H = 2.4, ry = -0.45, rx = 0.12;
-  const bl = [[-1.7, 0.72, 1.5, 0.55], [-0.05, 0.72, 1.75, 0.55], [-1.7, 0.02, 1.0, 1.05], [-0.55, 0.02, 1.0, 1.05], [0.6, 0.02, 1.1, 1.05]];
-  for (let i = 0; i < N; i++) { let x, y; const p = R();
-    if (p < 0.3) { const t = R() * 2 * (W + H); if (t < W) { x = -W / 2 + t; y = H / 2; } else if (t < W + H) { x = W / 2; y = H / 2 - (t - W); } else if (t < 2 * W + H) { x = W / 2 - (t - W - H); y = -H / 2; } else { x = -W / 2; y = -H / 2 + (t - 2 * W - H); } }
-    else if (p < 0.38) { x = -W / 2 + R() * W; y = H / 2 - 0.3; }
-    else if (p < 0.42) { const d = (R() * 3) | 0, th = R() * Math.PI * 2; x = -W / 2 + 0.22 + d * 0.17 + Math.cos(th) * 0.05; y = H / 2 - 0.15 + Math.sin(th) * 0.05; }
-    else { const b = bl[i % bl.length]; x = b[0] + R() * b[2]; y = b[1] - R() * b[3]; }
-    const z = (R() - .5) * 0.05, x1 = x * Math.cos(ry) + z * Math.sin(ry), z1 = -x * Math.sin(ry) + z * Math.cos(ry);
-    a.set([x1, y * Math.cos(rx) - z1 * Math.sin(rx), y * Math.sin(rx) + z1 * Math.cos(rx)], i * 3); }
   return a;
 }
 
@@ -375,7 +396,8 @@ const MAX_BOT = Math.max(...B.marcas.flatMap((x) => x.miles_botellas));
 const xsMarca = B.marcas.map((_, k) => (k - (B.marcas.length - 1) / 2) * 1.1);
 /* Probetas como las del capítulo E2: cristal gris con su aro, líquido del color de cada marca con su superficie y un
    anillo oscuro en el nivel del primer año. Cada partícula tiene un papel fijo, así que entre años solo se mueve el nivel. */
-const RAMPA = ['#33081a', '#7a1a3e', '#b35a80', '#d493ad'].map((h) => [1, 3, 5].map((o) => parseInt(h.slice(o, o + 2), 16) / 255));
+const rgb = (h) => [1, 3, 5].map((o) => parseInt(h.slice(o, o + 2), 16) / 255);
+const RAMPA = ['#33081a', '#7a1a3e', '#b35a80', '#d493ad'].map(rgb);
 const GRIS = [0.66, 0.64, 0.62], OSCURO = [0.09, 0.07, 0.08];
 const papel = (i) => { const g = U2[i]; return g < 0.2 ? 'vidrio' : g < 0.25 ? 'borde' : g < 0.31 ? 'marca' : g < 0.37 ? 'superficie' : 'liquido'; };
 const nivelBot = (v) => -1.5 + 3 * 0.9 * v / MAX_BOT;
@@ -393,10 +415,13 @@ function probetasAnio(j) {
 const COLOR_PROBETAS = (() => { const c = new Float32Array(N * 3), n = B.marcas.length;
   for (let i = 0; i < N; i++) { const p = papel(i); c.set(p === 'vidrio' || p === 'borde' ? GRIS : p === 'marca' ? OSCURO : RAMPA[(i % n) % RAMPA.length], i * 3); }
   return c; })();
+/** Gira un punto sobre el eje Y y después sobre el X (el mismo orden que la cámara). */
+const girar = (q, ry, rx) => { const x1 = q[0] * Math.cos(ry) + q[2] * Math.sin(ry), z1 = -q[0] * Math.sin(ry) + q[2] * Math.cos(ry);
+  return [x1, q[1] * Math.cos(rx) - z1 * Math.sin(rx), q[1] * Math.sin(rx) + z1 * Math.cos(rx)]; };
+const giroX = (p, g) => girar(p, 0, g);
 /* La ladera: cuatro bancales con su muro de piedra y dos hileras de cepas cada uno, vistos desde abajo y de lado. */
 const BANCALES = B.terruno.parcelas.map((p, k) => ({ y: -1.3 + k * 0.62, z: 0.8 - k * 0.52, w: 1.75 - k * 0.16, p }));
-const giroLadera = (q) => { const ry = -0.32, rx = 0.3, x1 = q[0] * Math.cos(ry) + q[2] * Math.sin(ry), z1 = -q[0] * Math.sin(ry) + q[2] * Math.cos(ry);
-  return [x1, q[1] * Math.cos(rx) - z1 * Math.sin(rx), q[1] * Math.sin(rx) + z1 * Math.cos(rx)]; };
+const giroLadera = (q) => girar(q, -0.32, 0.3);
 const CEPAS = BANCALES.flatMap((b) => [-0.11, 0.11].flatMap((dz) => { const n = Math.floor(2 * b.w / 0.32), out = [];
   for (let c = 0; c < n; c++) out.push({ x: -b.w + 0.16 + c * 0.32 + (dz > 0 ? 0.08 : 0), y: b.y, z: b.z + dz, s: c * 1.7 + b.y * 3 }); return out; }));
 function ladera() {
@@ -416,17 +441,142 @@ function ladera() {
     a.set(giroLadera(q), i * 3); }
   return a;
 }
-/** El cliente en el centro y un nodo por canal, con tamaño y partículas en proporción a lo que factura. */
-function redDe(canales) {
-  const a = new Float32Array(N * 3), C = [0, 0, 0], n = canales.length, total = canales.reduce((s, c) => s + c.pct, 0);
-  const hubs = canales.map((c, k) => { const t = k / n * Math.PI * 2 - Math.PI / 2; return { p: [Math.cos(t) * 2, Math.sin(t) * 1.35, Math.sin(t * 2) * 0.5], w: c.pct / total }; });
-  const ar = []; hubs.forEach((h, k) => { ar.push([h.p, C]); ar.push([h.p, hubs[(k + 1) % n].p]); });
-  let acum = 0; const cortes = hubs.map((h) => (acum += h.w));
-  for (let i = 0; i < N; i++) { const u = R();
-    if (u < 0.35) { const e = ar[i % ar.length], t = R(); a.set([0, 1, 2].map((d) => e[0][d] + (e[1][d] - e[0][d]) * t + (R() - .5) * .035), i * 3); }
-    else if (u < 0.45) a.set(esfera(C, 0.3 * Math.cbrt(R())), i * 3);
-    else { const v = R(), h = hubs[Math.max(0, cortes.findIndex((c) => v <= c))]; a.set(esfera(h.p, (0.12 + 0.55 * Math.sqrt(h.w)) * Math.cbrt(R())), i * 3); } }
-  return a;
+/* Del racimo a la botella: cuatro formas con color propio por partícula (uva, acero, roble y vidrio). Las cifras salen
+   de bodega.json; aquí solo se dibuja. Entre pasos no hay dispersión: cada partícula viaja recta a su sitio nuevo. */
+const ELAB = JSON.parse(document.getElementById('pasos-elaboracion').textContent);
+const mezcla = (a, b, t) => a.map((v, k) => v + (b[k] - v) * t);
+const UVA = [rgb('#33081a'), rgb('#7a1a3e')], RASPON = rgb('#5a3b2c'), VINO = [rgb('#6e1432'), rgb('#a3456a')];
+const ACERO = [0.6, 0.59, 0.58], ACERO_OSC = [0.42, 0.41, 0.4], ROBLE = [rgb('#7a1a3e'), rgb('#b35a80')], ARO = rgb('#3a2a24');
+/** Forma con color: f(i) devuelve la posición y el color de la partícula i. */
+function conColor(f) {
+  const pos = new Float32Array(N * 3), col = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) { const [p, c] = f(i); pos.set(p, i * 3); col.set(c, i * 3); }
+  return { pos, col };
+}
+function vendimia() {
+  const pos = racimo(), col = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) col.set(i < N * 0.035 ? RASPON : mezcla(UVA[0], UVA[1], U4[i]), i * 3);   // las primeras de racimo() son el raspón
+  return { pos, col };
+}
+/* El depósito de acero, visto un poco desde arriba, con el vino dentro hasta su nivel. */
+const DEP = { r: 0.82, y0: -1.25, y1: 1.05, giro: 0.28 }; DEP.nivel = DEP.y0 + (DEP.y1 - DEP.y0) * 0.78;
+function deposito() {
+  const { r, y0, y1, nivel, giro } = DEP;
+  return conColor((i) => { const g = U2[i], th = U1[i] * Math.PI * 2, c = Math.cos(th), s = Math.sin(th), u = U3[i], v = U4[i]; let q, col = ACERO;
+    if (g < 0.26) q = [c * r, y0 + u * (y1 - y0), s * r];   // pared
+    else if (g < 0.32) { q = [c * r * 1.02, (u < 0.5 ? 0.55 : -0.05) + (v - .5) * 0.16, s * r * 1.02]; col = ACERO_OSC; }   // camisas de frío
+    else if (g < 0.4) { const rr = r * (1 - u * 0.8); q = [c * rr, y1 + u * 0.36, s * rr]; }   // techo cónico
+    else if (g < 0.43) { const an = Math.floor(u * 4) * Math.PI / 2 + Math.PI / 4; q = [Math.cos(an) * r * 0.75, y0 - v * 0.38, Math.sin(an) * r * 0.75]; }   // patas
+    else if (g < 0.45) { const an = Math.PI / 2 + c * 0.3; q = [Math.cos(an) * r * 1.01, -0.8 + s * 0.2, Math.sin(an) * r * 1.01]; col = ACERO_OSC; }   // puerta
+    else if (g < 0.53) { const rr = Math.sqrt(u) * r * 0.96; q = [c * rr, nivel, s * rr]; col = VINO[1]; }   // superficie del vino
+    else { const rr = Math.sqrt(u) * r * 0.93; q = [c * rr, y0 + v * (nivel - y0), s * rr]; col = mezcla(VINO[0], VINO[1], U1[(i * 7) % N] * 0.5); }
+    return [giroX(q, giro), col]; });
+}
+/* Tres barricas apiladas (dos abajo y una encima), con sus duelas, cuatro aros y la tapa de frente, giradas a tres cuartos. */
+const BARR = { rb: 0.56, rh: 0.47, l: 0.7, centros: [[-0.62, -0.48], [0.62, -0.48], [0, 0.45]], ry: -0.75, rx: 0.15 };
+function barricas() {
+  const { rb, rh, l, centros, ry, rx } = BARR, perfil = (z) => rh + (rb - rh) * (1 - (z / l) ** 2), DUELA = Math.PI * 2 / 20;
+  return conColor((i) => { const [cx, cy] = centros[i % 3], g = U2[i], th = U1[i] * Math.PI * 2, u = U3[i], v = U4[i]; let x, y, z, col = mezcla(ROBLE[0], ROBLE[1], v);
+    if (g < 0.42) { z = (u * 2 - 1) * l; const r = perfil(z), an = v < 0.5 ? Math.round(th / DUELA) * DUELA : th; x = Math.cos(an) * r; y = Math.sin(an) * r; }   // duelas
+    else if (g < 0.64) { z = [-0.88, -0.45, 0.45, 0.88][Math.floor(u * 4)] * l + (v - .5) * 0.05; const r = perfil(z) * 1.02; x = Math.cos(th) * r; y = Math.sin(th) * r; col = ARO; }   // aros
+    else if (g < 0.74) { const rr = rh * (0.95 + v * 0.05); x = Math.cos(th) * rr; y = Math.sin(th) * rr; z = l; col = ARO; }   // canto de la tapa
+    else if (g < 0.94) { const rr = Math.sqrt(v) * rh * 0.92; x = Math.cos(th) * rr; y = Math.sin(th) * rr; z = l; col = ROBLE[1]; }   // tapa (solo la de delante: la de detrás no se ve)
+    else { const yl = [-0.45, -0.15, 0.15, 0.45][Math.floor(u * 4)] * rh, cu = Math.sqrt(rh * rh - yl * yl) * 0.92; x = (v * 2 - 1) * cu; y = yl; z = l; col = ARO; }   // juntas de la tapa
+    return [girar([cx + x, cy + y, z], ry, rx), col]; });
+}
+/* La botella de vidrio con el vino dentro hasta el cuello y su cápsula. */
+function botellaLlena() {
+  const nivel = 1.15;
+  return conColor((i) => { const g = U2[i], th = U1[i] * Math.PI * 2, c = Math.cos(th), s = Math.sin(th), u = U3[i], v = U4[i];
+    if (g < 0.3) { const y = -1.6 + u * 3.35, r = perfilBotella(y); return [[c * r, y, s * r], GRIS]; }   // vidrio
+    if (g < 0.34) { const rr = Math.sqrt(u) * 0.64; return [[c * rr, -1.6, s * rr], GRIS]; }   // fondo
+    if (g < 0.4) { const y = 1.4 + u * 0.35, r = perfilBotella(y) * 1.05; return [[c * r, y, s * r], UVA[0]]; }   // cápsula
+    // El vino: casi todo en el cuerpo, para que la densidad sea pareja hasta el cuello.
+    const y = v < 0.92 ? -1.6 + u * 1.9 : 0.3 + u * (nivel - 0.3), rr = Math.sqrt(U1[(i * 7) % N]) * perfilBotella(y) * 0.9;
+    return [[c * rr, y, s * rr], mezcla(VINO[0], VINO[1], v * 0.4)]; });
+}
+/* El ensamblaje: cada parcela, con su color, baja en una corriente hasta la copa del vino que las junta. La corriente y el
+   vino de la copa llevan partículas en proporción a lo que pone cada parcela. */
+const RESERVA = B.vinos.find((v) => v.ensamblaje);
+const ENS = RESERVA.ensamblaje.map((e) => ({ ...e, ...B.terruno.parcelas.find((p) => p.nombre === e.parcela) }));
+const XS_ENS = ENS.map((_, k) => (k - (ENS.length - 1) / 2) * 1.3), Y_PARCELA = 1.25, GIRO_ENS = 0.2;
+const TINTE_ENS = [RAMPA[1], RAMPA[2], RAMPA[0], RAMPA[3]];
+const COPA = { r: 0.5, alto: 0.85, tallo: 0.62, pie: 0.42, nivel: 0.45 };
+/** Radio del cáliz a la profundidad u (0 en el borde, 1 en el fondo): se abre un poco y luego se cierra. */
+const radioCopa = (u) => u < 0.35 ? COPA.r * (0.86 + 0.14 * u / 0.35) : COPA.r * Math.sqrt(Math.max(0, 1 - ((u - 0.35) / 0.65) ** 2));
+function ensamblaje() {
+  const total = ENS.reduce((s, e) => s + e.pct, 0); let acum = 0; const cortes = ENS.map((e) => (acum += e.pct / total));
+  const parcelaDe = (x) => Math.max(0, cortes.findIndex((c) => x <= c)), vinoCopa = mezcla(VINO[0], VINO[1], 0.25);
+  return conColor((i) => { const g = U2[i], u = U3[i], v = U4[i], w = U1[(i * 7) % N], th = U1[i] * Math.PI * 2; let q, col;
+    if (g < 0.2) { const k = i % ENS.length, x0 = XS_ENS[k];
+      if (u < 0.4) { const zz = (v - .5) * 0.5; q = [x0 + (w - .5) * 0.84, Y_PARCELA - 0.06 - zz * 0.5, zz]; col = RASPON; }   // la tierra de la parcela, inclinada
+      else { const fila = Math.floor(v * 3), cepa = Math.floor(w * 6), zz = (fila - 1) * 0.16, rr = 0.05 * Math.cbrt(U1[(i * 13) % N]), ph = Math.acos(2 * (u - 0.4) / 0.6 - 1);
+        q = [x0 - 0.36 + cepa * 0.14 + (fila % 2) * 0.07 + rr * Math.sin(ph) * Math.cos(th), Y_PARCELA + 0.04 - zz * 0.5 + rr * Math.cos(ph), zz + rr * Math.sin(ph) * Math.sin(th)]; col = TINTE_ENS[k]; } }   // tres hileras de cepas
+    else if (g < 0.5) { const k = parcelaDe(w), t = u, S = [XS_ENS[k], Y_PARCELA - 0.22], C = [XS_ENS[k] * 0.9, 0.4], E = [0, 0.06];   // la corriente
+      const bx = (1 - t) ** 2 * S[0] + 2 * (1 - t) * t * C[0] + t * t * E[0], by = (1 - t) ** 2 * S[1] + 2 * (1 - t) * t * C[1] + t * t * E[1], ancho = 0.1 * (1 - t) + 0.025;
+      q = [bx + (v - .5) * 2 * ancho, by, (U1[(i * 13) % N] - .5) * 1.2 * ancho]; col = mezcla(TINTE_ENS[k], vinoCopa, t * 0.8); }
+    else if (g < 0.68) { q = cristalCopa(u, v, th); col = GRIS; }   // la copa de cristal: cáliz, tallo y pie
+    else { q = vinoDeCopa(u, v, th); col = mezcla(TINTE_ENS[parcelaDe(w)], vinoCopa, 0.75); }   // el vino, con su superficie
+    return [giroX(q, GIRO_ENS), col]; });
+}
+/* La visita: una bodega moderna de hormigón, inventada (inspirada en la arquitectura de bodegas actuales), de frente. El
+   modelo va en unidades de dibujo (x a lo largo, y arriba, z hacia el fondo) y se pasa al mundo con EDI. */
+const EDI = { esc: 3.6 / 170, x0: 85, y0: -0.72, giro: 0.1 };
+const aMundo = ([x, y, z]) => giroX([(x - EDI.x0) * EDI.esc, EDI.y0 + y * EDI.esc, -z * EDI.esc], EDI.giro);
+const ARISTAS = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+/** Punto t de la arista k de la caja [x0, x1, y0, y1, z0, z1]; los vértices 0-3 son la cara delantera y 4-7 la trasera. */
+const aristaCaja = (b, k, t) => { const V = (n) => [b[(n % 4 === 1 || n % 4 === 2) ? 1 : 0], b[n % 4 >= 2 ? 3 : 2], b[n >= 4 ? 5 : 4]];
+  const [a, c] = ARISTAS[k], p = V(a), q = V(c); return p.map((v, d) => v + (q[d] - v) * t); };
+const BAJO = [0, 170, 0, 38, 0, 40], LOSA = [22, 150, 48, 54, 4, 36], MIRADOR = [60, 76, 54, 68, 14, 28], PORTON = [102, 126, 0, 26];
+const CIPRESES = [[-14, 58], [-6, 46], [182, 40]];
+function visita() {
+  return conColor((i) => { const g = U2[i], u = U3[i], v = U4[i], w = U1[(i * 7) % N]; let q, col = GRIS;
+    if (g < 0.09) { q = aristaCaja(BAJO, Math.floor(w * 12), u); col = ACERO_OSC; }   // el volumen bajo
+    else if (g < 0.29) q = [BAJO[0] + u * BAJO[1], v * BAJO[3], 0];   // su fachada de hormigón
+    else if (g < 0.34) { q = aristaCaja(LOSA, Math.floor(w * 12), u); col = ACERO_OSC; }   // la losa de arriba
+    else if (g < 0.37) q = [LOSA[0] + u * (LOSA[1] - LOSA[0]), LOSA[2] + v * (LOSA[3] - LOSA[2]), LOSA[4]];
+    else if (g < 0.385) { q = [22 + Math.floor(w * 4) * 40, 38 + u * 10, 4]; col = ACERO_OSC; }   // pilares bajo la losa
+    else if (g < 0.55) { const off = Math.floor(w * 7) * 1.8; q = [36 + u * 114, 12 + off + u * 35, -0.5]; col = mezcla(VINO[0], VINO[1], v * 0.5); }   // la banda de lamas, en diagonal
+    else if (g < 0.575) { q = aristaCaja(MIRADOR, Math.floor(w * 12), u); col = ACERO_OSC; }   // el mirador de cristal
+    else if (g < 0.61) { q = [MIRADOR[0] + u * 16, MIRADOR[2] + v * 14, MIRADOR[4]]; col = RAMPA[3]; }
+    else if (g < 0.63) q = [PORTON[0] + u * 24, v * 26, -0.3];   // el portón
+    else if (g < 0.69) { q = [PORTON[0] + u * 24, 2 + Math.floor(v * 9) * 3, -0.6]; col = ARO; }   // y sus lamas
+    else if (g < 0.8) { const [cx, h] = CIPRESES[Math.floor(w * 3)], t = u, r = 4.2 * Math.sin(Math.PI * Math.min(1, t * 1.15)), th = v * Math.PI * 2, rr = Math.sqrt(U1[(i * 13) % N]) * r;
+      q = [cx + Math.cos(th) * rr, t * h, -4 + Math.sin(th) * rr * 0.6]; col = mezcla(ARO, UVA[0], U1[(i * 13) % N]); }   // cipreses
+    else if (g < 0.86) { q = [-20 + u * 210, 0, -2 - v * 14]; col = ACERO; }   // la explanada
+    else q = [BAJO[0] + u * BAJO[1], v * BAJO[3], 0];
+    return [aMundo(q), col]; });
+}
+/* El brindis: dos copas que chocan, con chispas, y la ventana de la tienda con los tres vinos. Entre los dos pasos hay
+   dispersión: las chispas se ordenan en la tienda. */
+/** Un punto del cristal de una copa (cáliz, tallo y pie) con el borde en y = 0. */
+const cristalCopa = (u, v, th) => { if (v < 0.7) { const r = radioCopa(u); return [Math.cos(th) * r, -u * COPA.alto, Math.sin(th) * r]; }
+  if (v < 0.82) return [Math.cos(th) * 0.025, -COPA.alto - u * COPA.tallo, Math.sin(th) * 0.025];
+  const rr = Math.sqrt(u) * COPA.pie; return [Math.cos(th) * rr, -COPA.alto - COPA.tallo, Math.sin(th) * rr]; };
+/** Un punto del vino de una copa, con su superficie (v < 0.15). */
+const vinoDeCopa = (u, v, th) => { const uu = v < 0.15 ? COPA.nivel : COPA.nivel + v * (1 - COPA.nivel), rr = Math.sqrt(u) * radioCopa(uu) * 0.92;
+  return [Math.cos(th) * rr, -uu * COPA.alto, Math.sin(th) * rr]; };
+function brindis() {
+  return conColor((i) => { const g = U2[i], u = U3[i], v = U4[i], w = U1[(i * 7) % N], th = U1[i] * Math.PI * 2;
+    if (g < 0.88) { const lado = g < 0.44 ? -1 : 1, a = lado * 0.32, cristal = (g % 0.44) < 0.2, q0 = cristal ? cristalCopa(u, v, th) : vinoDeCopa(u, v, th);
+      const x = q0[0] * 0.9, y = q0[1] * 0.9;   // cada copa gira sobre el centro de su borde: los bordes se tocan y los pies se separan
+      return [[lado * 0.4 + x * Math.cos(a) - y * Math.sin(a), 0.72 + x * Math.sin(a) + y * Math.cos(a), q0[2] * 0.9], cristal ? GRIS : mezcla(VINO[0], VINO[1], w * 0.4)]; }
+    const r = 0.12 + Math.pow(u, 0.7) * 0.6, ph = Math.acos(1 - v * 1.3);   // chispas donde chocan, sobre todo hacia arriba
+    return [[Math.sin(ph) * Math.cos(th) * r, 0.62 + Math.cos(ph) * r * 0.8, Math.sin(ph) * Math.sin(th) * r * 0.5], mezcla(RAMPA[2], RAMPA[3], w)]; });
+}
+const TIENDA = { w: 3.4, h: 2.3, xs: B.vinos.map((_, k) => (k - (B.vinos.length - 1) / 2) * 1.1), ry: -0.3, rx: 0.1 };
+function tienda() {
+  const { w: W, h: H, xs, ry, rx } = TIENDA, barra = H / 2 - 0.28;
+  return conColor((i) => { const g = U2[i], u = U3[i], v = U4[i], w = U1[(i * 7) % N], th = U1[i] * Math.PI * 2; let q, col = GRIS;
+    if (g < 0.16) { const t = u * 2 * (W + H); q = t < W ? [-W / 2 + t, H / 2] : t < W + H ? [W / 2, H / 2 - (t - W)] : t < 2 * W + H ? [W / 2 - (t - W - H), -H / 2] : [-W / 2, -H / 2 + (t - 2 * W - H)]; col = ACERO_OSC; }   // la ventana
+    else if (g < 0.22) q = [-W / 2 + u * W, barra];   // la barra
+    else if (g < 0.25) { const d = Math.floor(w * 3), r = 0.05 * Math.sqrt(v); q = [-W / 2 + 0.2 + d * 0.16 + Math.cos(th) * r, H / 2 - 0.14 + Math.sin(th) * r]; col = RAMPA[d]; }   // los tres botones
+    else if (g < 0.35) { const k = Math.floor(w * xs.length), cw = 0.9, ch = 1.75, t = u * 2 * (cw + ch), cx = xs[k], cy = -0.125;   // una tarjeta por vino
+      q = t < cw ? [cx - cw / 2 + t, cy + ch / 2] : t < cw + ch ? [cx + cw / 2, cy + ch / 2 - (t - cw)] : t < 2 * cw + ch ? [cx + cw / 2 - (t - cw - ch), cy - ch / 2] : [cx - cw / 2, cy - ch / 2 + (t - 2 * cw - ch)]; }
+    else if (g < 0.96) { const k = i % xs.length, yb = -1.6 + u * 3.35, r = perfilBotella(yb) * (v < 0.25 ? 1 : Math.sqrt(v)), cap = yb > 1.4;   // la botella de cada tarjeta
+      return [girar([xs[k] + Math.cos(th) * r * 0.27, 0.2 + yb * 0.27, Math.sin(th) * r * 0.27], ry, rx), cap ? UVA[0] : mezcla(VINO[0], VINO[1], w * 0.4)]; }
+    else q = [-W / 2 + u * W, -H / 2 + v * (barra + H / 2)];   // el fondo de la página
+    return [girar([q[0], q[1], 0], ry, rx), col]; });
 }
 /* Rueda de cata: una porción por aroma, hasta su intensidad (el borde es el 10). Entre vinos solo cambia el radio. */
 const GIRO_RUEDA = 0.35, RM = 1.55, SEC = Math.PI * 2 / B.aromas.length;
@@ -446,7 +596,7 @@ function ruedaVino(w) {
 const FOV = 34, DIST = 9.5, ESCALA_FOTO = 1.45;
 const VERT = `
   uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uVel, uFoto, uCalma, uTinteA, uTinteB;
-  attribute vec3 aFrom, aTo, aCol; attribute float aRnd; varying float vA, vGlow, vTinte; varying vec3 vCol;
+  attribute vec3 aFrom, aTo, aCol, aCol2; attribute float aRnd; varying float vA, vGlow, vTinte; varying vec3 vCol;
   void main(){
     float t = smoothstep(0.0, 1.0, clamp((uT - aRnd * 0.3) / 0.7, 0.0, 1.0));
     vec3 p = mix(aFrom, aTo, t);
@@ -456,7 +606,7 @@ const VERT = `
     vec4 mv = uMV * vec4(p, 1.0);
     gl_Position = uProj * mv;
     gl_PointSize = uSize * (0.55 + aRnd * 0.9) * (1.0 + mid * 0.7 * (1.0 - uCalma) + uFoto * 0.5) / -mv.z;
-    vA = 0.45 + 0.55 * aRnd; vGlow = clamp((mid + uVel * 0.4) * (1.0 - uCalma * 0.8), 0.0, 1.0); vCol = aCol; vTinte = mix(uTinteA, uTinteB, t);
+    vA = 0.45 + 0.55 * aRnd; vGlow = clamp((mid + uVel * 0.4) * (1.0 - uCalma * 0.8), 0.0, 1.0); vCol = mix(aCol, aCol2, t); vTinte = mix(uTinteA, uTinteB, t);
   }`;
 const FRAG = `
   precision highp float;
@@ -534,20 +684,25 @@ function desdeFoto(img) {
   return { pos, colores };
 }
 
-/* Plan: una entrada por escena, en el orden de las secciones; las largas tienen un paso por año o por vino. */
+/* Plan: una entrada por escena, en el orden de las secciones; las largas tienen un paso por año o por vino. En el móvil una
+   escena puede crecer (`movil.s`, para que sus etiquetas quepan a lo ancho) o subir (`movil.y`, para acercarse a su texto). */
+const FORMAS_ELAB = [vendimia(), deposito(), barricas(), botellaLlena()], ENSAMBLAJE = ensamblaje(), VISITA = visita(), BRINDIS = [brindis(), tienda()];
 const PLAN = [
-  { n: B.anios.length, forma: (j) => probetasAnio(j) },
+  { n: B.anios.length, forma: (j) => probetasAnio(j), color: () => COLOR_PROBETAS, movil: { s: 0.15 } },
   { n: 1, forma: () => ladera() },
-  { n: 1, forma: () => redDe(B.canales) },
+  { n: ELAB.length, forma: (j) => FORMAS_ELAB[j].pos, color: (j) => FORMAS_ELAB[j].col, movil: { y: 0.45 } },
   { n: B.vinos.length, forma: (j) => ruedaVino(j) },
   { n: 1, forma: () => botella() },
-  { n: 1, forma: () => web() },
+  { n: 1, forma: () => ENSAMBLAJE.pos, color: () => ENSAMBLAJE.col, movil: { s: 0.12 } },
+  { n: 1, forma: () => VISITA.pos, color: () => VISITA.col, movil: { s: 0.13 } },
+  // Entre el brindis y la tienda sí hay dispersión: las chispas se ordenan en la ventana.
+  { n: 2, forma: (j) => BRINDIS[j].pos, color: (j) => BRINDIS[j].col, disperso: true, movil: { s: 0.15 } },
 ];
-const formas = [racimo(), racimo()], escenaDe = [-1, -1], inicio = [];
-PLAN.forEach((e, s) => { inicio.push(formas.length); for (let j = 0; j < e.n; j++) { formas.push(e.forma(j)); escenaDe.push(s); } });
-const NF = formas.length - 1;
 /* Color propio de cada forma (null: el granate del motor). Las probetas llevan el de cada marca. */
-const COLORES = formas.map((_, f) => (escenaDe[f] === 0 ? COLOR_PROBETAS : null));
+const formas = [racimo(), racimo()], escenaDe = [-1, -1], inicio = [], COLORES = [null, null];
+PLAN.forEach((e, s) => { inicio.push(formas.length);
+  for (let j = 0; j < e.n; j++) { formas.push(e.forma(j)); escenaDe.push(s); COLORES.push(e.color ? e.color(j) : null); } });
+const NF = formas.length - 1;
 let coloresFoto = new Float32Array(N * 3).fill(0.4);
 const motor = crearMotor(document.getElementById('gl'), N);
 const rnd = new Float32Array(N); for (let i = 0; i < N; i++) rnd[i] = R();
@@ -557,6 +712,7 @@ if (motor) {
   motor.atributo('aFrom', formas[0].slice(), 3);
   motor.atributo('aTo', formas[1].slice(), 3);
   motor.atributo('aCol', new Float32Array(N * 3).fill(0.4), 3);
+  motor.atributo('aCol2', new Float32Array(N * 3).fill(0.4), 3);
   motor.atributo('aRnd', rnd, 1);
   motor.tamano();
   addEventListener('resize', () => motor.tamano());
@@ -568,27 +724,38 @@ document.getElementById('motorKB').textContent = (crearMotor.toString().length /
 
 
 /* ---------- cifras sobre la forma: etiquetas HTML proyectadas con la misma cámara que las partículas ---------- */
-const miles = (n) => n.toLocaleString('es-ES');
-const giroX = (p, g) => [p[0], p[1] * Math.cos(g) - p[2] * Math.sin(g), p[1] * Math.sin(g) + p[2] * Math.cos(g)];
-const giroWeb = (x, y) => { const ry = -0.45, rx = 0.12, x1 = x * Math.cos(ry), z1 = -x * Math.sin(ry); return [x1, y * Math.cos(rx) - z1 * Math.sin(rx), y * Math.sin(rx) + z1 * Math.cos(rx)]; };
+const miles = (n) => n.toLocaleString('es-ES', { useGrouping: 'always' });
 /** Etiquetas de cada forma (por su índice en `formas`). */
 const ETIQ = [];
 const hex = (c) => `rgb(${c.map((v) => Math.round(v * 255)).join(',')})`;
 B.anios.forEach((anio, j) => { ETIQ[inicio[0] + j] = B.marcas.map((x, k) => ({ p: [xsMarca[k], -2.05, 0], b: `${x.miles_botellas[j]} mil`, s: x.corto,
   punto: hex(RAMPA[k % RAMPA.length]), t: `${B.anios[0]} · ${x.miles_botellas[0]} mil` })); });
 ETIQ[inicio[1]] = BANCALES.map((b) => ({ p: giroLadera([b.w + 0.12, b.y + 0.3, b.z]), b: b.p.variedad, s: `${b.p.nombre} · ${b.p.plantada}`, izq: true }));
-ETIQ[inicio[2]] = (() => { const totC = B.canales.reduce((s, c) => s + c.pct, 0);
-  return [{ p: [0, -0.62, 0], b: 'Cliente', s: 'en el centro' }, ...B.canales.map((c, k) => { const t = k / B.canales.length * Math.PI * 2 - Math.PI / 2, rr = 0.12 + 0.55 * Math.sqrt(c.pct / totC);
-    const h = [Math.cos(t) * 2, Math.sin(t) * 1.35], l = Math.hypot(h[0], h[1]), d = rr + 0.45;
-    return { p: [h[0] + h[0] / l * d, h[1] + h[1] / l * d, Math.sin(t * 2) * 0.5], b: `${c.pct} %`, s: c.canal }; })]; })();
+// Del racimo a la botella: en fila bajo el racimo y las barricas (en el móvil, `pm`, en columna) y a la derecha del
+// depósito y de la botella.
+const POS_ELAB = [
+  [{ p: [-1.15, -1.75, 0], pm: [0, -1.85, 0] }, { p: [0, -1.75, 0], pm: [0, -1.85, 0] }, { p: [1.15, -1.75, 0], pm: [0, -1.85, 0] }],
+  [{ p: giroX([DEP.r + 0.22, DEP.nivel, 0], DEP.giro), izq: true }, { p: giroX([DEP.r + 0.22, -0.55, 0], DEP.giro), izq: true }],
+  [{ p: [-0.6, -1.5, 0], pm: [0, -1.65, 0] }, { p: [0.75, -1.5, 0], pm: [0, -1.65, 0] }],
+  [{ p: [0.9, -0.75, 0], izq: true }],
+];
+ELAB.forEach((paso, j) => { ETIQ[inicio[2] + j] = paso.etiquetas.map((e, k) => ({ ...e, ...POS_ELAB[j][k] })); });
 B.vinos.forEach((v, w) => { ETIQ[inicio[3] + w] = B.aromas.map((a, k) => ({ a, k })).filter(({ k }) => v.cata[k] > 0).map(({ a, k }) => {
   const th = k * SEC - Math.PI / 2 + SEC / 2, r = RM * 1.24; return { p: giroX([Math.cos(th) * r, Math.sin(th) * r, 0], GIRO_RUEDA), b: String(v.cata[k]), s: a }; }); });
 ETIQ[inicio[4]] = [{ p: [0.95, 0.95, 0], b: B.vinos[0].precio, s: 'precio', izq: true }, { p: [0.95, 0.15, 0], b: miles(B.vinos[0].stock), s: 'botellas en stock', izq: true },
   { p: [0.95, -0.65, 0], b: B.vinos[0].formato, s: B.vinos[0].nombre, izq: true }];
-ETIQ[inicio[5]] = [{ p: giroWeb(-1.2, -0.5), b: 'Historia', s: 'Markdown', chip: true }, { p: giroWeb(-0.05, -0.5), b: 'Datos', s: 'JSON', chip: true }, { p: giroWeb(1.15, -0.5), b: 'Tienda', s: 'API', chip: true }];
+// El ensamblaje: el porcentaje sobre cada parcela y el vino bajo la copa.
+ETIQ[inicio[5]] = [...ENS.map((e, k) => ({ p: giroX([XS_ENS[k], Y_PARCELA + 0.55, 0], GIRO_ENS), b: `${e.pct} %`, s: e.variedad, t: `${e.parcela} · ${e.plantada}` })),
+  { p: giroX([0, -COPA.alto - COPA.tallo - 0.5, 0], GIRO_ENS), b: RESERVA.nombre, s: RESERVA.tipo }];
+// La visita: las visitas sobre el mirador; los días y el club, bajo el edificio (en el móvil, en columna).
+ETIQ[inicio[6]] = [{ p: aMundo([68, 82, 21]), b: miles(B.visitas.al_anio), s: 'visitas al año' },
+  { p: aMundo([40, -16, 0]), pm: aMundo([85, -16, 0]), b: B.visitas.dias[0].toUpperCase() + B.visitas.dias.slice(1), s: B.visitas.cata },
+  { p: aMundo([130, -16, 0]), pm: aMundo([85, -16, 0]), b: `1 de cada ${B.visitas.socio_uno_de_cada}`, s: 'se hace socio del club' }];
+// La tienda: el precio de cada vino bajo su botella.
+ETIQ[inicio[7] + 1] = B.vinos.map((v, k) => ({ p: girar([TIENDA.xs[k], -0.6, 0], TIENDA.ry, TIENDA.rx), b: v.precio, s: v.nombre.split(' ').at(-1), t: `${miles(v.stock)} en stock` }));
 const capaEtiq = document.getElementById('etiquetas');
 const elsEtiq = ETIQ.map((grupo) => (grupo || []).map((e) => {
-  const el = document.createElement('div'); el.className = 'et' + (e.izq ? ' izq' : '') + (e.chip ? ' chip' : '');
+  const el = document.createElement('div'); el.className = 'et' + (e.izq ? ' izq' : '');
   el.innerHTML = `<b></b><span></span>${e.t ? '<small></small>' : ''}`; el.querySelector('b').textContent = e.b;
   const sp = el.querySelector('span'); if (e.punto) { const i = document.createElement('i'); i.style.background = e.punto; sp.appendChild(i); } sp.append(e.s);
   if (e.t) el.querySelector('small').textContent = e.t;
@@ -609,8 +776,10 @@ function pintarEtiquetas(m, vista, apagar) {
   const g0 = Math.round(m), cerca = 1 - clamp(Math.abs(m - g0) / 0.3), margen = 10, visibles = [];
   elsEtiq.forEach((grupo, g) => grupo.forEach((o) => {
     const op = g === g0 ? cerca * (1 - apagar) : 0;
-    if (op > 0.01) { const q = proyectar(o.e.p, vista);
-      const izq = o.e.izq ? Math.min(q.sx, innerWidth - margen - o.ancho) : clamp(q.sx - o.ancho / 2, margen, innerWidth - margen - o.ancho);
+    if (op > 0.01) { const q = proyectar(innerWidth <= 860 && o.e.pm ? o.e.pm : o.e.p, vista);
+      // Con su posición del móvil (`pm`), la etiqueta va centrada aunque en el ancho vaya a la izquierda.
+      const alaIzq = !!o.e.izq && !(innerWidth <= 860 && o.e.pm); if (o.el.classList.contains('izq') !== alaIzq) o.el.classList.toggle('izq', alaIzq);
+      const izq = alaIzq ? Math.min(q.sx, innerWidth - margen - o.ancho) : clamp(q.sx - o.ancho / 2, margen, innerWidth - margen - o.ancho);
       visibles.push({ o, op, x: izq, y: q.sy - (o.alto || 40) / 2 }); return; }
     if (o.el.style.opacity !== '0') o.el.style.opacity = '0';
   }));
@@ -631,6 +800,8 @@ const fotos = document.getElementById('fotos'), escarcha = document.getElementBy
 const b1 = document.getElementById('beat1'), b2 = document.getElementById('beat2'), medio = document.getElementById('medio');
 const pasos = [...document.querySelectorAll('section.scene')];
 const gal = document.getElementById('gal'), track = document.getElementById('track');
+// Una raya por escena más la de la apertura.
+document.getElementById('rail').innerHTML = '<span class="on"></span>' + '<span></span>'.repeat(pasos.length);
 const railSpans = [...document.querySelectorAll('#rail span')];
 const hudIdx = document.getElementById('hudIdx'), hudName = document.getElementById('hudName'), hudPct = document.getElementById('hudPct');
 let raton = [0, 0]; addEventListener('pointermove', (e) => { raton = [e.clientX / innerWidth - 0.5, e.clientY / innerHeight - 0.5]; });
@@ -676,8 +847,10 @@ function vueloVisual(y) {
 }
 let formaTexto = -1;
 const anioGrande = document.getElementById('anioGrande'), vinoNombre = document.getElementById('vinoNombre'), vinoTipo = document.getElementById('vinoTipo');
+const elabCifra = document.getElementById('elabCifra'), elabPaso = document.getElementById('elabPaso');
 function textosDeForma(fr) {
   if (escenaDe[fr] === 0) anioGrande.textContent = B.anios[fr - inicio[0]];
+  if (escenaDe[fr] === 2) { const p = ELAB[fr - inicio[2]]; elabCifra.textContent = p.cifra; elabPaso.textContent = p.paso; }
   if (escenaDe[fr] === 3) { const v = B.vinos[fr - inicio[3]]; vinoNombre.textContent = v.nombre; vinoTipo.textContent = v.tipo; }
 }
 function cuadro(t) {
@@ -686,18 +859,21 @@ function cuadro(t) {
   const aparece = vueloVisual(y);
   m += (objetivoM(y) - m) * (m < 1.02 ? 0.2 : 0.07);
   const i = Math.min(NF - 1, Math.floor(m)), f = m - i;
-  if (motor && i !== segmento) { segmento = i; motor.subir('aFrom', formas[i]); motor.subir('aTo', formas[i + 1]); motor.subir('aCol', COLORES[i] || COLORES[i + 1] || coloresFoto); }
+  if (motor && i !== segmento) { segmento = i; motor.subir('aFrom', formas[i]); motor.subir('aTo', formas[i + 1]);
+    motor.subir('aCol', COLORES[i] || COLORES[i + 1] || coloresFoto); motor.subir('aCol2', COLORES[i + 1] || COLORES[i] || coloresFoto); }
   // Entre dos años o dos vinos de la misma escena, sin dispersión: solo se mueve el nivel o el radio.
-  const calma = escenaDe[i] >= 0 && escenaDe[i] === escenaDe[i + 1] ? 1 : 0;
+  const calma = escenaDe[i] >= 0 && escenaDe[i] === escenaDe[i + 1] && !PLAN[escenaDe[i]].disperso ? 1 : 0;
   const fr = Math.round(Math.min(m, NF)), esc = escenaDe[fr], quieta = esc >= 0 && PLAN[esc].n > 1;
   const ancho = innerWidth > 860, k = clamp(m);
+  // 1 mientras se ve la escena s y 0 a partir de una forma de distancia.
+  const dentro = (s) => 1 - clamp(Math.max(inicio[s] - m, m - (inicio[s] + PLAN[s].n - 1), 0));
+  const ajusteMovil = (c) => PLAN.reduce((a, e, s) => a + (e.movil?.[c] || 0) * dentro(s), 0);
   const galIni = gal.offsetTop - innerHeight, desv = clamp((y - galIni) / (innerHeight * 0.7));
   const vista = {
     // En el móvil la ladera se aparta a la izquierda (solo cuando está en pantalla) para dejar sitio a las parcelas.
     x: !ancho ? -0.5 * (1 - clamp(Math.abs(m - inicio[1]))) : m <= 1 ? k * 1.5 : 1.5 + clamp(m - 1) * 0.7,
-    y: ancho ? 0 : -(0.9 * suave(tramo(m, 0.85, 1)) + 0.15 * clamp(m - 1)),
-    // En el móvil las probetas de las añadas crecen para que sus cuatro etiquetas quepan a lo ancho.
-    s: ancho ? 1 + 0.1 * k - 0.1 * clamp(m - 1) : 0.72 - 0.3 * clamp(m - 1) + 0.15 * (1 - clamp(Math.max(inicio[0] - m, m - (inicio[0] + PLAN[0].n - 1), 0))),
+    y: ancho ? 0 : -(0.9 * suave(tramo(m, 0.85, 1)) + 0.15 * clamp(m - 1)) + ajusteMovil('y'),
+    s: ancho ? 1 + 0.1 * k - 0.1 * clamp(m - 1) : 0.72 - 0.3 * clamp(m - 1) + ajusteMovil('s'),
     ry: (Math.sin(t / 4200) * 0.55 + raton[0] * 0.5) * k * (quieta ? 0.3 : 1),
     rx: raton[1] * 0.22 * k * (quieta ? 0.3 : 1),
   };
