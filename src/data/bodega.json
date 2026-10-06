@@ -1,5 +1,5 @@
 {
-  "aviso": "Todos los datos de Bodega Ejemplo son inventados para la demo.",
+  "aviso": "Todos los datos de Bodega Ejemplo son ficticios.",
   "anadas": [
     { "anio": 2021, "botellas": 182000, "lluvia_mm": 412, "nota": "Fresca y larga" },
     { "anio": 2022, "botellas": 141000, "lluvia_mm": 298, "nota": "Sequía y calor" },

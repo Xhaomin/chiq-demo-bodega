@@ -78,10 +78,19 @@ h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(40px,5vw
 .seguir{display:flex;gap:28px;flex-wrap:wrap;padding:0 0 90px;font-family:'Instrument Serif',serif;font-size:clamp(26px,3vw,40px)}
 .seguir a{text-decoration:none;border-bottom:1px solid var(--line)}
 footer{border-top:1px solid var(--line);padding:28px clamp(16px,3vw,32px) 40px;color:var(--mute);font-size:13px;line-height:1.6}
+.col{min-width:0}
+pre{white-space:pre-wrap;overflow-wrap:anywhere}
 @media (max-width:900px){
-  .esquema{grid-template-columns:1fr}
+  .esquema{grid-template-columns:minmax(0,1fr)}
   .flecha{transform:rotate(90deg);justify-self:center}
-  .porque{grid-template-columns:1fr}
+  .porque{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:600px){
+  header{gap:12px;padding:16px}
+  .logo{font-size:21px;white-space:nowrap}
+  nav{gap:12px}
+  nav a{font-size:12.5px}
+  nav a:first-child{display:none}
 }
 </style>
 </head>

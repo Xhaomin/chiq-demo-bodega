@@ -1,5 +1,5 @@
 ---
-// Los datos de la bodega son inventados para la demo; la forma de cada paso se calcula con ellos en el navegador.
+// Los datos de la bodega son ficticios; la forma de cada paso se calcula con ellos en el navegador.
 import B from '../data/bodega.json';
 
 const miles = (n: number) => n.toLocaleString('es-ES');
@@ -119,6 +119,22 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
 .datos{list-style:none;margin:20px 0 22px;display:grid;gap:7px;color:var(--mute);max-width:46ch}
 .datos li{line-height:1.5}
 .datos b{display:inline-block;min-width:7ch;color:var(--wine);font-weight:500;margin-right:10px}
+#etiquetas{position:fixed;inset:0;pointer-events:none;z-index:4}
+.et{position:absolute;left:0;top:0;text-align:center;white-space:nowrap;opacity:0;will-change:transform,opacity}
+.et b{display:block;font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(20px,1.8vw,30px);line-height:1;color:#141011}
+.et span{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);margin-top:4px}
+.et.izq{text-align:left}
+.et.chip{background:rgba(235,232,227,.9);padding:5px 9px 6px;border-radius:10px}
+.con-etiquetas .datos{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+@media (max-width:860px){
+  section.scene{align-items:flex-start;padding-top:92px}
+  .step h2{font-size:40px;margin:16px 0 12px}
+  .step p{font-size:15px}
+  .tag{margin-top:16px}
+  .cta{margin-top:18px}
+  .et b{font-size:19px}
+  .hud.tl{display:none}
+}
 </style>
 </head>
 <body class="oscuro">
@@ -130,6 +146,7 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
 </div>
 <div id="escarcha"></div>
 <canvas id="gl" aria-hidden="true"></canvas>
+<div id="etiquetas" aria-hidden="true"></div>
 <div class="grain"></div>
 
 <header>
@@ -158,7 +175,7 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
       <div class="beat beat2" id="beat2" style="opacity:0">
         <div class="caja">
           <p class="l">Una web de bodega que cuenta su historia <em>y enseña sus datos.</em></p>
-          <span class="mono">Demo de chiq.es · los datos de la bodega son inventados</span>
+          <span class="mono">Demo de chiq.es · los datos de la bodega son ficticios</span>
         </div>
       </div>
     </div>
@@ -169,35 +186,35 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <h2 class="split">Cada añada, <em>su propia historia.</em></h2>
     <p class="fade">Cada probeta es una añada y se llena con las botellas que dio. La lluvia del año explica el resto.</p>
     <ul class="datos mono fade">{B.anadas.map((a) => <li><b>{a.anio}</b>{miles(a.botellas)} botellas · {a.lluvia_mm} mm de lluvia · {a.nota}</li>)}</ul>
-    <span class="tag mono fade">Datos inventados</span>
+    <span class="tag mono fade">Datos ficticios</span>
   </div></section>
   <section class="scene" data-name="AL MUNDO"><div class="step">
     <div class="n mono fade"><b>02</b> Al mundo</div>
     <h2 class="split">De la ladera <em>al mundo.</em></h2>
     <p class="fade">Cada grupo de partículas es un país, del tamaño de su parte de las ventas.</p>
     <ul class="datos mono fade">{B.mercados.map((m) => <li><b>{m.pct} %</b>{m.pais}</li>)}</ul>
-    <span class="tag mono fade">Datos inventados</span>
+    <span class="tag mono fade">Datos ficticios</span>
   </div></section>
   <section class="scene" data-name="EL CLIENTE"><div class="step">
     <div class="n mono fade"><b>03</b> El cliente</div>
     <h2 class="split">El cliente es <em>el dato.</em></h2>
     <p class="fade">Distribución, tienda, club y visitas giran alrededor del mismo cliente. Cada nodo pesa lo que factura.</p>
     <ul class="datos mono fade">{B.canales.map((c) => <li><b>{c.pct} %</b>{c.canal}</li>)}<li><b>Club</b>{B.paso_club}</li></ul>
-    <span class="tag mono fade">Datos inventados</span>
+    <span class="tag mono fade">Datos ficticios</span>
   </div></section>
   <section class="scene" data-name="LA RUEDA DE AROMAS"><div class="step">
     <div class="n mono fade"><b>04</b> En la copa</div>
     <h2 class="split">Lo que hay <em>en la copa.</em></h2>
     <p class="fade">La rueda de aromas del {B.vino.nombre}. Cada porción crece con su intensidad, del 0 al 10.</p>
     <ul class="datos mono fade">{B.vino.aromas.map((a) => <li><b>{a.intensidad}</b>{a.aroma}</li>)}</ul>
-    <span class="tag mono fade">Datos inventados</span>
+    <span class="tag mono fade">Datos ficticios</span>
   </div></section>
   <section class="scene" data-name="CADA BOTELLA"><div class="step">
     <div class="n mono fade"><b>05</b> Cada botella</div>
     <h2 class="split">Cada botella, <em>con su ficha.</em></h2>
     <p class="fade">La ficha vive en PrestaShop y la web la lee por su API. Así también un asistente de IA entiende cada vino.</p>
     <ul class="datos mono fade"><li><b>Vino</b>{B.vino.nombre} · {B.vino.formato}</li><li><b>Precio</b>{B.vino.precio}</li><li><b>Stock</b>{miles(B.vino.stock)} botellas</li></ul>
-    <span class="tag mono fade">Datos inventados · en la demo, un JSON imita la API</span>
+    <span class="tag mono fade">Datos ficticios · en la demo, un JSON imita la API</span>
   </div></section>
   <section class="scene" data-name="SIN CABEZA"><div class="step">
     <div class="n mono fade"><b>06</b> Una web sin cabeza</div>
@@ -331,7 +348,7 @@ function web() {
 }
 
 
-/* ---------- formas calculadas con los datos de la bodega (inventados) ---------- */
+/* ---------- formas calculadas con los datos de la bodega (ficticios) ---------- */
 const B = JSON.parse(document.getElementById('datos-bodega').textContent);
 /** Una probeta por añada, llena en proporción a sus botellas (la más llena es la añada con más botellas). */
 function probetasDe(anadas) {
@@ -438,14 +455,14 @@ function crearMotor(canvas, n) {
       gl.uniform1f(u.uSize, 44 * dpr);
     },
     /** Grupo: posición x, rotación X e Y (orden XYZ, como Three.js) y escala; la cámara está en z = DIST. */
-    dibujar({ x, rx, ry, s, t, tiempo, vel, foto, alfa }) {
+    dibujar({ x, y = 0, rx, ry, s, t, tiempo, vel, foto, alfa }) {
       const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
       // M = T · Rx · Ry · S, y la vista desplaza -DIST en z (columna a columna).
       gl.uniformMatrix4fv(u.uMV, false, new Float32Array([
         cy * s, sx * sy * s, -cx * sy * s, 0,
         0, cx * s, sx * s, 0,
         sy * s, -sx * cy * s, cx * cy * s, 0,
-        x, 0, -DIST, 1]));
+        x, y, -DIST, 1]));
       gl.uniform1f(u.uT, t); gl.uniform1f(u.uTime, tiempo); gl.uniform1f(u.uVel, vel); gl.uniform1f(u.uFoto, foto); gl.uniform1f(u.uAlpha, alfa);
       gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.POINTS, 0, n);
@@ -477,6 +494,7 @@ const motor = crearMotor(document.getElementById('gl'), N);
 const rnd = new Float32Array(N); for (let i = 0; i < N; i++) rnd[i] = R();
 let segmento = -1;
 if (motor) {
+  document.body.classList.add('con-etiquetas');
   motor.atributo('aFrom', formas[0].slice(), 3);
   motor.atributo('aTo', formas[1].slice(), 3);
   motor.atributo('aCol', new Float32Array(N * 3).fill(0.4), 3);
@@ -489,8 +507,74 @@ imgUvas.onload = () => { try { const r = desdeFoto(imgUvas); formas[0] = r.pos; 
 imgUvas.src = 'https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=1200&q=70';
 document.getElementById('motorKB').textContent = (crearMotor.toString().length / 1024 + (VERT.length + FRAG.length) / 1024).toFixed(1) + ' KB';
 
+
+/* ---------- cifras sobre la forma: etiquetas HTML proyectadas con la misma cámara que las partículas ---------- */
+const miles = (n) => n.toLocaleString('es-ES');
+const giroX = (p, g) => [p[0], p[1] * Math.cos(g) - p[2] * Math.sin(g), p[1] * Math.sin(g) + p[2] * Math.cos(g)];
+const giroWeb = (x, y) => { const ry = -0.45, rx = 0.12, x1 = x * Math.cos(ry), z1 = -x * Math.sin(ry); return [x1, y * Math.cos(rx) - z1 * Math.sin(rx), y * Math.sin(rx) + z1 * Math.cos(rx)]; };
+const ETIQ = (() => {
+  const rad = Math.PI / 180, nA = B.anadas.length, totC = B.canales.reduce((s, c) => s + c.pct, 0), nR = B.vino.aromas.length, sec = Math.PI * 2 / nR;
+  return [
+    B.anadas.map((a, k) => ({ p: [(k - (nA - 1) / 2) * 1.1, -1.95, 0], b: `${Math.round(a.botellas / 1000)} mil`, s: `${a.anio}` })),
+    B.mercados.map((m) => { const la = m.lat * rad, lo = (m.lon - B.mercados[0].lon) * rad, r = 1.7 * 1.22;
+      return { p: [Math.cos(la) * Math.sin(lo) * r, Math.sin(la) * r, Math.cos(la) * Math.cos(lo) * r], b: `${m.pct} %`, s: m.pais, cara: true }; }),
+    [{ p: [0, -0.62, 0], b: 'Cliente', s: 'en el centro' }, ...B.canales.map((c, k) => { const t = k / B.canales.length * Math.PI * 2 - Math.PI / 2, rr = 0.12 + 0.55 * Math.sqrt(c.pct / totC);
+      const h = [Math.cos(t) * 2, Math.sin(t) * 1.35], l = Math.hypot(h[0], h[1]), d = rr + 0.45;
+      return { p: [h[0] + h[0] / l * d, h[1] + h[1] / l * d, Math.sin(t * 2) * 0.5], b: `${c.pct} %`, s: c.canal }; })],
+    B.vino.aromas.map((a, k) => { const th = k * sec - Math.PI / 2 + sec / 2, r = 1.9 * 1.24;
+      return { p: giroX([Math.cos(th) * r, Math.sin(th) * r, 0], 0.35), b: String(a.intensidad), s: a.aroma }; }),
+    [{ p: [0.95, 0.95, 0], b: B.vino.precio, s: 'precio', izq: true }, { p: [0.95, 0.15, 0], b: miles(B.vino.stock), s: 'botellas en stock', izq: true },
+     { p: [0.95, -0.65, 0], b: B.vino.formato, s: B.vino.nombre, izq: true }],
+    [{ p: giroWeb(-1.2, -0.5), b: 'Historia', s: 'Markdown', chip: true }, { p: giroWeb(-0.05, -0.5), b: 'Datos', s: 'JSON', chip: true }, { p: giroWeb(1.15, -0.5), b: 'Tienda', s: 'API', chip: true }],
+  ];
+})();
+const capaEtiq = document.getElementById('etiquetas');
+const elsEtiq = ETIQ.map((grupo, k) => grupo.map((e) => {
+  const el = document.createElement('div'); el.className = 'et' + (e.izq ? ' izq' : '') + (e.chip ? ' chip' : '');
+  el.innerHTML = `<b></b><span></span>`; el.querySelector('b').textContent = e.b; el.querySelector('span').textContent = e.s;
+  capaEtiq.appendChild(el); return { e, el, ancho: 0 };
+}));
+const medirEtiquetas = () => elsEtiq.flat().forEach((o) => { o.ancho = o.el.offsetWidth; o.alto = o.el.offsetHeight; });
+addEventListener('resize', medirEtiquetas); document.fonts?.ready.then(medirEtiquetas); setTimeout(medirEtiquetas, 800);
+/** Proyecta un punto de la forma a la pantalla con la misma matriz que dibujar(): T · Rx · Ry · S y perspectiva. */
+function proyectar(p, { x, y, rx, ry, s }) {
+  const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
+  const X = cy * s * p[0] + sy * s * p[2] + x;
+  const Y = sx * sy * s * p[0] + cx * s * p[1] - sx * cy * s * p[2] + y;
+  const Zc = -cx * sy * s * p[0] + sx * s * p[1] + cx * cy * s * p[2];
+  const f = 1 / Math.tan((FOV * Math.PI / 180) / 2), a = innerWidth / innerHeight, w = DIST - Zc;
+  return { sx: ((f / a) * X / w + 1) / 2 * innerWidth, sy: (1 - f * Y / w) / 2 * innerHeight, frente: Zc };
+}
+function pintarEtiquetas(m, vista, apagar) {
+  const k = Math.round(m) - 2, cerca = 1 - clamp(Math.abs(m - Math.round(m)) / 0.3), margen = 10, visibles = [];
+  elsEtiq.forEach((grupo, g) => grupo.forEach((o) => {
+    let op = g === k ? cerca * (1 - apagar) : 0;
+    if (op > 0.01) {
+      const q = proyectar(o.e.p, vista);
+      if (o.e.cara) op *= clamp((q.frente + 0.2) / 0.6);
+      const izq = o.e.izq ? Math.min(q.sx, innerWidth - margen - o.ancho) : clamp(q.sx - o.ancho / 2, margen, innerWidth - margen - o.ancho);
+      if (op > 0.01) { visibles.push({ o, op, x: izq, y: q.sy - (o.alto || 40) / 2 }); return; }
+    }
+    if (o.el.style.opacity !== '0') o.el.style.opacity = '0';
+  }));
+  // En el globo los países europeos caen juntos: sus etiquetas van en dos columnas, a los lados del globo.
+  if (visibles.length && visibles[0].o.e.cara) {
+    const c = proyectar([0, 0, 0], vista), r = Math.abs(proyectar([0, 1.7, 0], vista).sy - c.sy);
+    visibles.forEach((v) => { const q = proyectar(v.o.e.p, vista), der = q.sx >= c.sx;
+      v.x = der ? Math.min(c.sx + r + 12, innerWidth - margen - v.o.ancho) : Math.max(c.sx - r - 12 - v.o.ancho, margen); v.der = der; });
+  }
+  // Las que se pisan bajan hasta dejar hueco (de arriba abajo).
+  visibles.sort((a, b) => a.y - b.y).forEach((a, i) => {
+    for (let j = 0; j < i; j++) { const b = visibles[j], h = b.o.alto || 40;
+      if (a.x < b.x + b.o.ancho + 6 && b.x < a.x + a.o.ancho + 6 && a.y < b.y + h + 2 && b.y < a.y + h + 2) a.y = b.y + h + 2; }
+    a.o.el.style.opacity = a.op.toFixed(3);
+    a.o.el.style.transform = `translate(${a.x.toFixed(1)}px, ${a.y.toFixed(1)}px)`;
+  });
+}
+
 /* ---------- scroll (igual que la otra maqueta) ---------- */
-let lenis = null; try { lenis = new Lenis({ lerp: 0.085, smoothWheel: true }); } catch (e) {}
+// En pantallas táctiles, scroll nativo: el suavizado no aporta y desplaza los saltos a cada paso.
+let lenis = null; if (!matchMedia('(pointer: coarse)').matches) { try { lenis = new Lenis({ lerp: 0.085, smoothWheel: true }); } catch (e) {} }
 const vuelo = document.getElementById('vuelo'), f1 = document.getElementById('f1'), f2 = document.getElementById('f2'), sombra = document.getElementById('sombra');
 const fotos = document.getElementById('fotos'), escarcha = document.getElementById('escarcha');
 const b1 = document.getElementById('beat1'), b2 = document.getElementById('beat2'), medio = document.getElementById('medio');
@@ -538,14 +622,16 @@ function cuadro(t) {
   if (motor && i !== segmento) { segmento = i; motor.subir('aFrom', formas[i]); motor.subir('aTo', formas[i + 1]); }
   const ancho = innerWidth > 860, k = clamp(m);
   const galIni = gal.offsetTop - innerHeight, desv = clamp((y - galIni) / (innerHeight * 0.7));
-  motor?.dibujar({
+  const vista = {
     x: !ancho ? 0 : m <= 1 ? k * 1.5 : 1.5 + clamp(m - 1) * 0.7,
-    s: ancho ? 1 + 0.1 * k - 0.1 * clamp(m - 1) : 0.72,
+    y: ancho ? 0 : -1.05 * clamp(m - 1),
+    s: ancho ? 1 + 0.1 * k - 0.1 * clamp(m - 1) : 0.72 - 0.3 * clamp(m - 1),
     ry: (Math.sin(t / 4200) * 0.55 + raton[0] * 0.5) * k,
     rx: raton[1] * 0.22 * k,
-    t: m >= NF ? 1 : f, tiempo: t / 1000, vel: Math.min(1, vel), foto: uFoto,
-    alfa: aparece * (ancho ? 1 : (m > 1.5 ? 0.35 : 1)) * (1 - desv * 0.9),
-  });
+  };
+  motor?.dibujar({ ...vista, t: m >= NF ? 1 : f, tiempo: t / 1000, vel: Math.min(1, vel), foto: uFoto,
+    alfa: aparece * (1 - desv * 0.9) });
+  if (motor) pintarEtiquetas(m, vista, desv);
   const act = Math.max(0, Math.round(Math.min(m, NF)) - 1);
   if (act !== activo) { activo = act; railSpans.forEach((s, j) => s.classList.toggle('on', j === act)); hudIdx.textContent = `[0${act}/0${NF - 1}]`; descifrar(hudName, act === 0 ? 'APERTURA' : pasos[act - 1].dataset.name); }
   hudPct.textContent = String(Math.round(y / (document.documentElement.scrollHeight - innerHeight) * 100)).padStart(3, '0') + '%';
