@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta A · Hilo de vino · Bodega Ejemplo</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Inter+Tight:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--noche:#0a0607;--marfil:#efe6dc;--marfil2:rgba(239,230,220,.66);--marfil3:rgba(239,230,220,.38);--laton:#c9a874;--rubi:#e0839f;--linea:rgba(239,230,220,.14)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--noche)}
+body{color:var(--marfil);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+canvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:0}
+.vineta{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse 80% 70% at 62% 50%,transparent 40%,rgba(5,3,3,.7))}
+.grano{position:fixed;inset:-50%;width:200%;height:200%;z-index:2;pointer-events:none;opacity:.06;animation:grano 1s steps(5) infinite;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+@keyframes grano{0%{transform:translate(0,0)}25%{transform:translate(-3%,2%)}50%{transform:translate(2%,-2%)}75%{transform:translate(-1%,-3%)}100%{transform:translate(0,0)}}
+.mono{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:26px clamp(20px,4vw,56px)}
+.logo{font-family:'Cormorant Garamond',serif;font-weight:400;font-size:25px;letter-spacing:.06em;color:var(--marfil);text-decoration:none}
+.logo small{display:block;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.32em;color:var(--laton);margin-top:2px}
+nav.menu{display:flex;gap:30px}
+nav.menu a{color:var(--marfil2);text-decoration:none;font-size:12px;letter-spacing:.18em;text-transform:uppercase;transition:color .4s}
+nav.menu a:hover{color:var(--marfil)}
+.recorrido{position:fixed;left:clamp(20px,4vw,56px);top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:18px}
+.recorrido span{display:flex;align-items:center;gap:12px;color:var(--marfil3);transition:color .6s}
+.recorrido span::before{content:'';width:18px;height:1px;background:currentColor;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.recorrido span.on{color:var(--laton)}
+.recorrido span.on::before{width:44px}
+main{position:relative;z-index:10}
+section{position:relative;min-height:100vh;display:flex;align-items:center;padding:0 clamp(20px,7vw,120px) 0 clamp(20px,14vw,230px)}
+.texto{max-width:33rem}
+.kicker{color:var(--laton);display:flex;align-items:center;gap:14px}
+.kicker::after{content:'';width:56px;height:1px;background:var(--laton);opacity:.6}
+h1,h2{font-family:'Cormorant Garamond',serif;font-weight:300;letter-spacing:-.02em;line-height:.92}
+h1{font-size:clamp(58px,8.4vw,148px);margin:30px 0 30px}
+h2{font-size:clamp(50px,6.4vw,112px);margin:26px 0 26px}
+h1 em,h2 em{font-style:italic;color:var(--rubi)}
+p.cuerpo{font-size:17px;line-height:1.7;color:var(--marfil2);max-width:31ch}
+.dato{margin-top:34px;padding-top:18px;border-top:1px solid var(--linea);display:flex;gap:36px;flex-wrap:wrap}
+.dato b{display:block;font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;font-size:38px;letter-spacing:-.01em;color:var(--marfil)}
+.dato span{color:var(--marfil3)}
+.boton{display:inline-flex;align-items:center;gap:16px;margin-top:30px;color:var(--marfil);text-decoration:none;font-size:13px;letter-spacing:.16em;text-transform:uppercase;padding:16px 26px;border:1px solid rgba(201,168,116,.55);border-radius:999px;transition:background .5s,color .5s}
+.boton:hover{background:var(--laton);color:var(--noche)}
+.precio{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:64px;line-height:1;margin-top:26px}
+.precio small{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.2em;color:var(--marfil3);display:block;margin-top:10px}
+.aviso{color:var(--marfil3);margin-top:16px;font-size:10px}
+.pista{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);color:var(--marfil3);text-align:center}
+.pista::after{content:'';display:block;width:1px;height:54px;margin:14px auto 0;background:linear-gradient(var(--laton),transparent);animation:pista 2.4s cubic-bezier(.7,0,.2,1) infinite}
+@keyframes pista{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+/* entrada de los textos */
+.texto>*{opacity:0;transform:translateY(26px);transition:opacity 1.2s,transform 1.4s cubic-bezier(.16,.84,.24,1)}
+.dentro .texto>*{opacity:1;transform:none}
+.dentro .texto>*:nth-child(2){transition-delay:.12s}.dentro .texto>*:nth-child(3){transition-delay:.24s}.dentro .texto>*:nth-child(4){transition-delay:.36s}.dentro .texto>*:nth-child(5){transition-delay:.48s}
+/* etiquetas sobre la forma */
+#etq{position:fixed;inset:0;z-index:5;pointer-events:none}
+#etq div{position:absolute;transform:translate(-50%,-50%);text-align:center;opacity:0;transition:opacity 1.2s .9s;white-space:nowrap}
+#etq div.ver{opacity:1}
+#etq b{display:block;font-family:'Cormorant Garamond',serif;font-weight:400;font-style:italic;font-size:22px;color:var(--marfil)}
+#etq span{color:var(--marfil3);font-size:10px}
+footer{position:relative;z-index:10;padding:60px clamp(20px,7vw,120px) 50px clamp(20px,14vw,230px);color:var(--marfil3);border-top:1px solid var(--linea);display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.maqueta{position:fixed;right:clamp(20px,4vw,56px);bottom:26px;z-index:30;display:flex;gap:16px;align-items:center;color:var(--marfil3);background:rgba(10,6,7,.6);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:10px 16px;border:1px solid var(--linea);border-radius:999px}
+.maqueta a{color:var(--marfil2);text-decoration:none}.maqueta a.esta{color:var(--laton)}
+@media (min-width:761px) and (max-width:1100px){
+  .recorrido{display:none}
+  section{padding-left:clamp(24px,6vw,72px);padding-right:24px}
+  .texto{max-width:21rem}
+  h1{font-size:62px}h2{font-size:54px}
+  p.cuerpo{font-size:15px}
+}
+@media (max-width:760px){
+  nav.menu,.recorrido{display:none}
+  section{align-items:flex-start;padding:16vh 22px 0}
+  h1{font-size:54px;margin:20px 0}h2{font-size:48px;margin:18px 0}
+  p.cuerpo{font-size:15px}
+  .dato{gap:22px;margin-top:20px}.dato b{font-size:30px}
+  .precio{font-size:48px}
+  .vineta{background:radial-gradient(ellipse 120% 60% at 50% 70%,transparent 40%,rgba(5,3,3,.75))}
+  .maqueta{left:50%;right:auto;transform:translateX(-50%);bottom:14px;white-space:nowrap;font-size:9px}
+  .pista{display:none}
+  section:first-of-type{align-items:flex-end;padding-bottom:12vh}
+  #tienda p.cuerpo{display:none}
+  #etq b{font-size:17px}
+}
+</style>
+</head>
+<body>
+<canvas id="lienzo" aria-hidden="true"></canvas>
+<div class="vineta"></div><div class="grano"></div>
+<div id="etq" aria-hidden="true"></div>
+
+<header>
+  <a class="logo" href="#">Bodega Ejemplo<small>Desde 1952</small></a>
+  <nav class="menu" aria-label="Principal"><a href="#descubre">Descubre</a><a href="#prueba">Prueba</a><a href="#visita">Visita</a><a href="#tienda">Tienda</a><a href="#club">Club</a></nav>
+</header>
+<nav class="recorrido mono" aria-label="Tu recorrido">
+  <span data-paso="descubre">Descubre</span><span data-paso="prueba">Prueba</span><span data-paso="visita">Visita</span><span data-paso="llevatelo">Llévatelo</span><span data-paso="quedate">Quédate</span>
+</nav>
+
+<main>
+  <section data-forma="vertido" data-forma-paso="">
+    <div class="texto">
+      <p class="kicker mono">Bodega Ejemplo · desde 1952</p>
+      <h1>Un vino se cuenta <em>despacio.</em></h1>
+      <p class="cuerpo">Te acompañamos del viñedo a tu mesa, en cinco pasos.</p>
+    </div>
+    <div class="pista mono">Empieza el recorrido</div>
+  </section>
+  <section id="descubre" data-forma="terruno" data-forma-paso="descubre">
+    <div class="texto">
+      <p class="kicker mono">01 · Descubre</p>
+      <h2>El <em>lugar.</em></h2>
+      <p class="cuerpo">Una ladera al sur entre 650 y 780 metros. Cuatro parcelas, y la más vieja plantada en 1952.</p>
+      <div class="dato"><div><b>4 parcelas</b><span class="mono">en la ladera</span></div><div><b>74 años</b><span class="mono">la cepa más vieja</span></div></div>
+    </div>
+  </section>
+  <section id="prueba" data-forma="remolino" data-forma-paso="prueba">
+    <div class="texto">
+      <p class="kicker mono">02 · Prueba</p>
+      <h2>Lo que hay <em>en la copa.</em></h2>
+      <p class="cuerpo">Fruta negra, especias y madera. Veinticuatro meses en barrica de roble francés.</p>
+      <div class="dato"><div><b>Ejemplo Reserva</b><span class="mono">añada 2021</span></div></div>
+    </div>
+  </section>
+  <section id="visita" data-forma="bodega" data-forma-paso="visita">
+    <div class="texto">
+      <p class="kicker mono">03 · Visita</p>
+      <h2>Ven a <em>vernos.</em></h2>
+      <p class="cuerpo">De martes a domingo, con cata incluida. Reserva tu hora en dos clics.</p>
+      <a class="boton" href="#visita">Reservar visita <span>→</span></a>
+    </div>
+  </section>
+  <section id="tienda" data-forma="botella" data-forma-paso="llevatelo">
+    <div class="texto">
+      <p class="kicker mono">04 · Llévatelo</p>
+      <h2>Llévatelo <em>a casa.</em></h2>
+      <p class="cuerpo">Ejemplo Reserva 2021. Tinto, 75 cl, veinticuatro meses en barrica.</p>
+      <p class="precio">24,00 €<small>Envío en 48 horas</small></p>
+      <a class="boton" href="#tienda">Añadir a la cesta <span>+</span></a>
+    </div>
+  </section>
+  <section id="club" data-forma="sello" data-forma-paso="quedate">
+    <div class="texto">
+      <p class="kicker mono">05 · Quédate</p>
+      <h2>Quédate <em>cerca.</em></h2>
+      <p class="cuerpo">Los socios del club reciben cada añada antes que nadie y una visita al año.</p>
+      <a class="boton" href="#club">Hacerme socio <span>→</span></a>
+      <p class="aviso mono">1 de cada 8 visitantes se hace socio</p>
+    </div>
+  </section>
+</main>
+<footer class="mono"><span>Bodega Ejemplo es una bodega ficticia y sus datos, inventados</span><span>Maqueta de chiq.es</span></footer>
+<div class="maqueta mono">Maqueta <a class="esta" href="a-hilo-de-vino.html">A · Hilo de vino</a><a href="b-dentro-de-la-copa.html">B</a><a href="c-papel-y-tinta.html">C</a></div>
+
+<script src="motor.js"></script>
+<script>
+/* Maqueta A · Hilo de vino. Fondo de noche y un solo vino de luz: se vierte en la copa, dibuja las curvas de nivel de la
+   ladera, gira en la copa, pinta la bodega como una foto de larga exposición, llena la botella y firma con el sello. */
+const perfil = (y) => y < 0.3 ? 0.64 : y < 0.95 ? 0.21 + 0.43 * (0.5 + 0.5 * Math.cos((y - 0.3) / 0.65 * Math.PI)) : (y > 1.6 ? 0.25 : 0.21);
+const GL = { rim: 0.3, r: 0.34, hondo: 0.6, tallo: 0.5, pie: 0.25 }, NIVEL = GL.rim - 0.42 * GL.hondo;
+const radio = (d) => d < 0.35 ? GL.r * (0.86 + 0.14 * d / 0.35) : GL.r * Math.sqrt(Math.max(0, 1 - ((d - 0.35) / 0.65) ** 2));
+const PARC = [[0.42, 0.2, 'El Cerro', '1952'], [-0.16, 0.3, 'La Hoya', '1978'], [0.2, -0.24, 'Los Llanos', '1990'], [-0.5, -0.14, 'La Cuesta', '2004']];
+/* La bodega: líneas que la luz recorre (u0, v0, u1, v1, color, peso, velocidad). Inventada, de hormigón y con la banda de lamas. */
+const LINEAS = [[-1.25, -0.5, 1.25, -0.5, 4, 1, 0.03], [-1.12, -0.08, 1.08, -0.08, 3, 1.2, 0.04], [-1.12, -0.5, -1.12, -0.08, 3, 0.35, 0.05], [1.08, -0.5, 1.08, -0.08, 3, 0.35, 0.05],
+  [-0.85, 0.16, 0.8, 0.16, 3, 1, 0.04], [-0.85, 0.1, 0.8, 0.1, 3, 0.7, 0.04], [-0.7, -0.08, -0.7, 0.1, 3, 0.15, 0.05], [-0.15, -0.08, -0.15, 0.1, 3, 0.15, 0.05], [0.4, -0.08, 0.4, 0.1, 3, 0.15, 0.05],
+  [-0.42, 0.16, -0.42, 0.38, 4, 0.2, 0.05], [-0.22, 0.16, -0.22, 0.38, 4, 0.2, 0.05], [-0.42, 0.38, -0.22, 0.38, 4, 0.2, 0.05],
+  ...Array.from({ length: 8 }, (_, k) => [-0.8, -0.42 + k * 0.024, 0.78, 0.04 + k * 0.024, 2, 1.1, 0.09]),
+  ...Array.from({ length: 6 }, (_, k) => [0.02, -0.47 + k * 0.05, 0.26, -0.47 + k * 0.05, 0, 0.25, 0.03])];
+const CUM = (() => { let a = 0; const tot = LINEAS.reduce((s, l) => s + l[5], 0); return LINEAS.map((l) => (a += l[5] / tot)); })();
+const ETQ = {
+  terruno: PARC.map(([u, v, n, a]) => ({ u, v: v + 0.11, b: n, s: a })),
+  remolino: [{ u: 0.95, v: 0.95, b: 'Fruta negra', s: '8 de 10' }, { u: 1.12, v: 0.02, b: 'Especias', s: '7 de 10' }, { u: 0.75, v: -1.05, b: 'Madera', s: '8 de 10' }],
+};
+
+function arrancar() {
+  const motor = Maqueta.Motor({
+    lienzo: document.getElementById('lienzo'), n: 9000, estilo: 'luz', fondo: [10, 6, 7],
+    paleta: [{ color: 'rgba(122,20,48,0.55)', ancho: 1.3 }, { color: 'rgba(176,36,74,0.5)', ancho: 1.1 }, { color: 'rgba(240,110,150,0.5)', ancho: 1 },
+      { color: 'rgba(236,222,206,0.2)', ancho: 0.8 }, { color: 'rgba(206,170,112,0.42)', ancho: 1 }],
+    cajas: (W, H, movil, medio = !movil && W < 1100) => ({
+      derecha: movil ? { cx: W * 0.5, cy: H * 0.74, s: Math.min(W * 0.38, H * 0.2) } : medio ? { cx: W * 0.71, cy: H * 0.55, s: Math.min(W * 0.21, H * 0.34) } : { cx: W * 0.66, cy: H * 0.52, s: Math.min(W * 0.25, H * 0.4) },
+      heroe: movil ? { cx: W * 0.62, cy: H * 0.36, s: H * 0.26 } : medio ? { cx: W * 0.76, cy: H * 0.5, s: Math.min(H * 0.4, W * 0.3) } : { cx: W * 0.7, cy: H * 0.5, s: H * 0.42 },
+      lejos: movil ? { cx: W * 0.5, cy: H * 0.74, s: Math.min(W * 0.34, H * 0.19) } : medio ? { cx: W * 0.73, cy: H * 0.55, s: Math.min(W * 0.17, H * 0.3) } : { cx: W * 0.72, cy: H * 0.52, s: Math.min(W * 0.2, H * 0.36) },
+    }),
+    formas: ({ R1, R2, R3, R4, n }, muestrear) => {
+      const SEG = Uint8Array.from({ length: n }, (_, i) => CUM.findIndex((c) => R2[(i * 7) % n] <= c));
+      const BE = muestrear('BE', 'italic 300 320px "Cormorant Garamond"', n);
+      return {
+        vertido: { caja: 'heroe', flujo: 0.12, rigidez: 0.07, estela: 0.16,
+          color: (i) => (R1[i] < 0.16 ? 3 : R1[i] < 0.55 ? (R3[i] < 0.5 ? 0 : 1) : 2),
+          pos(i, t, q) { const g = R1[i], a = R2[i], b = R3[i], c = R4[i];
+            if (g < 0.16) {   // la copa
+              if (c < 0.72) { q[0] = (b < 0.5 ? -1 : 1) * radio(a); q[1] = GL.rim - a * GL.hondo; }
+              else if (c < 0.8) { q[0] = (b - 0.5) * 0.012; q[1] = GL.rim - GL.hondo - a * GL.tallo; }
+              else if (c < 0.92) { const th = a * 6.2832; q[0] = Math.cos(th) * GL.pie; q[1] = GL.rim - GL.hondo - GL.tallo + Math.sin(th) * 0.03; }
+              else { const th = a * 6.2832; q[0] = Math.cos(th) * GL.r * 0.86; q[1] = GL.rim + Math.sin(th) * 0.04; }
+              return; }
+            if (g < 0.55) {   // el vino en la copa, que gira despacio
+              if (c < 0.3) { const th = b * 6.2832 + t * 0.5, rr = Math.sqrt(a) * radio(0.42) * 0.95; q[0] = Math.cos(th) * rr; q[1] = NIVEL + Math.sin(th) * rr * 0.12; }
+              else { const d = 0.42 + a * 0.58; q[0] = (b * 2 - 1) * radio(d) * 0.93 + Math.sin(t * 1.1 + c * 9) * 0.006; q[1] = GL.rim - d * GL.hondo; }
+              return; }
+            if (g < 0.9) {   // el chorro, siempre cayendo
+              const s = (a + t * 0.42) % 1, s1 = 1 - s, x = s1 * s1 * 0.1 + 2 * s1 * s * 0.16, y = s1 * s1 * 1.35 + 2 * s1 * s * 0.7 + s * s * NIVEL, ancho = 0.004 + 0.012 * s;
+              q[0] = x + (b - 0.5) * 2 * ancho + Math.sin(t * 6 + c * 30) * 0.003; q[1] = y; q[2] = 1; return; }
+            const th = a * Math.PI, rr = (0.02 + b * 0.1) * (0.6 + 0.4 * Math.sin(t * 2.4 + c * 20));   // la salpicadura
+            q[0] = Math.cos(th) * rr * 1.6; q[1] = NIVEL + Math.abs(Math.sin(th)) * rr * 0.55; } },
+        terruno: { flujo: 0.08, rigidez: 0.06, estela: 0.2,
+          color: (i) => { if (R4[i] < 0.1) return 4; const j = Math.floor(R1[i] * 13); return j % 4 === 0 ? 3 : j < 4 ? 2 : j < 8 ? 1 : 0; },
+          pos(i, t, q) {
+            if (R4[i] < 0.1) { const p = PARC[Math.floor(R3[i] * 4)], th = R2[i] * 6.2832, rr = 0.05 * Math.sqrt(R1[i]); q[0] = p[0] + Math.cos(th) * rr; q[1] = p[1] + Math.sin(th) * rr * 0.7; return; }
+            const j = Math.floor(R1[i] * 13), th = R2[i] * 6.2832 + t * 0.03 * (j % 2 ? 1 : -1), rj = 0.08 + j * 0.064;
+            const r = rj * (1 + 0.14 * Math.sin(3 * th + j * 0.5) + 0.07 * Math.sin(5 * th - j * 0.9 + 1.3));
+            q[0] = 0.1 - j * 0.012 + r * Math.cos(th) * 1.15; q[1] = -0.02 + r * Math.sin(th) * 0.8 + (R3[i] - 0.5) * 0.004; } },
+        remolino: { caja: 'lejos', flujo: 0.05, rigidez: 0.08, estela: 0.09,
+          color: (i) => (R1[i] < 0.12 ? 3 : Math.sqrt(R2[i]) > 0.9 ? 2 : R3[i] < 0.55 ? 0 : 1),
+          pos(i, t, q) { if (R1[i] < 0.12) { const th = R3[i] * 6.2832; q[0] = Math.cos(th) * 0.95; q[1] = Math.sin(th) * 0.87; return; }
+            const rr = 0.9 * Math.sqrt(R2[i]), th = Math.floor(R4[i] * 5) * 1.2566 + 2.2 * Math.log(rr + 0.15) + (R3[i] - 0.5) * 1.1 + t * (0.25 + 0.7 * (1 - rr));
+            q[0] = Math.cos(th) * rr; q[1] = Math.sin(th) * rr * 0.92; } },
+        bodega: { caja: 'lejos', flujo: 0.04, rigidez: 0.09, estela: 0.07,
+          color: (i) => (R1[i] > 0.94 ? 0 : LINEAS[SEG[i]][4]),
+          pos(i, t, q) {
+            if (R1[i] > 0.94) { const cx = R4[i] < 0.5 ? -1.34 : -1.22, h = R4[i] < 0.5 ? 0.78 : 0.6, tt = R2[i], w = 0.045 * Math.sin(Math.PI * Math.min(1, tt * 1.1)); q[0] = cx + (R3[i] * 2 - 1) * w; q[1] = -0.5 + tt * h; return; }   // cipreses
+            const L = LINEAS[SEG[i]], s = (R3[i] + t * L[6]) % 1; q[0] = L[0] + (L[2] - L[0]) * s; q[1] = L[1] + (L[3] - L[1]) * s + (R4[i] - 0.5) * 0.004; q[2] = 1; } },
+        botella: { flujo: 0.06, rigidez: 0.07, estela: 0.14,
+          color: (i) => { const g = R1[i]; return g < 0.3 ? (R3[i] < 0.5 ? 3 : 2) : g < 0.82 ? (R4[i] < 0.5 ? 0 : 1) : g < 0.9 ? 0 : g < 0.95 ? 2 : 4; },
+          pos(i, t, q) { const g = R1[i], E = 0.48;
+            if (g < 0.3) { const y = -1.6 + ((R2[i] + t * 0.025) % 1) * 3.35; q[0] = (R3[i] < 0.5 ? -1 : 1) * perfil(y) * E; q[1] = y * E - 0.04; q[2] = 1; return; }   // el vidrio, recorrido por la luz
+            if (g < 0.82) { const y = -1.55 + R2[i] * 2.65 + Math.sin(t * 0.6 + R4[i] * 7) * 0.02; q[0] = (R3[i] * 2 - 1) * perfil(y) * 0.9 * E; q[1] = y * E - 0.04; return; }   // el vino
+            if (g < 0.9) { const y = 1.38 + R2[i] * 0.37; q[0] = (R3[i] * 2 - 1) * perfil(y) * 1.05 * E; q[1] = y * E - 0.04; return; }   // la cápsula
+            if (g < 0.95) { q[0] = -0.42 * E + (R3[i] - 0.5) * 0.01; q[1] = (-1.3 + R2[i] * 1.5) * E - 0.04; return; }   // el brillo del vidrio
+            const th = R2[i] * 6.2832, rr = Math.sqrt(R3[i]); q[0] = Math.cos(th) * rr * 0.75; q[1] = -1.6 * E - 0.06 + Math.sin(th) * rr * 0.06; } },   // el reflejo
+        sello: { caja: 'lejos', flujo: 0.05, rigidez: 0.07, estela: 0.18,
+          color: (i) => (R1[i] < 0.68 ? (R3[i] < 0.6 ? 2 : 1) : 4),
+          pos(i, t, q) { if (R1[i] < 0.68) { q[0] = BE[i * 2] * 0.52 + Math.sin(t * 0.8 + R4[i] * 9) * 0.004; q[1] = BE[i * 2 + 1] * 0.52; return; }
+            const th = R2[i] * 6.2832 + t * 0.05, r = R3[i] < 0.5 ? 0.86 : 0.78; q[0] = Math.cos(th) * r; q[1] = Math.sin(th) * r; } },
+      };
+    },
+  });
+  const capa = document.getElementById('etq');
+  const etiquetas = () => { const f = document.body.dataset.seccion, lista = ETQ[f] || [];
+    capa.innerHTML = lista.map((e) => { const [x0, y] = motor.aPantalla(e.u, e.v), x = Math.min(innerWidth - 56, Math.max(56, x0)); return `<div style="left:${x}px;top:${y}px"><b>${e.b}</b><span class="mono">${e.s}</span></div>`; }).join('');
+    requestAnimationFrame(() => capa.querySelectorAll('div').forEach((d) => d.classList.add('ver'))); };
+  Maqueta.enlazar(motor, etiquetas); addEventListener('resize', etiquetas);
+}
+document.fonts.load('italic 300 80px "Cormorant Garamond"').then(arrancar, arrancar);
+</script>
+</body>
+</html>

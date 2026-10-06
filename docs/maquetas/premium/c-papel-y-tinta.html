@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta C · Papel y tinta · Bodega Ejemplo</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Inter+Tight:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#f3eee6;--tinta:#1a1414;--tinta2:rgba(26,20,20,.68);--tinta3:rgba(26,20,20,.42);--vino:#7a1a3e;--oro:#a8875a;--linea:rgba(168,135,90,.42)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--papel)}
+body{color:var(--tinta);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+canvas{position:fixed;inset:0;width:100vw;height:100vh;z-index:0}
+.papel{position:fixed;inset:-50%;width:200%;height:200%;z-index:1;pointer-events:none;opacity:.32;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .55  0 0 0 0 .48  0 0 0 0 .4  0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+.borde{position:fixed;inset:14px;z-index:1;pointer-events:none;border:1px solid var(--linea)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;text-transform:uppercase}
+header{position:fixed;top:14px;left:14px;right:14px;z-index:20;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:20px clamp(18px,3.4vw,46px);border-bottom:1px solid var(--linea);background:linear-gradient(var(--papel) 70%,rgba(243,238,230,0))}
+.logo{font-family:'Newsreader',serif;font-style:italic;font-weight:300;font-size:27px;color:var(--tinta);text-decoration:none;letter-spacing:-.01em}
+.recorrido{display:flex;gap:26px}
+.recorrido span{color:var(--tinta3);padding-bottom:4px;border-bottom:1px solid transparent;transition:color .6s,border-color .6s}
+.recorrido span.on{color:var(--vino);border-color:var(--vino)}
+header .der{justify-self:end;color:var(--tinta2);text-decoration:none}
+main{position:relative;z-index:10}
+section{position:relative;min-height:100vh;display:flex;align-items:center;padding:110px clamp(30px,8vw,140px) 40px}
+section.heroe{align-items:flex-start;padding-top:22vh}
+.texto{max-width:34rem;position:relative}
+.num{position:absolute;left:-.06em;top:-.62em;font-family:'Newsreader',serif;font-weight:300;font-size:210px;line-height:1;color:transparent;-webkit-text-stroke:1px var(--linea);z-index:-1;pointer-events:none}
+.kicker{color:var(--oro)}
+h1,h2{font-family:'Newsreader',serif;font-weight:300;letter-spacing:-.025em;line-height:.95}
+h1{font-size:clamp(58px,7.6vw,132px);margin:22px 0 24px}
+h2{font-size:clamp(48px,5.6vw,98px);margin:20px 0 22px}
+h1 em,h2 em{font-style:italic;color:var(--vino)}
+p.cuerpo{font-size:17px;line-height:1.72;color:var(--tinta2);max-width:33ch}
+.pie{margin-top:28px;padding-top:14px;border-top:1px solid var(--linea);color:var(--tinta3);display:flex;gap:28px;flex-wrap:wrap}
+.boton{display:inline-flex;align-items:center;gap:14px;margin-top:28px;color:var(--papel);background:var(--tinta);text-decoration:none;font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:16px 26px;transition:background .5s}
+.boton:hover{background:var(--vino)}
+.precio{font-family:'Newsreader',serif;font-weight:300;font-size:64px;line-height:1;margin-top:22px}
+.precio small{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.22em;color:var(--tinta3);display:block;margin-top:10px}
+.texto>*{opacity:0;transform:translateY(18px);transition:opacity 1.2s,transform 1.3s cubic-bezier(.16,.84,.24,1)}
+.dentro .texto>*{opacity:1;transform:none}
+.dentro .texto>*:nth-child(3){transition-delay:.12s}.dentro .texto>*:nth-child(4){transition-delay:.24s}.dentro .texto>*:nth-child(5){transition-delay:.36s}.dentro .texto>*:nth-child(6){transition-delay:.48s}
+#etq{position:fixed;inset:0;z-index:5;pointer-events:none}
+#etq div{position:absolute;transform:translate(-50%,-50%);text-align:center;opacity:0;transition:opacity 1.2s .9s;white-space:nowrap}
+#etq div.ver{opacity:1}
+#etq b{display:block;font-family:'Newsreader',serif;font-style:italic;font-weight:400;font-size:19px;color:var(--tinta)}
+#etq span{color:var(--tinta3);font-size:9.5px}
+footer{position:relative;z-index:10;padding:50px clamp(30px,8vw,140px) 60px;color:var(--tinta3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px}
+.maqueta{position:fixed;right:34px;bottom:30px;z-index:30;display:flex;gap:14px;color:var(--tinta3);background:var(--papel);padding:8px 12px;border:1px solid var(--linea)}
+.maqueta a{color:var(--tinta2);text-decoration:none}.maqueta a.esta{color:var(--vino)}
+@media (min-width:761px) and (max-width:1100px){
+  header .recorrido{gap:14px}
+  section{padding-left:clamp(24px,6vw,72px);padding-right:24px}
+  .texto{max-width:21rem}
+  h1{font-size:62px}h2{font-size:54px}
+  p.cuerpo{font-size:15px}
+}
+@media (max-width:760px){
+  header{grid-template-columns:1fr auto;padding:14px 16px}.recorrido{display:none}
+  section{align-items:flex-start;padding:15vh 26px 0}
+  section.heroe{padding-top:15vh}
+  .num{font-size:130px}
+  h1{font-size:50px;margin:16px 0}h2{font-size:44px;margin:16px 0}
+  p.cuerpo{font-size:15px}.precio{font-size:48px}
+  .maqueta{left:50%;right:auto;transform:translateX(-50%);bottom:24px;font-size:9px;white-space:nowrap}
+  #etq b{font-size:15px}
+  #tienda p.cuerpo{display:none}
+}
+</style>
+</head>
+<body>
+<canvas id="lienzo" aria-hidden="true"></canvas>
+<div class="papel"></div><div class="borde"></div>
+<div id="etq" aria-hidden="true"></div>
+
+<header>
+  <a class="logo" href="#">Bodega Ejemplo</a>
+  <nav class="recorrido mono" aria-label="Tu recorrido"><span data-paso="descubre">Descubre</span><span data-paso="prueba">Prueba</span><span data-paso="visita">Visita</span><span data-paso="llevatelo">Llévatelo</span><span data-paso="quedate">Quédate</span></nav>
+  <a class="der mono" href="#tienda">Tienda</a>
+</header>
+
+<main>
+  <section class="heroe" data-forma="crestas" data-forma-paso="">
+    <div class="texto">
+      <p class="kicker mono">Bodega Ejemplo · cuaderno de la casa</p>
+      <h1>Cuatro parcelas, <em>un vino.</em></h1>
+      <p class="cuerpo">La historia de la bodega, contada como se hace el vino. Despacio y desde el suelo.</p>
+    </div>
+  </section>
+  <section id="descubre" data-forma="mapa" data-forma-paso="descubre">
+    <div class="texto">
+      <span class="num">01</span>
+      <p class="kicker mono">Descubre</p>
+      <h2>El mapa <em>de la ladera.</em></h2>
+      <p class="cuerpo">Cuatro parcelas al sur, entre 650 y 780 metros. Cada una se vendimia y se cría por separado.</p>
+      <div class="pie mono"><span>Arcilla y caliza</span><span>Orientación sur</span></div>
+    </div>
+  </section>
+  <section id="prueba" data-forma="constelacion" data-forma-paso="prueba">
+    <div class="texto">
+      <span class="num">02</span>
+      <p class="kicker mono">Prueba</p>
+      <h2>Las estrellas <em>del Reserva.</em></h2>
+      <p class="cuerpo">Ocho aromas, cada uno a la distancia de su intensidad. Fruta negra, especias y madera brillan más.</p>
+      <div class="pie mono"><span>Ejemplo Reserva 2021</span><span>Nota de cata</span></div>
+    </div>
+  </section>
+  <section id="visita" data-forma="alzado" data-forma-paso="visita">
+    <div class="texto">
+      <span class="num">03</span>
+      <p class="kicker mono">Visita</p>
+      <h2>La casa, <em>en alzado.</em></h2>
+      <p class="cuerpo">Hormigón, luz y una banda de lamas que sube con la ladera. Abierta de martes a domingo, con cata.</p>
+      <a class="boton" href="#visita">Reservar visita →</a>
+    </div>
+  </section>
+  <section id="tienda" data-forma="grabado" data-forma-paso="llevatelo">
+    <div class="texto">
+      <span class="num">04</span>
+      <p class="kicker mono">Llévatelo</p>
+      <h2>Grabado <em>en cada botella.</em></h2>
+      <p class="cuerpo">Ejemplo Reserva 2021. Tinto, 75 cl, veinticuatro meses en barrica.</p>
+      <p class="precio">24,00 €<small>Envío en 48 horas</small></p>
+      <a class="boton" href="#tienda">Añadir a la cesta +</a>
+    </div>
+  </section>
+  <section id="club" data-forma="lacre" data-forma-paso="quedate">
+    <div class="texto">
+      <span class="num">05</span>
+      <p class="kicker mono">Quédate</p>
+      <h2>El sello <em>de la casa.</em></h2>
+      <p class="cuerpo">Los socios del club reciben cada añada antes que nadie y una visita al año.</p>
+      <a class="boton" href="#club">Hacerme socio →</a>
+      <div class="pie mono"><span>1 de cada 8 visitantes se hace socio</span></div>
+    </div>
+  </section>
+</main>
+<footer class="mono"><span>Bodega Ejemplo es una bodega ficticia y sus datos, inventados</span><span>Maqueta de chiq.es</span></footer>
+<div class="maqueta mono">Maqueta <a href="a-hilo-de-vino.html">A</a><a href="b-dentro-de-la-copa.html">B</a><a class="esta" href="c-papel-y-tinta.html">C · Papel y tinta</a></div>
+
+<script src="motor.js"></script>
+<script>
+/* Maqueta C · Papel y tinta. Editorial claro: las partículas son trazos finos de tinta, como un grabado. Las crestas de la
+   ladera, el mapa topográfico, la constelación de aromas, el alzado de la bodega, la botella grabada y el lacre. */
+const perfil = (y) => y < 0.3 ? 0.64 : y < 0.95 ? 0.21 + 0.43 * (0.5 + 0.5 * Math.cos((y - 0.3) / 0.65 * Math.PI)) : (y > 1.6 ? 0.25 : 0.21);
+const PARC = [[0.42, 0.2, 'El Cerro', '1952'], [-0.16, 0.3, 'La Hoya', '1978'], [0.2, -0.24, 'Los Llanos', '1990'], [-0.5, -0.14, 'La Cuesta', '2004']];
+const CATA = [4, 8, 0, 0, 2, 7, 8, 3], NOMBRES = ['Fruta roja', 'Fruta negra', 'Fruta blanca', 'Cítricos', 'Floral', 'Especias', 'Madera', 'Mineral'];
+const ESTRELLA = CATA.map((c, k) => { const a = -Math.PI / 2 + k * Math.PI / 4, r = 0.2 + c / 10 * 0.66; return [Math.cos(a) * r, Math.sin(a) * r]; });
+const CUM_E = (() => { let a = 0; const tot = CATA.reduce((s, c) => s + c + 1, 0); return CATA.map((c) => (a += (c + 1) / tot)); })();
+/* El alzado: las mismas líneas que la bodega de la maqueta A (u0, v0, u1, v1, color, peso). */
+const LINEAS = [[-1.25, -0.5, 1.25, -0.5, 0, 1], [-1.12, -0.08, 1.08, -0.08, 0, 1.2], [-1.12, -0.5, -1.12, -0.08, 0, 0.35], [1.08, -0.5, 1.08, -0.08, 0, 0.35],
+  [-0.85, 0.16, 0.8, 0.16, 0, 1], [-0.85, 0.1, 0.8, 0.1, 0, 0.7], [-0.85, 0.1, -0.85, 0.16, 0, 0.06], [0.8, 0.1, 0.8, 0.16, 0, 0.06],
+  [-0.7, -0.08, -0.7, 0.1, 0, 0.15], [-0.15, -0.08, -0.15, 0.1, 0, 0.15], [0.4, -0.08, 0.4, 0.1, 0, 0.15],
+  [-0.42, 0.16, -0.42, 0.38, 3, 0.2], [-0.22, 0.16, -0.22, 0.38, 3, 0.2], [-0.42, 0.38, -0.22, 0.38, 3, 0.2],
+  ...Array.from({ length: 8 }, (_, k) => [-0.8, -0.42 + k * 0.024, 0.78, 0.04 + k * 0.024, 2, 0.9]),
+  ...Array.from({ length: 6 }, (_, k) => [0.02, -0.47 + k * 0.05, 0.26, -0.47 + k * 0.05, 1, 0.25])];
+const CUM_L = (() => { let a = 0; const tot = LINEAS.reduce((s, l) => s + l[5], 0); return LINEAS.map((l) => (a += l[5] / tot)); })();
+const ETQ = {
+  mapa: [...PARC.map(([u, v, n, a]) => ({ u, v: v + 0.13, b: n, s: a })), { u: 1.0, v: -0.28, b: 'N', s: '' }],
+  constelacion: CATA.map((c, k) => { const a = -Math.PI / 2 + k * Math.PI / 4; return { u: Math.cos(a) * 1.13, v: Math.sin(a) * 1.08, b: NOMBRES[k], s: `${c} de 10` }; }),
+  alzado: [{ u: 0, v: -0.8, b: 'Alzado sur', s: 'escala 1:500' }],
+};
+/** ¿El punto (u, v) del lacre cae dentro de las iniciales? */
+function mascara(texto, fuente) {
+  const c = document.createElement('canvas'), L = 300; c.width = c.height = L; const g = c.getContext('2d');
+  g.font = fuente; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(texto, L / 2, L / 2 + 8);
+  const d = g.getImageData(0, 0, L, L).data;
+  return (u, v) => { const x = Math.round((u / 0.6 * 0.5 + 0.5) * L), y = Math.round((-v / 0.6 * 0.5 + 0.5) * L); return x >= 0 && y >= 0 && x < L && y < L && d[(y * L + x) * 4 + 3] > 100; };
+}
+
+function arrancar() {
+  const motor = Maqueta.Motor({
+    lienzo: document.getElementById('lienzo'), n: 9000, estilo: 'tinta', fondo: [243, 238, 230],
+    paleta: [{ color: 'rgba(26,20,20,0.62)', ancho: 0.75 }, { color: 'rgba(26,20,20,0.3)', ancho: 0.65 }, { color: 'rgba(122,26,62,0.75)', ancho: 0.95 },
+      { color: 'rgba(168,135,90,0.65)', ancho: 0.75 }, { color: 'rgba(122,26,62,0.3)', ancho: 0.7 }],
+    cajas: (W, H, movil, medio = !movil && W < 1100) => ({
+      ancho: movil ? { cx: W * 0.5, cy: H * 0.98, s: W * 0.62 } : { cx: W * 0.5, cy: H * 0.95, s: W * 0.33 },
+      derecha: movil ? { cx: W * 0.5, cy: H * 0.74, s: Math.min(W * 0.34, H * 0.19) } : medio ? { cx: W * 0.72, cy: H * 0.56, s: Math.min(W * 0.19, H * 0.32) } : { cx: W * 0.69, cy: H * 0.54, s: Math.min(W * 0.22, H * 0.37) },
+    }),
+    formas: ({ R1, R2, R3, R4, n }) => {
+      const SEG = Uint8Array.from({ length: n }, (_, i) => CUM_L.findIndex((c) => R2[(i * 7) % n] <= c));
+      const EST = Uint8Array.from({ length: n }, (_, i) => CUM_E.findIndex((c) => R2[(i * 13) % n] <= c));
+      const dentroBE = mascara('BE', 'italic 500 210px "Newsreader"');
+      const radioLacre = (th) => 0.6 * (1 + 0.035 * Math.sin(7 * th) + 0.02 * Math.sin(13 * th + 1));
+      const puntoLacre = (i, q) => { const th = R2[i] * 6.2832, rr = R1[i] < 0.15 ? radioLacre(th) * (0.97 + R3[i] * 0.03) : Math.sqrt(R3[i]) * radioLacre(th); q[0] = Math.cos(th) * rr; q[1] = Math.sin(th) * rr; };
+      const q0 = [0, 0, 0];
+      return {
+        crestas: { caja: 'ancho', flujo: 0.03, rigidez: 0.08, estela: 0.3,
+          color: (i) => { const j = Math.floor(R1[i] * 24); return j >= 8 && j <= 12 ? 2 : j % 5 === 0 ? 0 : 1; },
+          pos(i, t, q) { const j = Math.floor(R1[i] * 24), f = 1 - j / 24, u = -1.5 + ((R2[i] + t * 0.003 * (j % 2 ? 1 : -1)) % 1 + 1) % 1 * 3;
+            q[0] = u; q[1] = 0.45 - j * 0.032 + f * (0.34 * Math.exp(-((u - 0.3) ** 2) / 0.22) + 0.16 * Math.exp(-((u + 0.75) ** 2) / 0.1)) + 0.01 * Math.sin(u * 8 + j * 1.7) + 0.006 * Math.sin(u * 23 + j); q[2] = 1; } },
+        mapa: { flujo: 0.02, rigidez: 0.08, estela: 0.3,
+          color: (i) => { const g = R1[i]; if (g < 0.62) { const j = Math.floor(g / 0.62 * 14); return j % 4 === 0 ? 0 : 1; } return g < 0.82 ? (R4[i] < 0.5 ? 2 : 4) : g < 0.93 ? 3 : 0; },
+          pos(i, t, q) { const g = R1[i];
+            if (g < 0.62) { const j = Math.floor(g / 0.62 * 14), th = R2[i] * 6.2832, rj = 0.08 + j * 0.062, r = rj * (1 + 0.14 * Math.sin(3 * th + j * 0.5) + 0.07 * Math.sin(5 * th - j * 0.9 + 1.3));
+              q[0] = 0.08 - j * 0.012 + r * Math.cos(th) * 1.12; q[1] = -0.02 + r * Math.sin(th) * 0.78; return; }   // curvas de nivel
+            if (g < 0.82) { const p = PARC[Math.floor(R3[i] * 4)], th = R2[i] * 6.2832, rr = Math.sqrt(R4[i]) * (1 + 0.15 * Math.sin(3 * th + p[0] * 9)); q[0] = p[0] + Math.cos(th) * rr * 0.12; q[1] = p[1] + Math.sin(th) * rr * 0.08; return; }   // parcelas punteadas
+            if (g < 0.9) { const s = R2[i] * 4, l = Math.floor(s), f = s - l; q[0] = [-1.15 + f * 2.3, 1.15, 1.15 - f * 2.3, -1.15][l]; q[1] = [0.9, 0.9 - f * 1.8, -0.9, -0.9 + f * 1.8][l]; return; }   // marco
+            if (g < 0.93) { const k = Math.floor(R2[i] * 24), lado = k % 2, x = -1.15 + (k >> 1) * 0.2; q[0] = x; q[1] = (lado ? 0.9 : -0.9) + (lado ? -1 : 1) * R3[i] * 0.04; return; }   // marcas del marco
+            if (g < 0.97) { q[0] = -1.0 + R2[i] * 0.4; q[1] = -0.78 + (R3[i] < 0.2 ? (R4[i] - 0.5) * 0.04 : 0); return; }   // escala
+            q[0] = 1.0 + (R3[i] - 0.5) * 0.006; q[1] = -0.62 + R2[i] * 0.24; } },   // norte
+        constelacion: { flujo: 0.02, rigidez: 0.08, estela: 0.3,
+          color: (i) => { const g = R1[i]; return g < 0.4 ? (CATA[EST[i]] >= 5 ? 2 : 0) : g < 0.62 ? 4 : g < 0.78 ? 1 : R2[i] > 0.66 ? 3 : 1; },
+          pos(i, t, q) { const g = R1[i];
+            if (g < 0.4) { const k = EST[i], rs = (0.014 + CATA[k] * 0.0045) * (1 + 0.08 * Math.sin(t * 2 + k)), th = R3[i] * 6.2832, rr = Math.sqrt(R4[i]) * rs; q[0] = ESTRELLA[k][0] + Math.cos(th) * rr; q[1] = ESTRELLA[k][1] + Math.sin(th) * rr; return; }   // estrellas
+            if (g < 0.62) { const k = Math.floor(R2[i] * 8), a = ESTRELLA[k], b = ESTRELLA[(k + 1) % 8], s = R3[i]; q[0] = a[0] + (b[0] - a[0]) * s; q[1] = a[1] + (b[1] - a[1]) * s; return; }   // la figura
+            if (g < 0.78) { const k = Math.floor(R2[i] * 8), an = -Math.PI / 2 + k * Math.PI / 4, r = Math.round(R3[i] * 0.95 * 40) / 40; q[0] = Math.cos(an) * r; q[1] = Math.sin(an) * r; return; }   // radios punteados
+            const r = R2[i] < 0.33 ? 0.33 : R2[i] < 0.66 ? 0.66 : 0.95, th = R3[i] * 6.2832; q[0] = Math.cos(th) * r; q[1] = Math.sin(th) * r; } },   // círculos
+        alzado: { flujo: 0.02, rigidez: 0.08, estela: 0.3,
+          color: (i) => { const g = R1[i]; return g < 0.55 ? LINEAS[SEG[i]][4] : g < 0.78 ? 1 : g < 0.86 ? 1 : g < 0.91 ? 3 : 0; },
+          pos(i, t, q) { const g = R1[i];
+            if (g < 0.55) { const L = LINEAS[SEG[i]], s = R3[i]; q[0] = L[0] + (L[2] - L[0]) * s; q[1] = L[1] + (L[3] - L[1]) * s; return; }   // líneas del alzado
+            if (g < 0.78) { q[0] = -1.12 + R2[i] * 2.2; q[1] = -0.5 + R3[i] ** 2 * 0.42; return; }   // sombreado de la fachada
+            if (g < 0.86) { const k = Math.floor(R2[i] * 64), s = R3[i]; q[0] = -1.3 + k * 0.041 - s * 0.04; q[1] = -0.5 - s * 0.05; return; }   // tramado del suelo
+            if (g < 0.91) { const s = R2[i]; if (R3[i] < 0.2) { q[0] = R4[i] < 0.5 ? -1.12 : 1.08; q[1] = -0.66 + (s - 0.5) * 0.06; } else { q[0] = -1.12 + s * 2.2; q[1] = -0.66; } return; }   // cota
+            const cx = R4[i] < 0.5 ? -1.34 : -1.22, h = R4[i] < 0.5 ? 0.78 : 0.6, tt = R2[i], w = 0.045 * Math.sin(Math.PI * Math.min(1, tt * 1.1)); q[0] = cx + (R3[i] * 2 - 1) * w; q[1] = -0.5 + tt * h; } },   // cipreses
+        grabado: { flujo: 0.02, rigidez: 0.08, estela: 0.3,
+          color: (i) => { const g = R1[i]; if (g < 0.22) return 0; if (g < 0.7) { const y = -1.58 + R2[i] * 3.3; return y < 1.1 && R4[i] < 0.45 ? 4 : 1; } if (g < 0.88) return R4[i] < 0.6 ? 3 : 0; return g < 0.95 ? 2 : 1; },
+          pos(i, t, q) { const g = R1[i], E = 0.5;
+            if (g < 0.22) { const y = -1.6 + R2[i] * 3.35; q[0] = (R3[i] < 0.5 ? -1 : 1) * perfil(y) * E; q[1] = y * E; return; }   // contorno
+            if (g < 0.7) { const y = -1.58 + R2[i] * 3.3, w = R3[i] ** 0.55; q[0] = (2 * w - 1) * perfil(y) * 0.97 * E; q[1] = y * E; return; }   // punteado, más denso a la derecha
+            if (g < 0.88) { if (R4[i] < 0.6) { const s = R2[i] * 4, l = Math.floor(s), f = s - l; q[0] = [-0.5 + f, 0.5, 0.5 - f, -0.5][l] * 0.64 * E; q[1] = [-0.15, -0.15 - f * 0.9, -1.05, -1.05 + f * 0.9][l] * E; }
+              else { const k = Math.floor(R3[i] * 3), largo = [0.6, 0.38, 0.5][k]; q[0] = (R2[i] - 0.5) * largo * 0.64 * E; q[1] = [-0.42, -0.62, -0.82][k] * E; } return; }   // etiqueta
+            if (g < 0.95) { const y = 1.38 + R2[i] * 0.37; q[0] = (R3[i] * 2 - 1) * perfil(y) * 1.04 * E; q[1] = y * E; return; }   // cápsula
+            const th = R2[i] * 6.2832, rr = Math.sqrt(R3[i]); q[0] = 0.12 + Math.cos(th) * rr * 0.55; q[1] = -1.6 * E + Math.sin(th) * rr * 0.04; } },   // sombra
+        lacre: { flujo: 0.02, rigidez: 0.08, estela: 0.3,
+          color: (i) => (R1[i] < 0.8 ? (R4[i] < 0.3 ? 4 : 2) : R1[i] < 0.9 ? 4 : 2),
+          pos(i, t, q) {
+            if (R1[i] < 0.8) { puntoLacre(i, q); if (dentroBE(q[0], q[1])) { const th = R2[i] * 6.2832, r = radioLacre(th) * (0.93 + R3[i] * 0.07); q[0] = Math.cos(th) * r; q[1] = Math.sin(th) * r; } return; }   // el lacre, con las iniciales en hueco
+            if (R1[i] < 0.9) { const th = R2[i] * 6.2832; q[0] = Math.cos(th) * 0.47; q[1] = Math.sin(th) * 0.47; return; }   // el aro
+            const lado = R4[i] < 0.5 ? -1 : 1, s = R2[i], w = (R3[i] - 0.5) * 0.12; q[0] = lado * (0.1 + s * 0.24) + w * 0.7; q[1] = -0.52 - s * 0.5 + w * lado * 0.7; } },   // las cintas
+      };
+    },
+  });
+  const capa = document.getElementById('etq');
+  const etiquetas = () => { const lista = ETQ[document.body.dataset.seccion] || [];
+    capa.innerHTML = lista.map((e) => { const [x0, y] = motor.aPantalla(e.u, e.v), x = Math.min(innerWidth - 56, Math.max(56, x0)); return `<div style="left:${x}px;top:${y}px"><b>${e.b}</b>${e.s ? `<span class="mono">${e.s}</span>` : ''}</div>`; }).join('');
+    requestAnimationFrame(() => capa.querySelectorAll('div').forEach((d) => d.classList.add('ver'))); };
+  Maqueta.enlazar(motor, etiquetas); addEventListener('resize', etiquetas);
+}
+document.fonts.load('italic 300 80px "Newsreader"').then(arrancar, arrancar);
+</script>
+</body>
+</html>
