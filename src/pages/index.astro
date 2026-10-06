@@ -5,8 +5,20 @@ import B from '../data/bodega.json';
 // Con separador también en las cifras de cuatro dígitos (4.200), como el resto de la página.
 const miles = (n: number) => n.toLocaleString('es-ES', { useGrouping: 'always' } as Intl.NumberFormatOptions);
 const JSON_BODEGA = JSON.stringify(B).replace(/</g, '\\u003c');
-const CUANTAS = ['Una', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis'][B.terruno.parcelas.length - 1];
+const enLetra = (n: number, femenino = false) => [femenino ? 'Una' : 'Un', 'Dos', 'Tres', 'Cuatro', 'Cinco', 'Seis'][n - 1] ?? String(n);
+const CUANTAS = enLetra(B.terruno.parcelas.length, true);
 const V = B.vinos[0];
+const DESDE = Math.min(...B.terruno.parcelas.map((p) => p.plantada));
+// El carrusel final: una foto por sección (Unsplash, provisionales y sin personas) que lleva a su escena.
+const GALERIA = [
+  { paso: 'Descubre', titulo: 'La ladera', ancla: '#descubre', foto: '1767731415567-3acdb94de881', texto: `${CUANTAS} parcelas al ${B.terruno.orientacion}, entre ${B.terruno.altitud_min} y ${B.terruno.altitud_max} metros.` },
+  { paso: 'Prueba', titulo: 'La cata', ancla: '#prueba', foto: '1630369160812-26c7604cbd8c', texto: `${enLetra(B.vinos.length)} vinos y lo que hay en cada copa.` },
+  { paso: 'Visita', titulo: 'La bodega', ancla: '#visita', foto: '1561906814-23da9a8bfee0', texto: `Visitas ${B.visitas.dias}, con ${B.visitas.cata}.` },
+  { paso: 'Llévatelo', titulo: 'La tienda', ancla: '#tienda', foto: '1554230561-31bdc707b537', texto: 'Cada vino con su ficha, su precio y su stock.' },
+  { paso: 'Quédate', titulo: 'El club', ancla: '#club', foto: '1785724290111-f8b9901e7aee', texto: 'Cada añada antes que nadie y una visita al año.' },
+];
+// El menú: las secciones de una web de bodega, que llevan a su parte de la home.
+const MENU = [['/', 'Historia'], ['#prueba', 'Los vinos'], ['#visita', 'Visitas'], ['#tienda', 'Tienda'], ['#club', 'Club']];
 // El recorrido del cliente: un paso por escena.
 const PASOS = [['descubre', 'Descubre'], ['prueba', 'Prueba'], ['visita', 'Visita'], ['llevatelo', 'Llévatelo'], ['quedate', 'Quédate']];
 ---
@@ -29,7 +41,7 @@ body.oscuro{--ink:#f4efe8;--linea:rgba(244,239,232,.3);--hud:rgba(244,239,232,.7
 .mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
 /* el vuelo: la foto del viñedo, que se acerca hasta las uvas */
 #fotos{position:fixed;inset:0;z-index:1;overflow:hidden;background:#1a1210}
-#fotos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity}
+#fotos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;will-change:transform,opacity,filter;transform-origin:50% 72%}
 #fotos .sombra{position:absolute;inset:0;background:radial-gradient(ellipse 70% 45% at 50% 50%,rgba(10,6,6,.32),transparent 75%),linear-gradient(180deg,rgba(10,6,6,.5),rgba(10,6,6,.18) 45%,rgba(10,6,6,.55))}
 #escarcha{position:fixed;inset:0;z-index:2;pointer-events:none;-webkit-backdrop-filter:blur(var(--b,0px)) saturate(1.2);backdrop-filter:blur(var(--b,0px)) saturate(1.2);background:rgba(242,237,229,var(--a,0))}
 canvas#gl{position:fixed;inset:0;width:100vw;height:100vh;z-index:3;pointer-events:none}
@@ -93,13 +105,15 @@ p.cuerpo{font-size:17px;line-height:1.72;color:var(--tinta2);max-width:34ch}
 .gal-head{padding:0 clamp(18px,8vw,140px);display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px}
 .gal-head h3{font-family:'Newsreader',serif;font-weight:300;font-size:clamp(36px,4.4vw,66px);letter-spacing:-.025em;line-height:1;color:#1a1414}
 .track{display:flex;gap:26px;padding:0 clamp(18px,8vw,140px);will-change:transform}
-.panel{flex:0 0 min(430px,80vw);height:min(54vh,470px);border-radius:20px;background:rgba(255,255,255,.42);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.75);box-shadow:0 40px 80px -40px rgba(20,16,17,.35);padding:28px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;color:#1a1414;text-decoration:none;transition:transform .6s cubic-bezier(.16,.84,.24,1)}
-.panel:hover{transform:translateY(-8px)}
-.panel h4{font-family:'Newsreader',serif;font-weight:300;font-size:48px;letter-spacing:-.025em;line-height:1;margin-bottom:12px}
-.panel p{font-size:15px;color:#3a3334;max-width:30ch;line-height:1.5}
-.panel .idx{position:absolute;left:28px;top:28px;color:var(--tinta3)}
-.panel .new{position:absolute;right:28px;top:28px;color:var(--vino)}
-.panel .ph{position:absolute;left:0;right:0;top:0;height:52%;background-size:cover;background-position:center;opacity:.9;mask-image:linear-gradient(#000 40%,transparent)}
+.panel{flex:0 0 min(380px,78vw);height:min(62vh,520px);border-radius:4px;padding:30px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;color:#f4efe8;text-decoration:none;box-shadow:0 40px 80px -40px rgba(20,16,17,.45);background:#1a1210}
+.panel .ph{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 1.4s cubic-bezier(.16,.84,.24,1)}
+.panel::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,14,.25),rgba(20,14,14,0) 30%,rgba(20,14,14,.15) 50%,rgba(20,14,14,.82))}
+.panel:hover .ph{transform:scale(1.06)}
+.panel>*:not(.ph){position:relative;z-index:1}
+.panel h4{font-family:'Newsreader',serif;font-weight:300;font-size:50px;letter-spacing:-.025em;line-height:1;margin-bottom:12px}
+.panel p{font-size:15px;color:rgba(244,239,232,.85);max-width:28ch;line-height:1.5}
+.panel .idx{position:absolute;left:30px;top:30px;color:rgba(244,239,232,.85)}
+.gal-head h3 em{font-style:italic;color:var(--vino)}
 footer{position:relative;z-index:10;padding:140px clamp(18px,8vw,140px) 40px;display:grid;gap:56px;background:var(--papel);color:#1a1414}
 footer .big{font-family:'Newsreader',serif;font-weight:300;font-size:clamp(40px,6vw,96px);letter-spacing:-.03em;line-height:.95;max-width:14ch}
 footer .big em{font-style:italic;color:var(--vino)}
@@ -139,7 +153,7 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
 <div id="pre"><div class="mono" id="preTxt">bodega ░░░░░░░░░░░░ 000</div></div>
 <div id="fotos" aria-hidden="true">
   <img id="f1" src="https://images.unsplash.com/photo-1543418219-44e30b057fea?w=2000&q=75" alt="">
-  <img id="f2" src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=2000&q=75" alt="" style="opacity:0">
+  <img id="f2" src="https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=2600&q=75" alt="" style="opacity:0">
   <div class="sombra" id="sombra"></div>
 </div>
 <div id="escarcha"></div>
@@ -151,19 +165,19 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
   <nav class="recorrido mono" aria-label="Tu recorrido">{PASOS.map(([id, nombre]) => <span data-paso={id}>{nombre}</span>)}</nav>
   <button class="burger" id="burger" aria-label="Abrir menú"><i></i></button>
 </header>
-<div class="nota mono">Demo de chiq.es · Astro y motor propio WebGL2 (<span id="motorKB">…</span>) · {B.nombre} es ficticia</div>
+<div class="nota mono">Demo de chiq.es · Astro y motor propio WebGL2 (<span id="motorKB">…</span>)</div>
 
 <main>
   <section id="vuelo">
     <div class="pin">
       <div class="beat beat1" id="beat1">
-        <p class="mono" style="color:rgba(244,239,232,.8);margin-bottom:34px">{B.nombre} · una bodega ficticia</p>
+        <p class="mono" style="color:rgba(244,239,232,.8);margin-bottom:34px">Ladera {B.terruno.orientacion} · {B.terruno.altitud_min}–{B.terruno.altitud_max} metros</p>
         <h1>Cada botella empieza <em>en la cepa.</em></h1>
         <div class="cue mono">Scroll</div>
       </div>
       <div class="medio" id="medio"><span class="mono">Del campo a la copa</span></div>
       <div class="beat beat2" id="beat2" style="opacity:0"><div class="texto">
-        <p class="kicker mono">{B.nombre} · demo de chiq.es</p>
+        <p class="kicker mono">Viñas desde {DESDE}</p>
         <h1 class="titulo">{CUANTAS} parcelas, <em>un vino.</em></h1>
         <p class="cuerpo">La historia de la bodega, contada como se hace el vino. Despacio y desde el suelo.</p>
       </div></div>
@@ -175,7 +189,6 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <h2>La <em>ladera.</em></h2>
     <p class="cuerpo">{CUANTAS} parcelas orientadas al {B.terruno.orientacion}, entre {B.terruno.altitud_min} y {B.terruno.altitud_max} metros, sobre suelo {B.terruno.suelo}. Cada una se vendimia por separado.</p>
     <ul class="datos mono">{B.terruno.parcelas.map((p) => <li><b>{p.nombre}</b>{p.variedad} · plantada en {p.plantada}</li>)}</ul>
-    <span class="tag mono">Datos ficticios</span>
   </div></div></section>
   <section class="escena" id="prueba" data-paso="prueba" data-pasos={B.vinos.length} style={`height:${B.vinos.length * 80 + 30}vh`}><div class="fijo"><div class="texto">
     <p class="kicker mono">02 · Prueba</p>
@@ -183,7 +196,7 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <p class="vino-nombre" id="vinoNombre" aria-live="polite">{B.vinos[0].nombre}</p>
     <p class="vino-tipo mono" id="vinoTipo">{B.vinos[0].tipo}</p>
     <ul class="datos mono">{B.vinos.map((v) => <li><b>{v.nombre}</b>{B.aromas.map((a, i) => `${a} ${v.cata[i]}`).join(' · ')}</li>)}</ul>
-    <span class="tag mono">Datos ficticios · cata del 0 al 10</span>
+    <span class="tag mono">Cata del 0 al 10</span>
   </div></div></section>
   <section class="escena" id="visita" data-paso="visita" style="height:170vh"><div class="fijo"><div class="texto">
     <p class="kicker mono">03 · Visita</p>
@@ -191,7 +204,6 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <p class="cuerpo">Hormigón, luz y una banda de lamas que sube con la ladera. Visitas {B.visitas.dias}, con {B.visitas.cata}.</p>
     <span class="pronto mono">Reservas · próximamente</span>
     <ul class="datos mono"><li><b>{miles(B.visitas.al_anio)}</b>visitas al año</li><li><b>Club</b>1 de cada {B.visitas.socio_uno_de_cada} visitantes se hace socio</li></ul>
-    <span class="tag mono">Datos ficticios · edificio inventado</span>
   </div></div></section>
   <section class="escena" id="tienda" data-paso="llevatelo" style="height:170vh"><div class="fijo"><div class="texto">
     <p class="kicker mono">04 · Llévatelo</p>
@@ -206,20 +218,15 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <p class="kicker mono">05 · Quédate</p>
     <h2>El sello <em>de la casa.</em></h2>
     <p class="cuerpo">Los socios del club reciben cada añada antes que nadie y una visita al año. 1 de cada {B.visitas.socio_uno_de_cada} visitantes se hace socio.</p>
-    <a class="cta" href="/como-esta-hecha/"><span class="ar">→</span>Cómo está hecha</a>
-    <span class="tag mono">Datos ficticios</span>
+    <span class="pronto mono">Club · próximamente</span>
   </div></div></section>
 
   <section class="gal" id="gal">
     <div class="gal-in">
-      <div class="gal-head"><h3>{B.nombre}</h3><span class="mono" style="color:var(--tinta3)">Desliza →</span></div>
-      <div class="track" id="track">
-        <a class="panel" href="/"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1537640538966-79f369143f8f?w=900&q=60)"></div><span class="idx mono">/01</span><h4>Historia</h4><p>Del viñedo a la copa, contado con scroll.</p></a>
-        <a class="panel" href="/mercado/"><span class="idx mono">/02</span><span class="new mono">Datos reales</span><h4>El mercado</h4><p>Qué parte del vino compra cada edad, con su fuente (MAPA).</p></a>
-        <a class="panel" href="/como-esta-hecha/"><span class="idx mono">/03</span><h4>Cómo está hecha</h4><p>Astro, datos en JSON y la tienda en PrestaShop por API.</p></a>
-        <div class="panel"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1543418219-44e30b057fea?w=900&q=60)"></div><span class="idx mono">/04</span><span class="new mono">Próximamente</span><h4>Tienda</h4><p>Los vinos de la bodega, servidos por PrestaShop.</p></div>
-        <div class="panel"><span class="idx mono">/05</span><span class="new mono">Próximamente</span><h4>Visitas</h4><p>Enoturismo con reserva y su dato.</p></div>
-        <div class="panel"><span class="idx mono">/06</span><span class="new mono">Próximamente</span><h4>Club</h4><p>Socios, envíos y lo que les gusta.</p></div>
+      <div class="gal-head"><h3>El <em>recorrido.</em></h3><span class="mono" style="color:var(--tinta3)">Desliza →</span></div>
+      <div class="track" id="track">{GALERIA.map((g, k) => (
+        <a class="panel" href={g.ancla}><div class="ph" style={`background-image:url(https://images.unsplash.com/photo-${g.foto}?w=900&h=1100&fit=crop&q=70)`}></div>
+          <span class="idx mono">/0{k + 1} · {g.paso}</span><h4>{g.titulo}</h4><p>{g.texto}</p></a>))}
       </div>
     </div>
   </section>
@@ -228,18 +235,16 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
 <footer>
   <p class="big">Cada botella empieza <em>en la cepa.</em></p>
   <div class="cols">
-    <div><span class="mono">{B.nombre}</span><a href="/">Historia</a><a href="/mercado/">El mercado en datos</a><a href="/como-esta-hecha/">Cómo está hecha</a></div>
-    <div><span class="mono">La demo</span><span class="pie-t">{B.nombre} es una bodega ficticia. Esta web es una demo de chiq.es y no vende nada.</span></div>
-    <div><span class="mono">Datos</span><span class="pie-t">MAPA · Panel de Consumo Alimentario en Hogares, con la fuente de cada cifra en su gráfico.</span></div>
-    <div><span class="mono">Imágenes</span><span class="pie-t">Fotos de viñedo de Unsplash, provisionales.</span><span class="mono" style="display:block;margin-top:14px">© 2026 chiq.es</span></div>
+    <div><span class="mono">{B.nombre}</span>{MENU.map(([href, nombre]) => <a href={href}>{nombre}</a>)}</div>
+    <div><span class="mono">La demo</span><span class="pie-t">Una bodega ficticia, con sus datos inventados. Esta web es una demo de chiq.es y no vende nada.</span></div>
+    <div><span class="mono">Imágenes</span><span class="pie-t">Fotos de Unsplash, provisionales.</span><span class="mono" style="display:block;margin-top:14px">© 2026 chiq.es</span></div>
   </div>
 </footer>
 
 <div id="menu" aria-hidden="true">
   <button class="close mono" id="close">Cerrar</button>
-  <a href="/"><small>/01</small>Historia</a><a href="/mercado/"><small>/02</small>El mercado en datos</a>
-  <a href="/como-esta-hecha/"><small>/03</small>Cómo está hecha</a>
-  <div class="seal mono">Demo de chiq.es · {B.nombre} es ficticia</div>
+  {MENU.map(([href, nombre], k) => <a href={href}><small>/0{k + 1}</small>{nombre}</a>)}
+  <div class="seal mono">Demo de chiq.es</div>
 </div>
 
 <script is:inline src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
@@ -261,6 +266,12 @@ document.querySelectorAll('section.escena .fijo').forEach((s) => io.observe(s));
 const menu = document.getElementById('menu');
 document.getElementById('burger').onclick = () => menu.classList.add('open');
 document.getElementById('close').onclick = () => menu.classList.remove('open');
+// Los enlaces a secciones de la home (menú, carrusel y pie) bajan con el mismo scroll suave; «Historia» vuelve arriba.
+document.querySelectorAll('a[href^="#"], #menu a[href="/"], footer a[href="/"]').forEach((a) => a.addEventListener('click', (e) => {
+  const h = a.getAttribute('href'), el = h === '/' ? null : document.querySelector(h); if (h !== '/' && !el) return;
+  e.preventDefault(); menu.classList.remove('open');
+  const y = el ? el.offsetTop : 0; if (lenis) lenis.scrollTo(y, { duration: 1.6 }); else scrollTo({ top: y, behavior: 'smooth' });
+}));
 
 /* ---------- formas ---------- */
 const N = 16000, R = Math.random;
@@ -364,7 +375,9 @@ function sello() {
 }
 
 /* ---------- el motor: WebGL2 directo ---------- */
-const FOV = 34, DIST = 9.5, ESCALA_FOTO = 1.45;
+/* El vuelo es un solo zoom hacia el mismo punto de fuga (ORIGEN_FOTO, como el transform-origin de las fotos): la segunda
+   foto entra a escala 1 en P_CRUCE y llega a ESCALA_FOTO en P_FIN, la escala a la que las moléculas toman sus píxeles. */
+const FOV = 34, DIST = 9.5, ESCALA_FOTO = 2.4, ORIGEN_FOTO = [0.5, 0.72], P_CRUCE = 0.4, P_FIN = 0.7;
 const VERT = `
   uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uVel, uFoto, uCalma, uTinteA, uTinteB;
   attribute vec3 aFrom, aTo, aCol, aCol2; attribute float aRnd; varying float vA, vGlow, vTinte; varying vec3 vCol;
@@ -444,7 +457,8 @@ function desdeFoto(img) {
   const hMundo = 2 * Math.tan((FOV / 2) * Math.PI / 180) * DIST, wMundo = hMundo * innerWidth / innerHeight;
   for (let i = 0; i < N; i++) {
     const id = cand.length > 800 ? cand[(R() * cand.length) | 0] : (R() * Wc * Hc) | 0, x = id % Wc, y = (id / Wc) | 0, k = id * 4;
-    pos.set([((x + R()) / Wc - 0.5) * wMundo * ESCALA_FOTO, -((y + R()) / Hc - 0.5) * hMundo * ESCALA_FOTO, (R() - .5) * 0.05], i * 3);
+    const sx = ORIGEN_FOTO[0] + ((x + R()) / Wc - ORIGEN_FOTO[0]) * ESCALA_FOTO, sy = ORIGEN_FOTO[1] + ((y + R()) / Hc - ORIGEN_FOTO[1]) * ESCALA_FOTO;
+    pos.set([(sx - 0.5) * wMundo, -(sy - 0.5) * hMundo, (R() - .5) * 0.05], i * 3);
     colores.set([d[k] / 255, d[k + 1] / 255, d[k + 2] / 255], i * 3);
   }
   return { pos, colores };
@@ -560,15 +574,17 @@ function objetivoM(y) {
 }
 function vueloVisual(y) {
   const p = clamp(y / (vuelo.offsetTop + vuelo.offsetHeight - innerHeight));
-  const a = suave(tramo(p, 0, 0.46));
-  f1.style.transform = `scale(${1.02 + a * 1.9}) translateY(${a * -4}%)`;
-  f1.style.transformOrigin = '50% 78%';
-  f1.style.opacity = 1 - suave(tramo(p, 0.38, 0.5));
-  const b = suave(tramo(p, 0.4, 0.68));
-  f2.style.opacity = suave(tramo(p, 0.38, 0.5)) * (1 - suave(tramo(p, 0.74, 0.86)));
-  f2.style.transform = `scale(${1.25 + b * (ESCALA_FOTO - 1.25)})`;
-  const e1 = Math.sin(Math.PI * tramo(p, 0.36, 0.54)), e2 = tramo(p, 0.72, 0.9);
-  escarcha.style.setProperty('--b', (e1 * 22 + e2 * 14) + 'px');
+  // Un solo zoom a ritmo constante: la primera foto se acerca y se desenfoca; la segunda llega desenfocada, se enfoca y
+  // sigue acercándose al mismo ritmo, como si la cámara se metiera entre las vides.
+  const r = Math.log(ESCALA_FOTO) / (P_FIN - P_CRUCE), L = r * Math.min(p, P_FIN);
+  f1.style.transform = `scale(${Math.exp(L).toFixed(4)})`;
+  f1.style.opacity = 1 - suave(tramo(p, 0.32, 0.46));
+  f1.style.filter = `blur(${(suave(tramo(p, 0.24, 0.44)) * 10).toFixed(2)}px)`;
+  f2.style.opacity = suave(tramo(p, 0.32, 0.46)) * (1 - suave(tramo(p, 0.74, 0.86)));
+  f2.style.transform = `scale(${Math.exp(Math.max(0, L - r * P_CRUCE)).toFixed(4)})`;
+  f2.style.filter = `blur(${((1 - suave(tramo(p, 0.36, 0.58))) * 12).toFixed(2)}px)`;
+  const e1 = Math.sin(Math.PI * tramo(p, 0.34, 0.5)), e2 = tramo(p, 0.72, 0.9);
+  escarcha.style.setProperty('--b', (e1 * 4 + e2 * 14) + 'px');
   escarcha.style.setProperty('--a', (e1 * 0.12 + suave(e2) * 1).toFixed(3));
   sombra.style.opacity = 1 - tramo(p, 0.6, 0.8);
   fotos.style.visibility = p >= 0.999 ? 'hidden' : 'visible';
@@ -601,7 +617,7 @@ function cuadro(t) {
   const vista = { x: va.x + (vb.x - va.x) * kv, y: va.y + (vb.y - va.y) * kv, s: va.s + (vb.s - va.s) * kv,
     ry: (Math.sin(t / 4200) * 0.35 + ratonS[0] * 0.6) * giro, rx: ratonS[1] * 0.26 * giro };
   motor?.dibujar({ ...vista, t: m >= NF ? 1 : f, tiempo: t / 1000, vel: Math.min(1, vel), foto: uFoto, calma, tinteA: COLORES[i] ? 1 : 0, tinteB: COLORES[i + 1] ? 1 : 0,
-    alfa: aparece * (1 - desv * 0.9) });
+    alfa: aparece * (1 - desv) });
   if (motor) pintarEtiquetas(m, vista, desv);
   if (fr !== formaTexto) { formaTexto = fr; if (esc === 1) { const v = B.vinos[fr - inicio[1]]; vinoNombre.textContent = v.nombre; vinoTipo.textContent = v.tipo; } }
   if (esc !== activo) { activo = esc; const paso = esc >= 0 ? escenas[esc].dataset.paso : ''; pasosNav.forEach((s) => s.classList.toggle('on', s.dataset.paso === paso)); }

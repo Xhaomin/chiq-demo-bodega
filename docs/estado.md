@@ -21,8 +21,8 @@ en segundo plano no corre `requestAnimationFrame` y las partículas no avanzan. 
 | Ruta | Contenido |
 |---|---|
 | `/` | Vuelo sobre el viñedo (fotos de Unsplash provisionales) → racimo de moléculas → cinco escenas del recorrido del cliente → carrusel |
-| `/mercado/` | La escena de probetas y los gráficos del capítulo E2 de chiq.es, con los JSON reales del modelo (`src/data/capitulos`, `src/data/graficos`) |
-| `/como-esta-hecha/` | Esquema de la arquitectura: historia, datos y PrestaShop por API → Astro → Caddy, Coolify y Cloudflare |
+| `/mercado/` | La escena de probetas y los gráficos del capítulo E2 de chiq.es, con los JSON reales del modelo (`src/data/capitulos`, `src/data/graficos`). **Sin enlaces desde la home** desde el 07/10/2026 |
+| `/como-esta-hecha/` | Esquema de la arquitectura: historia, datos y PrestaShop por API → Astro → Caddy, Coolify y Cloudflare. **Sin enlaces desde la home** desde el 07/10/2026 |
 
 ## La home (`src/pages/index.astro`)
 
@@ -42,8 +42,11 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 - Cifras sobre las formas: `ETIQ[forma]`, etiquetas HTML proyectadas con la misma cámara (`proyectar`), con un halo de
   papel y separadas si se pisan; `pm` es su posición en el móvil. Las listas `.datos` siguen en el HTML para lectores
   de pantalla y sin WebGL.
-- Sin botones falsos: lo que aún no existe dice «próximamente» (reservas, tienda) y la última escena enlaza a «Cómo
-  está hecha».
+- Sin botones falsos: lo que aún no existe dice «próximamente» (reservas, tienda, club).
+- El vuelo es un solo zoom a ritmo constante hacia el mismo punto de fuga (`ORIGEN_FOTO`) con un cambio de foco de una
+  foto a la otra; la segunda llega a `ESCALA_FOTO` en `P_FIN`, la escala a la que las moléculas toman sus píxeles.
+- El menú son las secciones de una web de bodega (Historia, Los vinos, Visitas, Tienda, Club) y lleva a su parte de la
+  home; «Bodega Ejemplo» solo está en el logo y «ficticia», una vez, en el pie.
 
 | # | Paso | Escena | Forma |
 |---|---|---|---|
@@ -53,7 +56,7 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 | 03 | Visita | Ven a vernos | La bodega de hormigón con sus colores (lamas en vino, mirador, portón, cipreses), inventada (`visitas`) |
 | 04 | Llévatelo | Llévatelo a casa | La botella con precio, stock y formato |
 | 05 | Quédate | El sello de la casa | Sello con las iniciales en relieve (`iniciales`), que se ve en 3D al girar |
-| — | Final | Carrusel | Historia, El mercado, Cómo está hecha y lo que vendrá (tienda, visitas, club) |
+| — | Final | Carrusel | Una foto por sección (Unsplash, provisionales y sin personas): ladera, cata, bodega, tienda y club; cada una lleva a su escena |
 
 ## Pendiente
 
@@ -62,6 +65,8 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 
 ## Historial
 
+- 07/10/2026 (tarde): vuelo con zoom continuo y cambio de foco; carrusel con una foto por sección; menú de bodega;
+  menos repeticiones de «Bodega Ejemplo» y «ficticia».
 - 07/10/2026: la home pasa a la maqueta D (recorrido del cliente, moléculas en 3D, ladera en relieve); fuera las
   probetas, los bancales, la elaboración, el ensamblaje y el brindis. Maquetas A, B, C y D en `docs/maquetas/premium/`.
 - 06/10/2026: escenas 03, 06, 07 y 08 de la home anterior; `/mercado/` sin rectángulos de anchura negativa ni
