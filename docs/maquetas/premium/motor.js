@@ -35,6 +35,8 @@
    * opciones: lienzo, n, estilo ('luz' suma colores sobre fondo oscuro; 'tinta' pinta encima), paleta [{color, ancho}],
    * fondo ([r, g, b] o null para dejar ver el fondo CSS), formas (R) => ({ nombre: forma }), cajas (W, H) => ({ tipo: caja }).
    * forma: { pos(i, t, q) escribe u, v en q (q[2] = 1 si salta de un extremo al otro), color(i), caja, flujo, rigidez, estela }.
+   * Para un movimiento más calmado: impulso (golpe al cambiar de forma, 5), agitacion (flujo extra al cambiar, 2.5),
+   * repulsion (del ratón, 1.8) y enForma (las partículas nacen ya en la primera forma en lugar de repartidas al azar).
    */
   function Motor(o) {
     const { lienzo, estilo, paleta } = o, n = innerWidth < 760 ? Math.round(o.n * 0.45) : o.n, ctx = lienzo.getContext('2d');
@@ -54,11 +56,15 @@
     addEventListener('pointerleave', () => { raton = [-1e5, -1e5]; });
     document.addEventListener('visibilitychange', () => { visible = !document.hidden; });
 
+    const impulso = o.impulso ?? 5, agitacion = o.agitacion ?? 2.5, repulsion = o.repulsion ?? 1.8;
     function poner(nombre) {
       if (forma === formas[nombre]) return;
-      forma = formas[nombre]; tCambio = performance.now() / 1000;
+      const primera = !forma; forma = formas[nombre]; tCambio = performance.now() / 1000;
       porColor = paleta.map(() => []);
-      for (let i = 0; i < n; i++) { porColor[Math.min(paleta.length - 1, forma.color(i))].push(i); VX[i] += (azar() - 0.5) * 5; VY[i] += (azar() - 0.5) * 5; }
+      for (let i = 0; i < n; i++) { porColor[Math.min(paleta.length - 1, forma.color(i))].push(i); VX[i] += (azar() - 0.5) * impulso; VY[i] += (azar() - 0.5) * impulso; }
+      if (primera && o.enForma) { const b = cajas[forma.caja || 'derecha'], q = [0, 0, 0];
+        for (let i = 0; i < n; i++) { forma.pos(i, tCambio, q); X[i] = PX[i] = b.cx + q[0] * b.s + (azar() - 0.5) * 30; Y[i] = PY[i] = b.cy - q[1] * b.s + (azar() - 0.5) * 30; VX[i] = VY[i] = 0; }
+        tCambio -= 1.6; }
       porColor = porColor.map((l) => Uint32Array.from(l));
     }
     const q = [0, 0, 0], f = [0, 0];
@@ -66,7 +72,7 @@
       requestAnimationFrame(cuadro);
       if (!forma || !visible) return;
       const t = ms / 1000, dt = t - tCambio, b = cajas[forma.caja || 'derecha'];
-      const k = 0.004 + (forma.rigidez ?? 0.06) * Math.min(1, (dt / 1.6) ** 2), fl = (forma.flujo ?? 0.3) * (1 + 2.5 * Math.max(0, 1 - dt / 1.2)), amort = 0.84;
+      const k = 0.004 + (forma.rigidez ?? 0.06) * Math.min(1, (dt / 1.6) ** 2), fl = (forma.flujo ?? 0.3) * (1 + agitacion * Math.max(0, 1 - dt / 1.2)), amort = 0.84;
       ctx.globalCompositeOperation = o.fondo ? 'source-over' : 'destination-out';
       ctx.fillStyle = o.fondo ? `rgba(${o.fondo.join(',')},${forma.estela ?? 0.2})` : `rgba(0,0,0,${forma.estela ?? 0.2})`;
       ctx.fillRect(0, 0, W, H);
@@ -77,7 +83,7 @@
         flujo(X[i] * 0.0035, Y[i] * 0.0035, t * 0.12, f);
         let ax = (tx - X[i]) * k + f[0] * fl, ay = (ty - Y[i]) * k + f[1] * fl;
         const dx = X[i] - raton[0], dy = Y[i] - raton[1], d2 = dx * dx + dy * dy;
-        if (d2 < 10000) { const m = (1 - d2 / 10000) * 1.8 / Math.sqrt(d2 + 1); ax += dx * m; ay += dy * m; }
+        if (d2 < 10000) { const m = (1 - d2 / 10000) * repulsion / Math.sqrt(d2 + 1); ax += dx * m; ay += dy * m; }
         VX[i] = VX[i] * amort + ax; VY[i] = VY[i] * amort + ay;
         PX[i] = X[i]; PY[i] = Y[i]; X[i] += VX[i]; Y[i] += VY[i];
       }
