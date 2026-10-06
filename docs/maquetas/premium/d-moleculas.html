@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maqueta D · Moléculas de vino · Bodega Ejemplo</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400;1,6..72,500&family=Inter+Tight:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#f2ede5;--tinta:#1a1414;--tinta2:rgba(26,20,20,.7);--tinta3:rgba(26,20,20,.45);--vino:#7a1a3e;--linea:rgba(26,20,20,.1)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--papel)}
+body{color:var(--tinta);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+canvas#gl{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;pointer-events:none}
+#etiquetas{position:fixed;inset:0;z-index:4;pointer-events:none}
+.mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
+header{position:fixed;top:0;left:0;right:0;z-index:20;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:24px clamp(20px,4vw,56px);background:var(--papel);border-bottom:1px solid var(--linea)}
+.logo{font-family:'Newsreader',serif;font-style:italic;font-weight:300;font-size:26px;color:var(--tinta);text-decoration:none;letter-spacing:-.01em}
+.recorrido{display:flex;gap:28px}
+.recorrido span{color:var(--tinta3);padding-bottom:4px;border-bottom:1px solid transparent;transition:color .6s,border-color .6s}
+.recorrido span.on{color:var(--vino);border-color:var(--vino)}
+main{position:relative;z-index:10}
+section.escena{position:relative}
+.fijo{position:sticky;top:0;height:100vh;display:flex;align-items:center;padding:90px clamp(30px,8vw,140px) 30px}
+.heroe .fijo{align-items:flex-start;padding-top:20vh}
+.texto{max-width:34rem}
+.kicker{color:var(--tinta3)}
+h1,h2{font-family:'Newsreader',serif;font-weight:300;letter-spacing:-.025em;line-height:.95}
+h1{font-size:clamp(58px,7.6vw,132px);margin:20px 0 24px}
+h2{font-size:clamp(48px,5.6vw,98px);margin:18px 0 22px}
+h1 em,h2 em{font-style:italic;color:var(--vino)}
+p.cuerpo{font-size:17px;line-height:1.72;color:var(--tinta2);max-width:33ch}
+.vino-nombre{font-family:'Newsreader',serif;font-style:italic;font-weight:300;font-size:clamp(34px,3.4vw,54px);color:var(--vino);line-height:1;margin:6px 0 10px}
+.vino-tipo{color:var(--tinta3)}
+.boton{display:inline-flex;align-items:center;gap:14px;margin-top:28px;color:var(--papel);background:var(--tinta);text-decoration:none;font-size:12px;letter-spacing:.16em;text-transform:uppercase;padding:16px 26px;transition:background .5s}
+.boton:hover{background:var(--vino)}
+.precio{font-family:'Newsreader',serif;font-weight:300;font-size:64px;line-height:1;margin-top:22px}
+.precio small{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;color:var(--tinta3);display:block;margin-top:10px}
+.texto>*{opacity:0;transform:translateY(14px);transition:opacity 1.3s,transform 1.4s cubic-bezier(.16,.84,.24,1)}
+.in .texto>*{opacity:1;transform:none}
+.in .texto>*:nth-child(2){transition-delay:.12s}.in .texto>*:nth-child(3){transition-delay:.24s}.in .texto>*:nth-child(4){transition-delay:.36s}.in .texto>*:nth-child(5){transition-delay:.48s}
+/* cifras sobre la forma, proyectadas con la misma cámara que las moléculas */
+.et{position:absolute;left:0;top:0;text-align:center;white-space:nowrap;opacity:0;will-change:transform,opacity}
+.et.izq{text-align:left}
+.et b,.et span{text-shadow:0 0 10px var(--papel),0 0 3px var(--papel),0 0 1px var(--papel)}
+.et b{display:block;font-family:'Newsreader',serif;font-weight:400;font-style:italic;font-size:clamp(18px,1.6vw,26px);line-height:1;color:var(--tinta)}
+.et span{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta3);margin-top:5px}
+footer{position:relative;z-index:10;padding:60px clamp(30px,8vw,140px) 60px;color:var(--tinta3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:20px;background:var(--papel)}
+.maqueta{position:fixed;right:clamp(20px,4vw,56px);bottom:22px;z-index:30;display:flex;gap:14px;color:var(--tinta3)}
+.maqueta a{color:var(--tinta2);text-decoration:none}.maqueta a.esta{color:var(--vino)}
+.sin-webgl .et{display:none}
+@media (min-width:861px) and (max-width:1100px){
+  header .recorrido{gap:14px}
+  .fijo{padding-left:clamp(24px,6vw,72px)}
+  .texto{max-width:21rem}
+  h1{font-size:62px}h2{font-size:54px}p.cuerpo{font-size:15px}
+}
+@media (max-width:860px){
+  header{grid-template-columns:1fr;padding:16px 20px}.recorrido{display:none}
+  .fijo,.heroe .fijo{align-items:flex-start;padding:15vh 24px 0}
+  h1{font-size:50px;margin:16px 0}h2{font-size:44px;margin:14px 0}
+  p.cuerpo{font-size:15px}.precio{font-size:46px;margin-top:12px}.boton{margin-top:16px}
+  .vino-nombre{font-size:32px}
+  #tienda p.cuerpo{display:none}
+  .maqueta{left:50%;right:auto;transform:translateX(-50%);bottom:16px;font-size:9px;white-space:nowrap}
+  .et b{font-size:16px}.et span{font-size:8.5px}
+}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="etiquetas" aria-hidden="true"></div>
+
+<header>
+  <a class="logo" href="#">Bodega Ejemplo</a>
+  <nav class="recorrido mono" aria-label="Tu recorrido"><span data-paso="descubre">Descubre</span><span data-paso="prueba">Prueba</span><span data-paso="visita">Visita</span><span data-paso="llevatelo">Llévatelo</span><span data-paso="quedate">Quédate</span></nav>
+</header>
+
+<main>
+  <section class="escena heroe" data-paso="" style="height:150vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">Bodega Ejemplo · desde 1952</p>
+    <h1>Cuatro parcelas, <em>un vino.</em></h1>
+    <p class="cuerpo">La historia de la bodega, contada como se hace el vino. Despacio y desde el suelo.</p>
+  </div></div></section>
+  <section class="escena" id="descubre" data-paso="descubre" style="height:170vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">01 · Descubre</p>
+    <h2>La <em>ladera.</em></h2>
+    <p class="cuerpo">Cuatro parcelas al sur, entre 650 y 780 metros. Cada una se vendimia y se cría por separado.</p>
+  </div></div></section>
+  <section class="escena" id="prueba" data-paso="prueba" style="height:270vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">02 · Prueba</p>
+    <h2>Lo que hay <em>en la copa.</em></h2>
+    <p class="vino-nombre" id="vinoNombre" aria-live="polite">Ejemplo Crianza</p>
+    <p class="vino-tipo mono" id="vinoTipo">Tinto · 14 meses en barrica</p>
+  </div></div></section>
+  <section class="escena" id="visita" data-paso="visita" style="height:170vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">03 · Visita</p>
+    <h2>Ven a <em>vernos.</em></h2>
+    <p class="cuerpo">Hormigón, luz y una banda de lamas que sube con la ladera. De martes a domingo, con cata.</p>
+    <a class="boton" href="#visita">Reservar visita →</a>
+  </div></div></section>
+  <section class="escena" id="tienda" data-paso="llevatelo" style="height:170vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">04 · Llévatelo</p>
+    <h2>Llévatelo <em>a casa.</em></h2>
+    <p class="cuerpo">Ejemplo Crianza. Tinto, 75 cl, catorce meses en barrica de roble francés.</p>
+    <p class="precio">14,50 €<small>Envío en 48 horas</small></p>
+    <a class="boton" href="#tienda">Añadir a la cesta +</a>
+  </div></div></section>
+  <section class="escena" id="club" data-paso="quedate" style="height:170vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">05 · Quédate</p>
+    <h2>El sello <em>de la casa.</em></h2>
+    <p class="cuerpo">Los socios del club reciben cada añada antes que nadie y una visita al año.</p>
+    <a class="boton" href="#club">Hacerme socio →</a>
+  </div></div></section>
+</main>
+<footer class="mono"><span>Bodega Ejemplo es una bodega ficticia y sus datos, inventados</span><span>Maqueta de chiq.es</span></footer>
+<div class="maqueta mono">Maqueta <a href="a-hilo-de-vino.html">A</a><a href="b-dentro-de-la-copa.html">B</a><a href="c-papel-y-tinta.html">C</a><a class="esta" href="d-moleculas.html">D · Moléculas de vino</a></div>
+
+<script>
+/* Maqueta D · Moléculas de vino. La página limpia de la C con el motor WebGL2 de la home: 16.000 moléculas en 3D que giran
+   con el ratón y se dispersan al pasar de una escena a otra. La ladera en relieve, la rueda de cata, la bodega con sus
+   colores, la botella con su ficha y el sello en relieve. Todos los datos son los ficticios de bodega.json. */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const suave = (x) => x * x * (3 - 2 * x);
+let semilla = 7; const R = () => ((semilla = (semilla * 16807) % 2147483647) / 2147483647);
+const N = 16000;
+const U1 = new Float32Array(N), U2 = new Float32Array(N), U3 = new Float32Array(N), U4 = new Float32Array(N);
+for (let i = 0; i < N; i++) { U1[i] = R(); U2[i] = R(); U3[i] = R(); U4[i] = R(); }
+const girar = (q, ry, rx) => { const x1 = q[0] * Math.cos(ry) + q[2] * Math.sin(ry), z1 = -q[0] * Math.sin(ry) + q[2] * Math.cos(ry);
+  return [x1, q[1] * Math.cos(rx) - z1 * Math.sin(rx), q[1] * Math.sin(rx) + z1 * Math.cos(rx)]; };
+const giroX = (p, g) => girar(p, 0, g);
+const miles = (n) => n.toLocaleString('es-ES', { useGrouping: 'always' });
+
+/* Datos ficticios (los de bodega.json). */
+const AROMAS = ['Fruta roja', 'Fruta negra', 'Fruta blanca', 'Cítricos', 'Floral', 'Especias', 'Madera', 'Mineral'];
+const VINOS = [
+  { nombre: 'Ejemplo Crianza', tipo: 'Tinto · 14 meses en barrica', formato: '75 cl', precio: '14,50 €', stock: 1240, cata: [7, 6, 0, 1, 3, 5, 4, 2] },
+  { nombre: 'Ejemplo Reserva', tipo: 'Tinto · 24 meses en barrica', formato: '75 cl', precio: '24,00 €', stock: 480, cata: [4, 8, 0, 0, 2, 7, 8, 3] },
+  { nombre: 'Ejemplo Blanco', tipo: 'Blanco · sobre lías', formato: '75 cl', precio: '11,90 €', stock: 2100, cata: [0, 0, 8, 7, 6, 1, 1, 5] },
+];
+const PARCELAS = [{ nombre: 'El Cerro', variedad: 'Garnacha', plantada: 1952, x: 0.35, z: -0.25 }, { nombre: 'La Hoya', variedad: 'Tempranillo', plantada: 1978, x: -0.6, z: 0.3 },
+  { nombre: 'La Cuesta', variedad: 'Graciano', plantada: 2004, x: -1.35, z: -0.45 }, { nombre: 'Los Llanos', variedad: 'Viura', plantada: 1990, x: 1.4, z: 0.55 }];
+const VISITAS = { al_anio: 4200, dias: 'De martes a domingo', cata: 'cata incluida', socio: 8 };
+
+/* ---------- formas ---------- */
+/* La ladera: un relieve hecho de moléculas, con las hileras de viña siguiendo el terreno, visto desde arriba. Con parcelas,
+   una de cada tres moléculas se junta en una de las cuatro y las marca. */
+const INCL = 0.55;
+const altura = (x, z) => 0.95 * Math.exp(-((x - 0.35) ** 2 / 1.1 + (z + 0.15) ** 2 / 0.7)) + 0.42 * Math.exp(-((x + 1.25) ** 2 / 0.35 + (z - 0.55) ** 2 / 0.45)) + 0.05 * Math.sin(2.6 * x + 1.3 * z);
+const enLadera = (x, z, dy = 0) => giroX([x, -0.75 + altura(x, z) + dy, z], INCL);
+function ladera(conParcelas) {
+  const a = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) { const g = U1[i]; let x, z, dy = 0;
+    if (conParcelas && g < 0.3) { const p = PARCELAS[i % 4], dz = Math.round((U3[i] * 2 - 1) * 0.24 * 16) / 16;   // la parcela: sus hileras, más juntas
+      z = p.z + dz + (U4[i] - 0.5) * 0.008; x = p.x + (U2[i] * 2 - 1) * 0.36 * Math.sqrt(Math.max(0, 1 - (dz / 0.26) ** 2)); dy = 0.02; }
+    else if (g < 0.74) { z = Math.round((U3[i] * 2 - 1) * 1.5 * 8) / 8 + (U4[i] - 0.5) * 0.012; const xm = 2.3 * Math.sqrt(Math.max(0, 1 - (z / 1.55) ** 2)); x = (U2[i] * 2 - 1) * xm; }   // hileras
+    else { const ph = U2[i] * Math.PI * 2, r = Math.sqrt(U3[i]); x = Math.cos(ph) * 2.3 * r; z = Math.sin(ph) * 1.5 * r; }   // suelo
+    a.set(enLadera(x, z, dy), i * 3); }
+  return a;
+}
+/* La rueda de cata original: una porción por aroma, hasta su intensidad (el borde es el 10). */
+const GIRO_RUEDA = 0.35, RM = 1.55, SEC = Math.PI * 2 / AROMAS.length;
+function ruedaVino(w) {
+  const a = new Float32Array(N * 3), n = AROMAS.length, cata = VINOS[w].cata;
+  for (let i = 0; i < N; i++) { let x, y; const u = U1[i];
+    if (u < 0.12) { const th = U2[i] * Math.PI * 2; x = Math.cos(th) * RM; y = Math.sin(th) * RM; }
+    else if (u < 0.2) { const th = Math.floor(U2[i] * n) * SEC - Math.PI / 2, r = U3[i] * RM; x = Math.cos(th) * r; y = Math.sin(th) * r; }
+    else { const k = i % n, th = k * SEC - Math.PI / 2 + (0.08 + U2[i] * 0.84) * SEC, r = Math.sqrt(U3[i]) * RM * Math.max(cata[k], 0.15) / 10; x = Math.cos(th) * r; y = Math.sin(th) * r; }
+    const z = (U4[i] - 0.5) * 0.06;
+    a.set([x, y * Math.cos(GIRO_RUEDA) - z * Math.sin(GIRO_RUEDA), y * Math.sin(GIRO_RUEDA) + z * Math.cos(GIRO_RUEDA)], i * 3); }
+  return a;
+}
+/* La bodega, con sus colores: hormigón, lamas en vino, mirador, portón y cipreses (inventada). */
+const rgb = (h) => [1, 3, 5].map((o) => parseInt(h.slice(o, o + 2), 16) / 255);
+const mezcla = (a, b, t) => a.map((v, k) => v + (b[k] - v) * t);
+const GRIS = [0.66, 0.64, 0.62], ACERO = [0.6, 0.59, 0.58], ACERO_OSC = [0.42, 0.41, 0.4], VINO = [rgb('#6e1432'), rgb('#a3456a')], ROSA = rgb('#d493ad'), ARO = rgb('#3a2a24'), UVA = rgb('#33081a');
+const EDI = { esc: 3.6 / 170, x0: 85, y0: -0.72, giro: 0.1 };
+const aMundo = ([x, y, z]) => giroX([(x - EDI.x0) * EDI.esc, EDI.y0 + y * EDI.esc, -z * EDI.esc], EDI.giro);
+const ARISTAS = [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]];
+const aristaCaja = (b, k, t) => { const V = (n) => [b[(n % 4 === 1 || n % 4 === 2) ? 1 : 0], b[n % 4 >= 2 ? 3 : 2], b[n >= 4 ? 5 : 4]];
+  const [a, c] = ARISTAS[k], p = V(a), q = V(c); return p.map((v, d) => v + (q[d] - v) * t); };
+const BAJO = [0, 170, 0, 38, 0, 40], LOSA = [22, 150, 48, 54, 4, 36], MIRADOR = [60, 76, 54, 68, 14, 28], PORTON = [102, 126, 0, 26], CIPRESES = [[-14, 58], [-6, 46], [182, 40]];
+function bodega() {
+  const pos = new Float32Array(N * 3), col = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) { const g = U2[i], u = U3[i], v = U4[i], w = U1[(i * 7) % N]; let q, c = GRIS;
+    if (g < 0.09) { q = aristaCaja(BAJO, Math.floor(w * 12), u); c = ACERO_OSC; }
+    else if (g < 0.29) q = [BAJO[0] + u * BAJO[1], v * BAJO[3], 0];
+    else if (g < 0.34) { q = aristaCaja(LOSA, Math.floor(w * 12), u); c = ACERO_OSC; }
+    else if (g < 0.37) q = [LOSA[0] + u * (LOSA[1] - LOSA[0]), LOSA[2] + v * (LOSA[3] - LOSA[2]), LOSA[4]];
+    else if (g < 0.385) { q = [22 + Math.floor(w * 4) * 40, 38 + u * 10, 4]; c = ACERO_OSC; }
+    else if (g < 0.55) { q = [36 + u * 114, 12 + Math.floor(w * 7) * 1.8 + u * 35, -0.5]; c = mezcla(VINO[0], VINO[1], v * 0.5); }
+    else if (g < 0.575) { q = aristaCaja(MIRADOR, Math.floor(w * 12), u); c = ACERO_OSC; }
+    else if (g < 0.61) { q = [MIRADOR[0] + u * 16, MIRADOR[2] + v * 14, MIRADOR[4]]; c = ROSA; }
+    else if (g < 0.63) q = [PORTON[0] + u * 24, v * 26, -0.3];
+    else if (g < 0.69) { q = [PORTON[0] + u * 24, 2 + Math.floor(v * 9) * 3, -0.6]; c = ARO; }
+    else if (g < 0.8) { const [cx, h] = CIPRESES[Math.floor(w * 3)], r = 4.2 * Math.sin(Math.PI * Math.min(1, u * 1.15)), th = v * Math.PI * 2, rr = Math.sqrt(U1[(i * 13) % N]) * r;
+      q = [cx + Math.cos(th) * rr, u * h, -4 + Math.sin(th) * rr * 0.6]; c = mezcla(ARO, UVA, U1[(i * 13) % N]); }
+    else if (g < 0.86) { q = [-20 + u * 210, 0, -2 - v * 14]; c = ACERO; }
+    else q = [BAJO[0] + u * BAJO[1], v * BAJO[3], 0];
+    pos.set(aMundo(q), i * 3); col.set(c, i * 3); }
+  return { pos, col };
+}
+/* La botella original. */
+const perfil = (y) => y < 0.3 ? 0.64 : y < 0.95 ? 0.21 + 0.43 * (0.5 + 0.5 * Math.cos((y - 0.3) / 0.65 * Math.PI)) : (y > 1.6 ? 0.25 : 0.21);
+function botella() {
+  const a = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) { const th = U2[i] * Math.PI * 2;
+    if (U1[i] < 0.06) { const rr = Math.sqrt(U3[i]) * 0.64; a.set([Math.cos(th) * rr, -1.6, Math.sin(th) * rr], i * 3); continue; }
+    const y = -1.6 + U3[i] * 3.35, r = perfil(y); a.set([Math.cos(th) * r, y, Math.sin(th) * r], i * 3); }
+  return a;
+}
+/* El sello en relieve: la cara, las iniciales levantadas, dos aros y el canto. Al girar con el ratón se ve la profundidad. */
+function muestrearTexto(texto, fuente) {
+  const c = document.createElement('canvas'), W = 600, H = 400; c.width = W; c.height = H; const g = c.getContext('2d');
+  g.font = fuente; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(texto, W / 2, H / 2);
+  const d = g.getImageData(0, 0, W, H).data, p = [];
+  for (let y = 0; y < H; y += 2) for (let x = 0; x < W; x += 2) if (d[(y * W + x) * 4 + 3] > 128) p.push([(x - W / 2) / 200, -(y - H / 2) / 200]);
+  return p;
+}
+function sello() {
+  const a = new Float32Array(N * 3), BE = muestrearTexto('BE', 'italic 500 260px "Newsreader"');
+  for (let i = 0; i < N; i++) { const g = U1[i], th = U2[i] * Math.PI * 2; let q;
+    if (g < 0.42 && BE.length) { const p = BE[(U3[i] * BE.length) | 0]; q = [p[0] * 0.95 + (U4[i] - 0.5) * 0.01, p[1] * 0.95, 0.16 + (U4[i] - 0.5) * 0.05]; }   // las iniciales, levantadas
+    else if (g < 0.62) { const rr = Math.sqrt(U3[i]) * 1.16; q = [Math.cos(th) * rr, Math.sin(th) * rr, (U4[i] - 0.5) * 0.02]; }   // la cara
+    else if (g < 0.86) { const r = U4[i] < 0.5 ? 1.22 : 1.36; q = [Math.cos(th) * r, Math.sin(th) * r, 0.1]; }   // los aros
+    else { q = [Math.cos(th) * 1.38, Math.sin(th) * 1.38, -0.12 + U3[i] * 0.22]; }   // el canto
+    a.set(q, i * 3); }
+  return a;
+}
+
+/* ---------- el motor original: WebGL2 directo ---------- */
+const FOV = 34, DIST = 9.5;
+const VERT = `
+  uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uVel, uCalma, uTinteA, uTinteB;
+  attribute vec3 aFrom, aTo, aCol, aCol2; attribute float aRnd; varying float vA, vGlow, vTinte; varying vec3 vCol;
+  void main(){
+    float t = smoothstep(0.0, 1.0, clamp((uT - aRnd * 0.3) / 0.7, 0.0, 1.0));
+    vec3 p = mix(aFrom, aTo, t);
+    float mid = sin(3.14159 * t);
+    vec3 n = vec3(sin(p.y * 2.3 + uTime * 0.9 + aRnd * 6.28), cos(p.x * 1.9 + uTime * 0.7 + aRnd * 3.1), sin(p.z * 2.1 + uTime * 0.8 + aRnd * 1.7));
+    p += n * (0.012 + (mid * 0.62 + uVel * 0.08) * (1.0 - uCalma));
+    vec4 mv = uMV * vec4(p, 1.0);
+    gl_Position = uProj * mv;
+    gl_PointSize = uSize * (0.55 + aRnd * 0.9) * (1.0 + mid * 0.7 * (1.0 - uCalma)) / -mv.z;
+    vA = 0.45 + 0.55 * aRnd; vGlow = clamp((mid + uVel * 0.4) * (1.0 - uCalma * 0.8), 0.0, 1.0); vCol = mix(aCol, aCol2, t); vTinte = mix(uTinteA, uTinteB, t);
+  }`;
+const FRAG = `
+  precision highp float;
+  uniform float uAlpha; varying float vA, vGlow, vTinte; varying vec3 vCol;
+  void main(){
+    float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard;
+    float s = smoothstep(0.5, 0.05, d);
+    vec3 vino = vec3(0.40, 0.06, 0.18), rosa = vec3(0.86, 0.46, 0.60);
+    vec3 col = mix(mix(vino, rosa, vGlow * 0.85 + (1.0 - vA) * 0.25), vCol, vTinte);
+    gl_FragColor = vec4(col, s * mix(vA, 0.9, vTinte) * uAlpha);
+  }`;
+function crearMotor(canvas, n) {
+  const gl = canvas.getContext('webgl2', { alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'high-performance' });
+  if (!gl) return null;
+  const sh = (tipo, src) => { const s = gl.createShader(tipo); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG)); gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog); gl.bindVertexArray(gl.createVertexArray());
+  const buffers = {}, u = {};
+  ['uProj', 'uMV', 'uT', 'uTime', 'uSize', 'uVel', 'uAlpha', 'uCalma', 'uTinteA', 'uTinteB'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
+  gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  return {
+    atributo(nombre, datos, tam) { const b = gl.createBuffer(), loc = gl.getAttribLocation(prog, nombre); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, datos, gl.DYNAMIC_DRAW);
+      gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, tam, gl.FLOAT, false, 0, 0); buffers[nombre] = b; },
+    subir(nombre, datos) { gl.bindBuffer(gl.ARRAY_BUFFER, buffers[nombre]); gl.bufferSubData(gl.ARRAY_BUFFER, 0, datos); },
+    tamano() { const dpr = Math.min(devicePixelRatio, 2); canvas.width = Math.round(innerWidth * dpr); canvas.height = Math.round(innerHeight * dpr); gl.viewport(0, 0, canvas.width, canvas.height);
+      const f = 1 / Math.tan((FOV * Math.PI / 180) / 2), a = innerWidth / innerHeight, near = 0.1, far = 100;
+      gl.uniformMatrix4fv(u.uProj, false, new Float32Array([f / a, 0, 0, 0, 0, f, 0, 0, 0, 0, (far + near) / (near - far), -1, 0, 0, (2 * far * near) / (near - far), 0])); gl.uniform1f(u.uSize, 44 * dpr); },
+    dibujar({ x, y, rx, ry, s, t, tiempo, vel, alfa, calma, tinteA, tinteB }) {
+      const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
+      gl.uniformMatrix4fv(u.uMV, false, new Float32Array([cy * s, sx * sy * s, -cx * sy * s, 0, 0, cx * s, sx * s, 0, sy * s, -sx * cy * s, cx * cy * s, 0, x, y, -DIST, 1]));
+      gl.uniform1f(u.uT, t); gl.uniform1f(u.uTime, tiempo); gl.uniform1f(u.uVel, vel); gl.uniform1f(u.uAlpha, alfa); gl.uniform1f(u.uCalma, calma); gl.uniform1f(u.uTinteA, tinteA); gl.uniform1f(u.uTinteB, tinteB);
+      gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.POINTS, 0, n);
+    },
+  };
+}
+function proyectar(p, { x, y, rx, ry, s }) {
+  const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
+  const X = cy * s * p[0] + sy * s * p[2] + x, Y = sx * sy * s * p[0] + cx * s * p[1] - sx * cy * s * p[2] + y, Zc = -cx * sy * s * p[0] + sx * s * p[1] + cx * cy * s * p[2];
+  const f = 1 / Math.tan((FOV * Math.PI / 180) / 2), a = innerWidth / innerHeight, w = DIST - Zc;
+  return { sx: ((f / a) * X / w + 1) / 2 * innerWidth, sy: (1 - f * Y / w) / 2 * innerHeight };
+}
+
+function iniciar() {
+  /* Plan: una entrada por escena, en el orden de las secciones. `vista` es dónde se coloca la forma (escritorio y móvil);
+     `suave` quita la dispersión al llegar (la ladera se queda y solo se juntan las parcelas). */
+  const BODEGA = bodega();
+  const PLAN = [
+    { n: 1, forma: () => ladera(false), vista: { d: { x: 1.0, y: -1.35, s: 1.45 }, m: { x: 0, y: -1.75, s: 0.66 } } },
+    { n: 1, forma: () => ladera(true), suave: true, vista: { d: { x: 2.1, y: -0.2, s: 0.95 }, m: { x: 0, y: -1.25, s: 0.55 } } },
+    { n: VINOS.length, forma: (j) => ruedaVino(j), vista: { d: { x: 2.2, y: 0, s: 1 }, m: { x: 0, y: -1.1, s: 0.5 } } },
+    { n: 1, forma: () => BODEGA.pos, color: () => BODEGA.col, vista: { d: { x: 2.05, y: 0, s: 0.98 }, m: { x: 0, y: -1.15, s: 0.56 } } },
+    { n: 1, forma: () => botella(), vista: { d: { x: 2.2, y: 0, s: 1 }, m: { x: 0, y: -1.2, s: 0.45 } } },
+    { n: 1, forma: () => sello(), vista: { d: { x: 2.3, y: 0, s: 1 }, m: { x: 0, y: -1.15, s: 0.55 } } },
+  ];
+  const formas = [], escenaDe = [], inicio = [], COLORES = [];
+  PLAN.forEach((e, s) => { inicio.push(formas.length); for (let j = 0; j < e.n; j++) { formas.push(e.forma(j)); escenaDe.push(s); COLORES.push(e.color ? e.color(j) : null); } });
+  const NF = formas.length - 1, gris = new Float32Array(N * 3).fill(0.4);
+
+  /* Cifras sobre cada forma. */
+  const ETIQ = [];
+  ETIQ[inicio[1]] = PARCELAS.map((p) => ({ p: enLadera(p.x, p.z, 0.5), b: p.nombre, s: `${p.variedad} · ${p.plantada}` }));
+  VINOS.forEach((v, w) => { ETIQ[inicio[2] + w] = AROMAS.map((a, k) => ({ a, k })).filter(({ k }) => v.cata[k] > 0).map(({ a, k }) => {
+    const th = k * SEC - Math.PI / 2 + SEC / 2, r = RM * 1.24; return { p: giroX([Math.cos(th) * r, Math.sin(th) * r, 0], GIRO_RUEDA), b: String(v.cata[k]), s: a }; }); });
+  ETIQ[inicio[3]] = [{ p: aMundo([68, 82, 21]), b: miles(VISITAS.al_anio), s: 'visitas al año' }, { p: aMundo([40, -16, 0]), pm: aMundo([85, -16, 0]), b: VISITAS.dias, s: VISITAS.cata },
+    { p: aMundo([130, -16, 0]), pm: aMundo([85, -16, 0]), b: `1 de cada ${VISITAS.socio}`, s: 'se hace socio del club' }];
+  ETIQ[inicio[4]] = [{ p: [0.95, 0.95, 0], b: VINOS[0].precio, s: 'precio', izq: true }, { p: [0.95, 0.15, 0], b: miles(VINOS[0].stock), s: 'botellas en stock', izq: true },
+    { p: [0.95, -0.65, 0], b: VINOS[0].formato, s: VINOS[0].nombre, izq: true }];
+  const capa = document.getElementById('etiquetas');
+  const elsEtiq = ETIQ.map((grupo) => (grupo || []).map((e) => { const el = document.createElement('div'); el.className = 'et' + (e.izq ? ' izq' : '');
+    el.innerHTML = '<b></b><span></span>'; el.querySelector('b').textContent = e.b; el.querySelector('span').textContent = e.s; capa.appendChild(el); return { e, el, ancho: 0, alto: 0 }; }));
+  const medir = () => elsEtiq.flat().forEach((o) => { o.ancho = o.el.offsetWidth; o.alto = o.el.offsetHeight; });
+  addEventListener('resize', medir); medir();
+  function pintarEtiquetas(m, vista, apagar) {
+    const g0 = Math.round(m), cerca = 1 - clamp(Math.abs(m - g0) / 0.3), movil = innerWidth <= 860, visibles = [];
+    elsEtiq.forEach((grupo, g) => grupo.forEach((o) => {
+      const op = g === g0 ? cerca * (1 - apagar) : 0;
+      if (op > 0.01) { const usaPm = movil && o.e.pm, q = proyectar(usaPm ? o.e.pm : o.e.p, vista), izqA = !!o.e.izq && !usaPm;
+        const x = izqA ? Math.min(q.sx, innerWidth - 10 - o.ancho) : clamp(q.sx - o.ancho / 2, 10, innerWidth - 10 - o.ancho);
+        visibles.push({ o, op, x, y: q.sy - (o.alto || 36) / 2 }); return; }
+      if (o.el.style.opacity !== '0') o.el.style.opacity = '0'; }));
+    visibles.sort((a, b) => a.y - b.y).forEach((a, i) => { for (let j = 0; j < i; j++) { const b = visibles[j], h = b.o.alto || 36;
+        if (a.x < b.x + b.o.ancho + 6 && b.x < a.x + a.o.ancho + 6 && a.y < b.y + h + 2 && b.y < a.y + h + 2) a.y = b.y + h + 2; }
+      a.o.el.style.opacity = a.op.toFixed(3); a.o.el.style.transform = `translate(${a.x.toFixed(1)}px, ${a.y.toFixed(1)}px)`; });
+  }
+
+  const motor = crearMotor(document.getElementById('gl'), N);
+  if (!motor) { document.body.classList.add('sin-webgl'); return; }
+  const rnd = new Float32Array(N); for (let i = 0; i < N; i++) rnd[i] = U4[(i * 31) % N] * 0.5 + U1[(i * 17) % N] * 0.5;
+  motor.atributo('aFrom', formas[0].slice(), 3); motor.atributo('aTo', formas[0].slice(), 3);
+  motor.atributo('aCol', gris, 3); motor.atributo('aCol2', gris, 3); motor.atributo('aRnd', rnd, 1);
+  motor.tamano(); addEventListener('resize', () => motor.tamano());
+
+  const secs = [...document.querySelectorAll('section.escena')], pasosNav = [...document.querySelectorAll('.recorrido span')], footer = document.querySelector('footer');
+  const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && e.target.closest('section').classList.add('in')), { threshold: 0.35 });
+  secs.forEach((s) => io.observe(s.querySelector('.fijo')));
+  function objetivoM(y) {
+    const anc = [];
+    secs.forEach((sec, s) => { const n = PLAN[s].n, a = sec.offsetTop, b = sec.offsetTop + sec.offsetHeight - innerHeight;
+      if (n === 1) { anc.push([a, inicio[s]]); anc.push([b, inicio[s]]); } else for (let j = 0; j < n; j++) anc.push([a + (b - a) * j / (n - 1), inicio[s] + j]); });
+    if (y <= anc[0][0]) return anc[0][1];
+    for (let i = 0; i < anc.length - 1; i++) if (y < anc[i + 1][0]) {
+      if (anc[i][1] === anc[i + 1][1]) return anc[i][1];
+      const p = (y - anc[i][0]) / (anc[i + 1][0] - anc[i][0]), misma = escenaDe[anc[i][1]] === escenaDe[anc[i + 1][1]];
+      return anc[i][1] + (misma ? Math.round(p) : p);
+    }
+    return NF;
+  }
+  const vinoNombre = document.getElementById('vinoNombre'), vinoTipo = document.getElementById('vinoTipo');
+  let raton = [0, 0], ratonS = [0, 0]; addEventListener('pointermove', (e) => { raton = [e.clientX / innerWidth - 0.5, e.clientY / innerHeight - 0.5]; });
+  let m = 0, segmento = -1, ultimo = scrollY, vel = 0, formaTexto = -1, activo = -1;
+  const vistaDe = (f, movil) => PLAN[escenaDe[f]].vista[movil ? 'm' : 'd'];
+  function cuadro(t) {
+    const y = scrollY; vel += (Math.abs(y - ultimo) / 40 - vel) * 0.1; ultimo = y;
+    m += (objetivoM(y) - m) * 0.07;
+    const i = Math.min(NF - 1, Math.max(0, Math.floor(m))), f = clamp(m - i);
+    if (i !== segmento) { segmento = i; motor.subir('aFrom', formas[i]); motor.subir('aTo', formas[i + 1]);
+      motor.subir('aCol', COLORES[i] || COLORES[i + 1] || gris); motor.subir('aCol2', COLORES[i + 1] || COLORES[i] || gris); }
+    const misma = escenaDe[i] === escenaDe[i + 1], calma = misma || PLAN[escenaDe[i + 1]].suave ? 1 : 0;
+    const fr = Math.round(Math.min(m, NF)), esc = escenaDe[fr], quieta = PLAN[esc].n > 1;
+    // La vista pasa de la de una forma a la siguiente; el ratón gira la forma, como en la home original.
+    const movil = innerWidth <= 860, va = vistaDe(i, movil), vb = vistaDe(i + 1, movil), k = suave(f);
+    ratonS = ratonS.map((v, d) => v + (raton[d] - v) * 0.06);
+    const giro = quieta ? 0.3 : 1;
+    const vista = { x: va.x + (vb.x - va.x) * k, y: va.y + (vb.y - va.y) * k, s: va.s + (vb.s - va.s) * k,
+      ry: (Math.sin(t / 4200) * 0.35 + ratonS[0] * 0.6) * giro, rx: ratonS[1] * 0.26 * giro };
+    const desv = clamp((y - (footer.offsetTop - innerHeight)) / (innerHeight * 0.6));
+    motor.dibujar({ ...vista, t: m >= NF ? 1 : f, tiempo: t / 1000, vel: Math.min(1, vel), alfa: 1 - desv * 0.9, calma, tinteA: COLORES[i] ? 1 : 0, tinteB: COLORES[i + 1] ? 1 : 0 });
+    pintarEtiquetas(m, vista, desv);
+    if (fr !== formaTexto) { formaTexto = fr; if (esc === 2) { const v = VINOS[fr - inicio[2]]; vinoNombre.textContent = v.nombre; vinoTipo.textContent = v.tipo; } }
+    if (esc !== activo) { activo = esc; const paso = secs[esc].dataset.paso; pasosNav.forEach((p) => p.classList.toggle('on', p.dataset.paso === paso)); }
+    requestAnimationFrame(cuadro);
+  }
+  requestAnimationFrame(cuadro);
+}
+document.fonts.load('italic 500 80px "Newsreader"').then(iniciar, iniciar);
+</script>
+</body>
+</html>
