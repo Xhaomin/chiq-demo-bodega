@@ -1,0 +1,39 @@
+{
+  "aviso": "Todos los datos de Bodega Ejemplo son inventados para la demo.",
+  "anadas": [
+    { "anio": 2021, "botellas": 182000, "lluvia_mm": 412, "nota": "Fresca y larga" },
+    { "anio": 2022, "botellas": 141000, "lluvia_mm": 298, "nota": "Sequía y calor" },
+    { "anio": 2023, "botellas": 158000, "lluvia_mm": 335, "nota": "Vendimia temprana" },
+    { "anio": 2024, "botellas": 196000, "lluvia_mm": 468, "nota": "La más generosa" }
+  ],
+  "mercados": [
+    { "pais": "España", "pct": 54, "lat": 40.4, "lon": -3.7 },
+    { "pais": "Alemania", "pct": 14, "lat": 51.2, "lon": 10.4 },
+    { "pais": "Reino Unido", "pct": 11, "lat": 52.4, "lon": -1.5 },
+    { "pais": "EE. UU.", "pct": 9, "lat": 39.8, "lon": -98.6 },
+    { "pais": "México", "pct": 7, "lat": 23.6, "lon": -102.5 },
+    { "pais": "Japón", "pct": 5, "lat": 36.2, "lon": 138.3 }
+  ],
+  "canales": [
+    { "canal": "Distribución", "pct": 61 },
+    { "canal": "Tienda online", "pct": 18 },
+    { "canal": "Club de vino", "pct": 12 },
+    { "canal": "Visitas", "pct": 9 }
+  ],
+  "paso_club": "1 de cada 8 visitantes se hace socio del club",
+  "vino": {
+    "nombre": "Ejemplo Crianza 2021",
+    "formato": "75 cl",
+    "precio": "14,50 €",
+    "stock": 1240,
+    "aromas": [
+      { "aroma": "Fruta roja", "intensidad": 8 },
+      { "aroma": "Fruta negra", "intensidad": 6 },
+      { "aroma": "Especias", "intensidad": 5 },
+      { "aroma": "Madera", "intensidad": 4 },
+      { "aroma": "Balsámico", "intensidad": 4 },
+      { "aroma": "Floral", "intensidad": 3 },
+      { "aroma": "Mineral", "intensidad": 2 }
+    ]
+  }
+}
