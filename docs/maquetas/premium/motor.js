@@ -32,7 +32,9 @@
   }
 
   /**
-   * opciones: lienzo, n, estilo ('luz' suma colores sobre fondo oscuro; 'tinta' pinta encima), paleta [{color, ancho}],
+   * opciones: lienzo, n, estilo ('luz' suma colores sobre fondo oscuro; 'tinta' pinta encima; 'moleculas' dibuja puntos
+   * redondos y suaves, como las moléculas de vino de la home), paleta [{color, ancho}] (en 'moleculas', [{rgb, tam, alfa}]
+   * con tres tamaños y tres opacidades: cada partícula toma uno de los tres, los grandes más opacos),
    * fondo ([r, g, b] o null para dejar ver el fondo CSS), formas (R) => ({ nombre: forma }), cajas (W, H) => ({ tipo: caja }).
    * forma: { pos(i, t, q) escribe u, v en q (q[2] = 1 si salta de un extremo al otro), color(i), caja, flujo, rigidez, estela }.
    * Para un movimiento más calmado: impulso (golpe al cambiar de forma, 5), agitacion (flujo extra al cambiar, 2.5),
@@ -44,6 +46,14 @@
     const R = { n, R1: new Float32Array(n), R2: new Float32Array(n), R3: new Float32Array(n), R4: new Float32Array(n) };
     for (let i = 0; i < n; i++) { R.R1[i] = azar(); R.R2[i] = azar(); R.R3[i] = azar(); R.R4[i] = azar(); }
     const formas = o.formas(R, muestrear);
+    const TAM = Uint8Array.from(R.R4, (r) => Math.min(2, Math.floor(r * 3)));
+    /** Una molécula: un disco con el borde difuminado, pintado una vez y estampado en cada cuadro. */
+    const molecula = (rgb, d, a) => { const dpr = Math.min(devicePixelRatio || 1, 2), L = Math.ceil(d * dpr) + 2, c = document.createElement('canvas'); c.width = c.height = L;
+      const g = c.getContext('2d'), gr = g.createRadialGradient(L / 2, L / 2, 0, L / 2, L / 2, L / 2), col = rgb.join(',');
+      gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(0.45, `rgba(${col},${a * 0.85})`); gr.addColorStop(1, `rgba(${col},0)`);
+      g.fillStyle = gr; g.fillRect(0, 0, L, L); return c; };
+    const EM = innerWidth < 760 ? 0.7 : 1;   // en el móvil las formas son pequeñas: moléculas más finas
+    const SPR = estilo === 'moleculas' ? paleta.map((p) => p.tam.map((d, k) => molecula(p.rgb, d * EM, p.alfa[k]))) : null;
     let W = 0, H = 0, cajas = {}, forma = null, tCambio = 0, porColor = [], raton = [-1e5, -1e5], visible = true;
     function tam() {
       const dpr = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight;
@@ -83,9 +93,15 @@
         flujo(X[i] * 0.0035, Y[i] * 0.0035, t * 0.12, f);
         let ax = (tx - X[i]) * k + f[0] * fl, ay = (ty - Y[i]) * k + f[1] * fl;
         const dx = X[i] - raton[0], dy = Y[i] - raton[1], d2 = dx * dx + dy * dy;
-        if (d2 < 10000) { const m = (1 - d2 / 10000) * repulsion / Math.sqrt(d2 + 1); ax += dx * m; ay += dy * m; }
+        if (repulsion && d2 < 10000) { const m = (1 - d2 / 10000) * repulsion / Math.sqrt(d2 + 1); ax += dx * m; ay += dy * m; }
         VX[i] = VX[i] * amort + ax; VY[i] = VY[i] * amort + ay;
         PX[i] = X[i]; PY[i] = Y[i]; X[i] += VX[i]; Y[i] += VY[i];
+      }
+      if (SPR) {
+        ctx.globalCompositeOperation = 'source-over';
+        for (let c = 0; c < paleta.length; c++) { const l = porColor[c]; if (!l) continue;
+          for (let j = 0; j < l.length; j++) { const i = l[j], k = TAM[i], d = paleta[c].tam[k] * EM; ctx.drawImage(SPR[c][k], X[i] - d / 2, Y[i] - d / 2, d, d); } }
+        return;
       }
       ctx.globalCompositeOperation = estilo === 'luz' ? 'lighter' : 'source-over'; ctx.lineCap = 'round';
       for (let c = 0; c < paleta.length; c++) {

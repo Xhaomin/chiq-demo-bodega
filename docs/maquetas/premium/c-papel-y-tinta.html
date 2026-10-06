@@ -38,7 +38,7 @@ p.cuerpo{font-size:17px;line-height:1.72;color:var(--tinta2);max-width:33ch}
 .dentro .texto>*{opacity:1}
 .dentro .texto>*:nth-child(2){transition-delay:.15s}.dentro .texto>*:nth-child(3){transition-delay:.3s}.dentro .texto>*:nth-child(4){transition-delay:.45s}.dentro .texto>*:nth-child(5){transition-delay:.6s}
 #etq{position:fixed;inset:0;z-index:5;pointer-events:none}
-#etq div{position:absolute;transform:translate(-50%,-50%);text-align:center;opacity:0;transition:opacity 1.2s 1s;white-space:nowrap}
+#etq div{position:absolute;transform:translate(-50%,-50%);text-align:center;opacity:0;transition:opacity 1.2s 1s;white-space:nowrap;background:rgba(244,239,231,.88);padding:3px 9px 4px}
 #etq div.ver{opacity:1}
 #etq b{display:block;font-family:'Newsreader',serif;font-style:italic;font-weight:400;font-size:19px;color:var(--tinta)}
 #etq span{color:var(--tinta3);font-size:9.5px}
@@ -60,7 +60,7 @@ footer{position:relative;z-index:10;padding:50px clamp(30px,8vw,140px) 60px;colo
   p.cuerpo{font-size:15px}.precio{font-size:48px}
   #tienda p.cuerpo{display:none}
   .maqueta{left:50%;right:auto;transform:translateX(-50%);bottom:18px;font-size:9px;white-space:nowrap}
-  #etq b{font-size:15px}
+  #etq b{font-size:14px}#etq span{display:none}#etq div{padding:1px 6px}
 }
 </style>
 </head>
@@ -71,7 +71,7 @@ footer{position:relative;z-index:10;padding:50px clamp(30px,8vw,140px) 60px;colo
 <header>
   <a class="logo" href="#">Bodega Ejemplo</a>
   <nav class="recorrido mono" aria-label="Tu recorrido"><span data-paso="descubre">Descubre</span><span data-paso="prueba">Prueba</span><span data-paso="visita">Visita</span><span data-paso="llevatelo">Llévatelo</span><span data-paso="quedate">Quédate</span></nav>
-  <a class="der mono" href="#tienda">Tienda</a>
+  <span></span>
 </header>
 
 <main>
@@ -153,10 +153,12 @@ function mascara(texto, fuente) {
 
 function arrancar() {
   const motor = Maqueta.Motor({
-    lienzo: document.getElementById('lienzo'), n: 6000, estilo: 'tinta', fondo: [244, 239, 231],
-    impulso: 0.6, agitacion: 0.4, repulsion: 0.8, enForma: true,
-    paleta: [{ color: 'rgba(74,10,30,0.85)', ancho: 2.4 }, { color: 'rgba(122,26,62,0.75)', ancho: 2.1 }, { color: 'rgba(170,48,88,0.6)', ancho: 1.9 },
-      { color: 'rgba(206,120,148,0.5)', ancho: 1.7 }, { color: 'rgba(26,20,20,0.55)', ancho: 1.2 }],
+    lienzo: document.getElementById('lienzo'), n: 6000, estilo: 'moleculas', fondo: [244, 239, 231],
+    impulso: 0.6, agitacion: 0.4, repulsion: 0, enForma: true,
+    // Las moléculas de vino de la home original: granate, con un punto más rosado en algunas, de tres tamaños. La tinta
+    // solo la usa la estructura del edificio.
+    paleta: [{ rgb: [102, 15, 46], tam: [2.6, 4, 5.6], alfa: [0.55, 0.78, 0.95] }, { rgb: [124, 28, 60], tam: [2.6, 4, 5.6], alfa: [0.55, 0.78, 0.95] },
+      { rgb: [26, 20, 20], tam: [1.6, 2, 2.4], alfa: [0.4, 0.5, 0.6] }, { rgb: [102, 15, 46], tam: [1.8, 2.2, 2.6], alfa: [0.6, 0.7, 0.8] }],
     cajas: (W, H, movil, medio = !movil && W < 1100) => ({
       ancho: movil ? { cx: W * 0.5, cy: H * 0.98, s: W * 0.62 } : { cx: W * 0.5, cy: H * 0.97, s: W * 0.33 },
       lejos: movil ? { cx: W * 0.5, cy: H * 0.74, s: Math.min(W * 0.3, H * 0.17) } : medio ? { cx: W * 0.74, cy: H * 0.56, s: Math.min(W * 0.17, H * 0.3) } : { cx: W * 0.72, cy: H * 0.55, s: Math.min(W * 0.2, H * 0.34) },
@@ -167,39 +169,39 @@ function arrancar() {
       const ARO = Uint8Array.from({ length: n }, (_, i) => CUM_A.findIndex((c) => R2[(i * 13) % n] <= c));
       const dentroBE = mascara('BE', 'italic 500 210px "Newsreader"');
       const radioSello = (th) => 0.6 * (1 + 0.035 * Math.sin(7 * th) + 0.02 * Math.sin(13 * th + 1));
-      const calma = { flujo: 0.012, rigidez: 0.07, estela: 0.35 };
+      const calma = { flujo: 0.012, rigidez: 0.07, estela: 1 };
       return {
         ladera: { ...calma, caja: 'ancho',   // la ladera hecha de vino: lejos, rosado; cerca, granate
-          color: (i) => { const j = Math.floor(R1[i] * 14); return j < 4 ? 3 : j < 8 ? 2 : j < 11 ? 1 : 0; },
+          color: (i) => (R3[i] < 0.7 ? 0 : 1),
           pos(i, t, q) { const j = Math.floor(R1[i] * 14), f = 1 - j / 14, u = -1.5 + R2[i] * 3;
             q[0] = u; q[1] = 0.37 - j * 0.05 + f * (0.34 * Math.exp(-((u - 0.3) ** 2) / 0.22) + 0.08 * Math.exp(-((u + 0.75) ** 2) / 0.1)) + 0.003 * Math.sin(t * 0.6 + u * 3); } },
         mapa: { ...calma,
-          color: (i) => (R1[i] < 0.72 ? (Math.floor(R1[i] / 0.72 * 9) % 3 === 0 ? 2 : 3) : R4[i] < 0.6 ? 0 : 1),
+          color: (i) => (R3[i] < 0.7 ? 0 : 1),
           pos(i, t, q) {
             if (R1[i] < 0.72) { const j = Math.floor(R1[i] / 0.72 * 9), th = R2[i] * 6.2832, rj = 0.1 + j * 0.09, r = rj * (1 + 0.14 * Math.sin(3 * th + j * 0.5) + 0.07 * Math.sin(5 * th - j * 0.9 + 1.3));
               q[0] = 0.08 - j * 0.015 + r * Math.cos(th) * 1.12; q[1] = -0.02 + r * Math.sin(th) * 0.78; return; }   // curvas de nivel
             const p = PARC[Math.floor(R3[i] * 4)], th = R2[i] * 6.2832, rr = Math.sqrt(R4[i]) * (1 + 0.12 * Math.sin(3 * th + p[0] * 9));
             q[0] = p[0] + Math.cos(th) * rr * 0.12; q[1] = p[1] + Math.sin(th) * rr * 0.085; } },   // las parcelas
         aromas: { ...calma, caja: 'lejos',
-          color: (i) => { if (R1[i] < 0.72) { const c = CATA[ARO[i]]; return c >= 7 ? 0 : c >= 3 ? 1 : 3; } return 3; },
+          color: (i) => (R1[i] < 0.72 ? (R3[i] < 0.7 ? 0 : 1) : 3),
           pos(i, t, q) {
             if (R1[i] < 0.72) { const k = ARO[i], rs = (0.014 + CATA[k] * 0.0075) * (1 + 0.05 * Math.sin(t * 1.2 + k)), th = R3[i] * 6.2832, rr = Math.sqrt(R4[i]) * rs; q[0] = AROMA[k][0] + Math.cos(th) * rr; q[1] = AROMA[k][1] + Math.sin(th) * rr; return; }   // una gota por aroma
             const k = Math.floor(R2[i] * 8), a = AROMA[k], b = AROMA[(k + 1) % 8], s = Math.round(R3[i] * 30) / 30; q[0] = a[0] + (b[0] - a[0]) * s; q[1] = a[1] + (b[1] - a[1]) * s; } },   // la figura que las une
         bodega: { ...calma, caja: 'lejos',
-          color: (i) => (R1[i] < 0.86 ? LINEAS[SEG[i]][4] : R1[i] < 0.95 ? 0 : 3),
+          color: (i) => (R1[i] < 0.86 && LINEAS[SEG[i]][4] === 4 ? 2 : (R3[i] < 0.7 ? 0 : 1)),
           pos(i, t, q) {
             if (R1[i] < 0.86) { const L = LINEAS[SEG[i]], s = L[4] === 4 ? Math.round(R3[i] * 90) / 90 : R3[i]; q[0] = L[0] + (L[2] - L[0]) * s; q[1] = L[1] + (L[3] - L[1]) * s; return; }   // la estructura y las lamas
             if (R1[i] < 0.95) { const cx = R4[i] < 0.5 ? -1.34 : -1.22, h = R4[i] < 0.5 ? 0.78 : 0.6, tt = R2[i], w = 0.045 * Math.sin(Math.PI * Math.min(1, tt * 1.1)); q[0] = cx + (R3[i] * 2 - 1) * w; q[1] = -0.5 + tt * h; return; }   // cipreses
             q[0] = -0.41 + R2[i] * 0.18; q[1] = 0.17 + R3[i] * 0.2; } },   // el mirador
         botella: { ...calma,
-          color: (i) => { const g = R1[i]; if (g < 0.18) return 4; if (g < 0.86) { const y = -1.55 + R2[i] * 2.65; return y < -0.6 ? 0 : y < 0.4 ? 1 : 2; } return g < 0.94 ? 0 : 3; },
+          color: (i) => (R1[i] < 0.18 ? 3 : (R3[i] < 0.7 ? 0 : 1)),
           pos(i, t, q) { const g = R1[i], E = 0.5;
             if (g < 0.18) { const y = -1.6 + Math.round(R2[i] * 110) / 110 * 3.35; q[0] = (R3[i] < 0.5 ? -1 : 1) * perfil(y) * E; q[1] = y * E; return; }   // el vidrio, en tinta
             if (g < 0.86) { const y = -1.55 + R2[i] * 2.65; q[0] = (R3[i] * 2 - 1) * perfil(y) * 0.9 * E; q[1] = y * E + 0.002 * Math.sin(t * 0.5 + R4[i] * 9); return; }   // el vino
             if (g < 0.94) { const y = 1.38 + R2[i] * 0.37; q[0] = (R3[i] * 2 - 1) * perfil(y) * 1.04 * E; q[1] = y * E; return; }   // la cápsula
-            q[0] = -0.4 * E; q[1] = (-1.3 + R2[i] * 1.4) * E; } },   // el brillo
+            const y = -1.55 + R2[i] * 2.65; q[0] = (R3[i] * 2 - 1) * perfil(y) * 0.9 * E; q[1] = y * E; } },   // más vino
         sello: { ...calma,
-          color: (i) => (R1[i] < 0.15 ? 0 : R4[i] < 0.55 ? 1 : 0),
+          color: (i) => (R3[i] < 0.7 ? 0 : 1),
           pos(i, t, q) { const th = R2[i] * 6.2832, rr = R1[i] < 0.15 ? radioSello(th) * (0.96 + R3[i] * 0.04) : Math.sqrt(R3[i]) * radioSello(th);
             q[0] = Math.cos(th) * rr; q[1] = Math.sin(th) * rr;
             if (dentroBE(q[0], q[1])) { const r = radioSello(th) * (0.94 + R4[i] * 0.06); q[0] = Math.cos(th) * r; q[1] = Math.sin(th) * r; } } },   // las iniciales, en hueco
