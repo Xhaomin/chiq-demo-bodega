@@ -2,7 +2,7 @@
 
 Última actualización: 07/10/2026. Demo de chiq.es: una web de bodega **ficticia** hecha con Astro, para enseñar a las
 bodegas cómo una web puede acompañar al cliente y contar la historia del vino de forma inmersiva. Todos los datos de la
-bodega son ficticios y la página lo dice. Se publicará en `https://demo.chiq.es` (sin indexar).
+bodega son ficticios y la página lo dice. Publicada en `https://demo.chiq.es` (sin indexar) desde el 07/10/2026.
 
 ## Cómo se trabaja
 
@@ -15,6 +15,15 @@ Vista previa: servir `dist/` (en el PC del autor, la configuración `demo-bodega
 `estudio-vino`, puerto 8767). Para probar las escenas en el navegador integrado, la pestaña tiene que estar al frente:
 en segundo plano no corre `requestAnimationFrame` y las partículas no avanzan. En pantallas táctiles no hay Lenis
 (scroll nativo). Las maquetas de `docs/maquetas/premium/` se sirven con la configuración `maquetas-premium` (puerto 8768).
+
+## Publicación
+
+Coolify (`http://100.87.235.12:8000`, por Tailscale): proyecto `chiq-demo-bodega`, entorno `production`, aplicación
+`yfpizofgkc2qvnlmt4dxfclg` (Public Git Repository `Xhaomin/chiq-demo-bodega`, rama `main`, build con `Dockerfile`).
+Dominio `http://demo.chiq.es` con el puerto 8080 y sin redirección; Cloudflare (Flexible) sirve `https://demo.chiq.es` por
+el túnel `*.chiq.es`. **No se despliega sola:** tras subir cambios a `main` hay que pulsar «Deploy» en Coolify. El
+navegador integrado pide permiso en cada acción sobre esa IP (no admite «permitir siempre»); para leer el estado sin
+clics, `ssh ubuntu@100.87.235.12` y `sudo docker exec coolify-db psql -U coolify -d coolify`.
 
 ## Páginas
 
@@ -71,12 +80,16 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 
 ## Pendiente
 
-1. **Publicar en `demo.chiq.es`** con Coolify, desde este repositorio público y su `Dockerfile` (Caddy, puerto 8080).
-2. Que el autor pruebe con su rueda el nuevo ritmo del scroll (entrada de 340vh, escenas de 210vh).
-3. Fotos de Unsplash provisionales; en la web final, fotogramas propios.
+1. Que el autor pruebe con su rueda el nuevo ritmo del scroll (entrada de 340vh, escenas de 210vh).
+2. Fotos de Unsplash provisionales; en la web final, fotogramas propios.
+3. Favicon (ahora la consola da un 404 por él).
+4. Los iconos de redes (Instagram, Facebook y YouTube) no enlazan: la bodega no tiene perfiles. Si se quieren
+   enlaces, van en `redes` de `bodega.json`.
 
 ## Historial
 
+- 07/10/2026 (madrugada, 5): iconos de redes en lugar de la nota del motor; publicada en `https://demo.chiq.es` con
+  Coolify.
 - 07/10/2026 (madrugada, 4): revisión con el autor. Cifras de la rueda fuera del borde; ladera con margen a 1440 px;
   formas encogidas en pantallas más cuadradas que 16:10; parcelas en fila en el móvil, con líneas que llegan a su sitio;
   índice de los paneles legible; pasos de la cabecera con enlace; entrada más corta y escenas más largas; fotos nuevas
