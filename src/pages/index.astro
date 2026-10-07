@@ -713,10 +713,11 @@ function cuadro(t) {
 
 /* ---------- precarga ---------- */
 const pre = document.getElementById('pre'), preTxt = document.getElementById('preTxt'), t0 = performance.now();
+// Sin tiempo mínimo: el contador avanza mientras llega la foto (sin pasar del 90 %) y termina en cuanto está lista.
 (function carga(t) {
-  const p = Math.min(1, Math.max(0, (t - t0) / 1600)), n = Math.round(p * 12);
+  const listo = f1.complete, p = listo ? 1 : Math.min(0.9, Math.max(0, (t - t0) / 1600)), n = Math.round(p * 12);
   preTxt.textContent = 'bodega ' + '▓'.repeat(n) + '░'.repeat(12 - n) + ' ' + String(Math.round(p * 100)).padStart(3, '0');
-  if (p < 1 || !f1.complete) requestAnimationFrame(carga);
+  if (!listo) requestAnimationFrame(carga);
   else { pre.classList.add('out'); requestAnimationFrame(cuadro); }
 })(t0);
 </script>
