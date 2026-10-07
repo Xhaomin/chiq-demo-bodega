@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retoques del móvil · Bodega Ejemplo</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Inter+Tight:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Maquetas de dos retoques de la home: las etiquetas de las parcelas a 375 px y el índice de los paneles del carrusel.
+   El fondo de los móviles es una captura real de la ladera (sin etiquetas) y los puntos son donde cae cada parcela. */
+:root{--papel:#f2ede5;--tinta:#1a1414;--tinta2:rgba(26,20,20,.7);--tinta3:rgba(26,20,20,.45);--vino:#7a1a3e}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:#e6e0d6}
+body{color:var(--tinta);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:48px clamp(16px,4vw,56px) 80px}
+.mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
+h1{font-family:'Newsreader',serif;font-weight:300;font-size:48px;letter-spacing:-.02em;line-height:1;margin:10px 0 14px}
+h2{font-family:'Newsreader',serif;font-weight:300;font-size:32px;letter-spacing:-.02em;margin:56px 0 6px}
+p.nota{color:var(--tinta2);max-width:70ch;line-height:1.6;font-size:15px}
+.fila{display:flex;flex-wrap:wrap;gap:28px;margin-top:22px}
+.op{display:flex;flex-direction:column;gap:10px}
+.op>.mono{color:var(--tinta3)}
+.op>.mono b{color:var(--vino);font-weight:500}
+.op p.desc{font-size:13.5px;line-height:1.5;color:var(--tinta2);max-width:375px}
+/* el móvil */
+.tel{position:relative;width:375px;height:812px;overflow:hidden;border-radius:22px;background:var(--papel) url(parcelas-movil-fondo.jpg) 0 0/375px 812px;box-shadow:0 30px 60px -30px rgba(26,20,20,.35),0 0 0 1px rgba(26,20,20,.08)}
+.tel.actual{background-image:url(parcelas-movil-actual.jpg)}
+.tel svg{position:absolute;inset:0;width:375px;height:812px;pointer-events:none}
+.tel [data-p]{position:absolute}
+.punto{position:absolute;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;border-radius:50%;background:var(--vino);box-shadow:0 0 0 3px rgba(242,237,229,.9)}
+.ficha{background:rgba(242,237,229,.96);border:1px solid rgba(26,20,20,.12);box-shadow:0 10px 24px -14px rgba(26,20,20,.35);text-align:center}
+.ficha b{display:block;font-family:'Newsreader',serif;font-style:italic;font-weight:400;font-size:15px;line-height:1.05;color:var(--tinta)}
+.ficha span{display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:rgba(26,20,20,.62);margin-top:4px;line-height:1.25}
+/* A: fila de fichas */
+.a .ficha{width:82px;top:452px;padding:7px 3px 8px}
+/* B: solo el nombre sobre el relieve y la ficha en el texto */
+.b .nombre{transform:translateX(-50%);padding:3px 8px 4px;background:rgba(242,237,229,.94);border:1px solid rgba(26,20,20,.1);font-family:'Newsreader',serif;font-style:italic;font-size:15px;line-height:1;white-space:nowrap}
+.b ul{position:absolute;left:24px;right:20px;top:300px;list-style:none;display:grid;gap:7px;color:var(--tinta3);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+.b ul b{display:inline-block;min-width:12ch;margin-right:8px;color:var(--vino);font-weight:500}
+/* C: escalera con fichas estrechas */
+.c .ficha{width:98px;padding:7px 6px 8px}
+/* el carrusel */
+.panel{position:relative;width:292px;height:470px;border-radius:4px;overflow:hidden;color:#f4efe8;background:#1a1210;box-shadow:0 40px 80px -40px rgba(20,16,17,.45);display:flex;flex-direction:column;justify-content:flex-end;padding:30px}
+.panel .ph{position:absolute;inset:0;background-size:cover;background-position:center}
+.panel::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,14,.25),rgba(20,14,14,0) 30%,rgba(20,14,14,.15) 50%,rgba(20,14,14,.82))}
+.panel.nuevo::after{background:linear-gradient(180deg,rgba(20,14,14,.68),rgba(20,14,14,.22) 20%,rgba(20,14,14,0) 36%,rgba(20,14,14,.15) 50%,rgba(20,14,14,.82))}
+.panel>*:not(.ph){position:relative;z-index:1}
+.panel .idx{position:absolute;left:30px;top:30px;color:rgba(244,239,232,.85)}
+.panel.nuevo .idx{color:#f4efe8;text-shadow:0 1px 3px rgba(10,6,6,.55),0 0 14px rgba(10,6,6,.6)}
+.panel h4{font-family:'Newsreader',serif;font-weight:300;font-size:44px;letter-spacing:-.025em;line-height:1;margin-bottom:12px}
+.panel p{font-size:14px;color:rgba(244,239,232,.85);max-width:28ch;line-height:1.5}
+</style>
+</head>
+<body>
+<p class="mono" style="color:var(--tinta3)">Maquetas · Bodega Ejemplo</p>
+<h1>Dos retoques del móvil</h1>
+<p class="nota">Las etiquetas de las parcelas a 375 px y el índice de los paneles del carrusel. En la home actual, además, las líneas de
+«La Cuesta» y «Los Llanos» no caen en su parcela cuando la etiqueta choca con el borde. Las tres opciones lo corrigen.</p>
+
+<h2>Las parcelas</h2>
+<div class="fila">
+  <div class="op"><span class="mono">Ahora</span><div class="tel actual"></div>
+    <p class="desc">«La Hoya» tapa la línea de «La Cuesta» y dos líneas no llegan a su sitio.</p></div>
+
+  <div class="op"><span class="mono"><b>A</b> · Fila de fichas · recomendada</span>
+    <div class="tel a" data-tel>
+      <div class="ficha" data-p="73,619" style="left:14px"><b>La Cuesta</b><span>Graciano<br>2004 · 700 m</span></div>
+      <div class="ficha" data-p="135,635" style="left:102px"><b>La Hoya</b><span>Tempranillo<br>1978 · 715 m</span></div>
+      <div class="ficha" data-p="217,566" style="left:190px"><b>El Cerro</b><span>Garnacha<br>1952 · 780 m</span></div>
+      <div class="ficha" data-p="312,665" style="left:278px"><b>Los Llanos</b><span>Viura<br>1990 · 655 m</span></div>
+    </div>
+    <p class="desc">Las cuatro, en fila sobre el relieve y ordenadas de izquierda a derecha, con una línea fina hasta su parcela. No se
+    pisan nunca y aguantan el giro lento de la ladera.</p></div>
+
+  <div class="op"><span class="mono"><b>B</b> · Nombre en el sitio</span>
+    <div class="tel b" data-tel>
+      <ul><li><b>El Cerro</b>Garnacha · 1952 · 780 m</li><li><b>La Hoya</b>Tempranillo · 1978 · 715 m</li><li><b>La Cuesta</b>Graciano · 2004 · 700 m</li><li><b>Los Llanos</b>Viura · 1990 · 655 m</li></ul>
+      <div class="nombre" data-p="73,619" style="left:73px;top:572px">La Cuesta</div>
+      <div class="nombre" data-p="135,635" style="left:142px;top:604px">La Hoya</div>
+      <div class="nombre" data-p="217,566" style="left:217px;top:524px">El Cerro</div>
+      <div class="nombre" data-p="312,665" style="left:316px;top:626px">Los Llanos</div>
+    </div>
+    <p class="desc">Sobre el relieve, solo el nombre junto a su parcela. La variedad, el año y la altitud pasan a una lista bajo el
+    texto, como en el resto de escenas sin etiquetas.</p></div>
+
+  <div class="op"><span class="mono"><b>C</b> · Escalera</span>
+    <div class="tel c" data-tel>
+      <div class="ficha" data-p="73,619" style="left:22px;top:524px"><b>La Cuesta</b><span>Graciano<br>2004 · 700 m</span></div>
+      <div class="ficha" data-p="135,635" style="left:88px;top:440px"><b>La Hoya</b><span>Tempranillo<br>1978 · 715 m</span></div>
+      <div class="ficha" data-p="217,566" style="left:190px;top:466px"><b>El Cerro</b><span>Garnacha<br>1952 · 780 m</span></div>
+      <div class="ficha" data-p="312,665" style="left:266px;top:566px"><b>Los Llanos</b><span>Viura<br>1990 · 655 m</span></div>
+    </div>
+    <p class="desc">Como ahora, con la línea recta hacia abajo, pero con fichas más estrechas y a alturas distintas para que
+    ninguna tape la línea de otra.</p></div>
+</div>
+
+<h2>El índice de los paneles</h2>
+<p class="nota">Sobre un cielo claro o unas velas, «/01 · Descubre» casi no se lee. La propuesta oscurece un poco la parte de arriba del
+panel y da una sombra suave al índice. El resto del panel no cambia.</p>
+<div class="fila">
+  <div class="op"><span class="mono">Ahora</span><div class="panel"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1543418219-44e30b057fea?w=900&h=1100&fit=crop&q=70&crop=focalpoint&fp-x=0.5&fp-y=0.75)"></div><span class="idx mono">/01 · Descubre</span><h4>La ladera</h4><p>Cuatro parcelas al sur, entre 650 y 780 metros.</p></div></div>
+  <div class="op"><span class="mono"><b>Propuesta</b></span><div class="panel nuevo"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1543418219-44e30b057fea?w=900&h=1100&fit=crop&q=70&crop=focalpoint&fp-x=0.5&fp-y=0.75)"></div><span class="idx mono">/01 · Descubre</span><h4>La ladera</h4><p>Cuatro parcelas al sur, entre 650 y 780 metros.</p></div></div>
+  <div class="op"><span class="mono">Ahora</span><div class="panel"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1663437555931-d385ee04b8d1?w=900&h=1100&fit=crop&q=70)"></div><span class="idx mono">/05 · Quédate</span><h4>Club del vino</h4><p>Cada añada antes que nadie y una visita al año.</p></div></div>
+  <div class="op"><span class="mono"><b>Propuesta</b></span><div class="panel nuevo"><div class="ph" style="background-image:url(https://images.unsplash.com/photo-1663437555931-d385ee04b8d1?w=900&h=1100&fit=crop&q=70)"></div><span class="idx mono">/05 · Quédate</span><h4>Club del vino</h4><p>Cada añada antes que nadie y una visita al año.</p></div></div>
+</div>
+
+<script>
+// Une cada etiqueta con su parcela: en A y B desde el centro de la etiqueta; en C, recta hacia abajo desde su borde.
+const NS = 'http://www.w3.org/2000/svg';
+document.fonts.ready.then(() => document.querySelectorAll('[data-tel]').forEach((tel) => {
+  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 375 812'); tel.prepend(svg);
+  tel.querySelectorAll('[data-p]').forEach((el) => {
+    const [px, py] = el.dataset.p.split(',').map(Number), r = el.getBoundingClientRect(), t = tel.getBoundingClientRect();
+    const x0 = tel.classList.contains('c') ? px : r.left - t.left + r.width / 2, y0 = r.bottom - t.top;
+    const l = document.createElementNS(NS, 'line');
+    Object.entries({ x1: x0, y1: y0, x2: px, y2: py, stroke: 'rgba(26,20,20,.45)', 'stroke-width': 1 }).forEach(([k, v]) => l.setAttribute(k, v));
+    svg.appendChild(l);
+    const d = document.createElement('i'); d.className = 'punto'; d.style.left = px + 'px'; d.style.top = py + 'px'; tel.appendChild(d);
+  });
+}));
+</script>
+</body>
+</html>

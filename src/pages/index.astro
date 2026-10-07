@@ -61,7 +61,8 @@ body:not(.oscuro) header{background:var(--papel);border-color:var(--linea)}
 .burger i{display:block;width:14px;height:1px;background:var(--ink);box-shadow:0 5px 0 var(--ink);transform:translateY(-2px);transition:background .6s,box-shadow .6s}
 .nota{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:22px;color:var(--hud);pointer-events:none;transition:color .6s;white-space:nowrap}
 main{position:relative;z-index:10}
-#vuelo{height:520vh;position:relative}
+/* la entrada: unas 20 vueltas de rueda en un portátil; las escenas reposan algo más, para que el ritmo sea parejo */
+#vuelo{height:340vh;position:relative}
 .pin{position:sticky;top:0;height:100vh;overflow:hidden}
 .beat{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(18px,8vw,140px);will-change:opacity,transform}
 .beat1{align-items:center;text-align:center;color:#f4efe8}
@@ -107,8 +108,11 @@ p.cuerpo{font-size:17px;line-height:1.72;color:var(--tinta2);max-width:34ch}
 .et.parcela{padding:8px 12px 9px;background:rgba(242,237,229,.96);border:1px solid rgba(26,20,20,.12);box-shadow:0 10px 24px -14px rgba(26,20,20,.35)}
 .et.parcela b,.et.parcela span{text-shadow:none}
 .et.parcela span{color:rgba(26,20,20,.62)}
-.et.parcela::after{content:'';position:absolute;left:50%;top:100%;width:1px;height:var(--l,0px);background:rgba(26,20,20,.45)}
-.et.parcela::before{content:'';position:absolute;left:calc(50% - 3px);top:calc(100% + var(--l,0px) - 3px);width:7px;height:7px;border-radius:50%;background:var(--vino);box-shadow:0 0 0 3px rgba(242,237,229,.9)}
+.et.parcela i{font-style:normal}.et.parcela i+i::before{content:' · '}
+/* la línea de cada parcela, de su etiqueta a su sitio en el relieve */
+#etiquetas svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+#etiquetas line{stroke:rgba(26,20,20,.45);stroke-width:1}
+#etiquetas circle{fill:var(--vino);stroke:rgba(242,237,229,.9);stroke-width:6;paint-order:stroke}
 /* el carrusel final */
 .gal{height:320vh;position:relative}
 .gal-in{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
@@ -117,12 +121,13 @@ p.cuerpo{font-size:17px;line-height:1.72;color:var(--tinta2);max-width:34ch}
 .track{display:flex;gap:26px;padding:0 clamp(18px,8vw,140px);will-change:transform}
 .panel{flex:0 0 min(380px,78vw);height:min(62vh,520px);border-radius:4px;padding:30px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;color:#f4efe8;text-decoration:none;box-shadow:0 40px 80px -40px rgba(20,16,17,.45);background:#1a1210}
 .panel .ph{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 1.4s cubic-bezier(.16,.84,.24,1)}
-.panel::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,14,.25),rgba(20,14,14,0) 30%,rgba(20,14,14,.15) 50%,rgba(20,14,14,.82))}
+/* arriba algo más oscuro, para que el índice se lea sobre un cielo claro o unas velas */
+.panel::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,14,.68),rgba(20,14,14,.22) 20%,rgba(20,14,14,0) 36%,rgba(20,14,14,.15) 50%,rgba(20,14,14,.82))}
 .panel:hover .ph{transform:scale(1.06)}
 .panel>*:not(.ph){position:relative;z-index:1}
 .panel h4{font-family:'Newsreader',serif;font-weight:300;font-size:50px;letter-spacing:-.025em;line-height:1;margin-bottom:12px}
 .panel p{font-size:15px;color:rgba(244,239,232,.85);max-width:28ch;line-height:1.5}
-.panel .idx{position:absolute;left:30px;top:30px;color:rgba(244,239,232,.85)}
+.panel .idx{position:absolute;left:30px;top:30px;color:#f4efe8;text-shadow:0 1px 3px rgba(10,6,6,.55),0 0 14px rgba(10,6,6,.6)}
 .gal-head h3 em{font-style:italic;color:var(--vino)}
 footer{position:relative;z-index:10;padding:140px clamp(18px,8vw,140px) 40px;display:grid;gap:56px;background:var(--papel);color:#1a1414}
 footer .big{font-family:'Newsreader',serif;font-weight:300;font-size:clamp(40px,6vw,96px);letter-spacing:-.03em;line-height:.95;max-width:14ch}
@@ -158,6 +163,10 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
   .et b{font-size:16px}.et span{font-size:8.5px}
   /* a los lados de la rueda no cabe «Fruta negra» en una línea: una palabra por línea */
   .et.lado span{white-space:normal;width:min-content}
+  /* las parcelas, en fila sobre el relieve: el mismo ancho para todas y la ficha en dos líneas */
+  .et.parcela{width:calc((100vw - 20px - (var(--np) - 1) * 6px) / var(--np));padding:7px 3px 8px}
+  .et.parcela b{font-size:15px}.et.parcela span{font-size:8px;letter-spacing:.12em;line-height:1.25;margin-top:4px}
+  .et.parcela i{display:block}.et.parcela i+i::before{content:none}
   .et.lado.der span{margin-left:auto}
 }
 </style>
@@ -197,13 +206,13 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     </div>
   </section>
 
-  <section class="escena" id="descubre" data-paso="descubre" data-pasos="2" style="height:190vh"><div class="fijo"><div class="texto">
+  <section class="escena" id="descubre" data-paso="descubre" data-pasos="2" style="height:230vh"><div class="fijo"><div class="texto">
     <p class="kicker mono">01 · Descubre</p>
     <h2>La <em>ladera.</em></h2>
     <p class="cuerpo">{CUANTAS} parcelas orientadas al {B.terruno.orientacion}, entre {B.terruno.altitud_min} y {B.terruno.altitud_max} metros, sobre suelo {B.terruno.suelo}. Cada una se vendimia por separado.</p>
     <ul class="datos mono">{B.terruno.parcelas.map((p) => <li><b>{p.nombre}</b>{p.variedad} · plantada en {p.plantada}</li>)}</ul>
   </div></div></section>
-  <section class="escena" id="prueba" data-paso="prueba" data-pasos={B.vinos.length} style={`height:${B.vinos.length * 80 + 30}vh`}><div class="fijo"><div class="texto">
+  <section class="escena" id="prueba" data-paso="prueba" data-pasos={B.vinos.length} style={`height:${B.vinos.length * 90 + 50}vh`}><div class="fijo"><div class="texto">
     <p class="kicker mono">02 · Prueba</p>
     <h2>Lo que hay <em>en la copa.</em></h2>
     <p class="vino-nombre" id="vinoNombre" aria-live="polite">{B.vinos[0].nombre}</p>
@@ -211,14 +220,14 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <ul class="datos mono">{B.vinos.map((v) => <li><b>{v.nombre}</b>{B.aromas.map((a, i) => `${a} ${v.cata[i]}`).join(' · ')}</li>)}</ul>
     <span class="tag mono">Cata del 0 al 10</span>
   </div></div></section>
-  <section class="escena" id="visita" data-paso="visita" style="height:170vh"><div class="fijo"><div class="texto">
+  <section class="escena" id="visita" data-paso="visita" style="height:210vh"><div class="fijo"><div class="texto">
     <p class="kicker mono">03 · Visita</p>
     <h2>Ven a <em>vernos.</em></h2>
     <p class="cuerpo">Hormigón, luz y una banda de lamas que sube con la ladera. Visitas {B.visitas.dias}, con {B.visitas.cata}.</p>
     <span class="pronto mono">Reservas · próximamente</span>
     <ul class="datos mono"><li><b>{miles(B.visitas.al_anio)}</b>visitas al año</li><li><b>Club</b>1 de cada {B.visitas.socio_uno_de_cada} visitantes se hace socio</li></ul>
   </div></div></section>
-  <section class="escena" id="tienda" data-paso="llevatelo" style="height:170vh"><div class="fijo"><div class="texto">
+  <section class="escena" id="tienda" data-paso="llevatelo" style="height:210vh"><div class="fijo"><div class="texto">
     <p class="kicker mono">04 · Llévatelo</p>
     <h2>Llévatelo <em>a casa.</em></h2>
     <p class="ficha mono">{V.nombre} · {V.tipo} · {V.formato}</p>
@@ -227,7 +236,7 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
     <span class="pronto mono">Tienda · próximamente</span>
     <ul class="datos mono"><li><b>Precio</b>{V.precio}</li><li><b>Stock</b>{miles(V.stock)} botellas</li></ul>
   </div></div></section>
-  <section class="escena" id="club" data-paso="quedate" style="height:170vh"><div class="fijo"><div class="texto">
+  <section class="escena" id="club" data-paso="quedate" style="height:210vh"><div class="fijo"><div class="texto">
     <p class="kicker mono">05 · Quédate</p>
     <h2>El sello <em>de la casa.</em></h2>
     <p class="cuerpo">Los socios del club reciben cada añada antes que nadie y una visita al año. 1 de cada {B.visitas.socio_uno_de_cada} visitantes se hace socio.</p>
@@ -531,7 +540,7 @@ document.getElementById('motorKB').textContent = (crearMotor.toString().length /
 
 /* ---------- cifras sobre la forma: etiquetas HTML proyectadas con la misma cámara que las moléculas ---------- */
 const ETIQ = [];
-ETIQ[inicio[0] + 1] = PARCELAS.map((p) => ({ p: enLadera(p.x, p.z, 0.02), b: p.nombre, s: `${p.variedad} · ${p.plantada} · ${p.altitud} m`, pin: true }));
+ETIQ[inicio[0] + 1] = PARCELAS.map((p) => ({ p: enLadera(p.x, p.z, 0.02), b: p.nombre, s: [p.variedad, `${p.plantada} · ${p.altitud} m`], pin: true }));
 // En la rueda, las cifras de los lados salen del borde hacia fuera para no pisarla; las de arriba y abajo, centradas.
 B.vinos.forEach((v, w) => { ETIQ[inicio[1] + w] = B.aromas.map((a, k) => ({ a, k })).filter(({ k }) => v.cata[k] > 0).map(({ a, k }) => {
   const th = k * SEC - Math.PI / 2 + SEC / 2, c = Math.cos(th), lado = Math.abs(c) > 0.6, r = RM * (lado ? 1.1 : 1.24);
@@ -542,11 +551,19 @@ ETIQ[inicio[2]] = [{ p: aMundo([68, 82, 21]), b: miles(B.visitas.al_anio), s: 'v
   { p: aMundo([130, -16, 0]), pm: aMundo([85, -16, 0]), b: `1 de cada ${B.visitas.socio_uno_de_cada}`, s: 'se hace socio del club' }];
 ETIQ[inicio[3]] = [{ p: [0.95, 0.95, 0], b: B.vinos[0].precio, s: 'precio', izq: true }, { p: [0.95, 0.15, 0], b: miles(B.vinos[0].stock), s: 'botellas en stock', izq: true },
   { p: [0.95, -0.65, 0], b: B.vinos[0].formato, s: B.vinos[0].nombre, izq: true }];
-const capaEtiq = document.getElementById('etiquetas');
+const capaEtiq = document.getElementById('etiquetas'), NS = 'http://www.w3.org/2000/svg', hilos = document.createElementNS(NS, 'svg');
+capaEtiq.appendChild(hilos); capaEtiq.style.setProperty('--np', PARCELAS.length);
 const elsEtiq = ETIQ.map((grupo) => (grupo || []).map((e) => {
   const el = document.createElement('div'); el.className = 'et' + (e.izq ? ' izq' : '') + (e.der ? ' der' : '') + (e.lado ? ' lado' : '') + (e.pin ? ' parcela' : '');
-  el.innerHTML = '<b></b><span></span>'; el.querySelector('b').textContent = e.b; el.querySelector('span').textContent = e.s;
-  capaEtiq.appendChild(el); return { e, el, ancho: 0, alto: 0 };
+  el.innerHTML = '<b></b><span></span>'; el.querySelector('b').textContent = e.b;
+  // La ficha de una parcela son dos trozos (variedad, y año y altitud): en una línea en el ancho y en dos en el móvil.
+  if (Array.isArray(e.s)) e.s.forEach((t) => { const i = document.createElement('i'); i.textContent = t; el.querySelector('span').appendChild(i); });
+  else el.querySelector('span').textContent = e.s;
+  capaEtiq.appendChild(el);
+  const o = { e, el, ancho: 0, alto: 0 };
+  if (e.pin) { o.hilo = document.createElementNS(NS, 'line'); o.punto = document.createElementNS(NS, 'circle'); o.punto.setAttribute('r', '3.5');
+    for (const n of [o.hilo, o.punto]) { n.style.opacity = '0'; hilos.appendChild(n); } }
+  return o;
 }));
 const medirEtiquetas = () => elsEtiq.flat().forEach((o) => { o.ancho = o.el.offsetWidth; o.alto = o.el.offsetHeight; });
 addEventListener('resize', medirEtiquetas); document.fonts?.ready.then(medirEtiquetas); setTimeout(medirEtiquetas, 800);
@@ -566,19 +583,32 @@ function pintarEtiquetas(m, vista, apagar) {
     if (op > 0.01) { const usaPm = movil && o.e.pm, q = proyectar(usaPm ? o.e.pm : o.e.p, vista), alaIzq = !!o.e.izq && !usaPm, alaDer = !!o.e.der && !usaPm;
       const x = alaIzq ? Math.min(q.sx, innerWidth - margen - o.ancho) : alaDer ? Math.max(margen, q.sx - o.ancho) : clamp(q.sx - o.ancho / 2, margen, innerWidth - margen - o.ancho);
       // Las de las parcelas (`pin`) van por encima de su sitio y bajan hasta él con una línea.
-      visibles.push({ o, op, x, y: o.e.pin ? q.sy - (o.alto || 40) - (movil ? 26 : 44) : q.sy - (o.alto || 36) / 2, punto: q.sy }); return; }
-    if (o.el.style.opacity !== '0') o.el.style.opacity = '0';
+      visibles.push({ o, op, x, y: o.e.pin ? q.sy - (o.alto || 40) - 44 : q.sy - (o.alto || 36) / 2, px: q.sx, punto: q.sy }); return; }
+    if (o.el.style.opacity !== '0') { o.el.style.opacity = '0'; if (o.hilo) o.hilo.style.opacity = o.punto.style.opacity = '0'; }
   }));
-  // Si dos de las parcelas se pisan, la segunda sube (su línea se alarga); las demás que se pisan bajan hasta dejar hueco.
-  const pins = visibles.filter((v) => v.o.e.pin).sort((a, b) => b.punto - a.punto);
-  pins.forEach((a, i) => { for (let j = 0; j < i; j++) { const b = pins[j];
-    if (a.x < b.x + b.o.ancho + 8 && b.x < a.x + a.o.ancho + 8 && a.y < b.y + b.o.alto + 6 && b.y < a.y + a.o.alto + 6) a.y = b.y - a.o.alto - 6; } });
+  const pins = visibles.filter((v) => v.o.e.pin);
+  if (movil && pins.length) {
+    // En el móvil, las parcelas van en fila sobre el relieve, ordenadas de izquierda a derecha por su sitio: nunca se pisan.
+    const y = Math.min(...pins.map((v) => v.punto)) - 40, ancho = pins[0].o.ancho;
+    pins.sort((a, b) => a.px - b.px).forEach((v, k) => { v.x = margen + k * (ancho + 6); v.y = y - v.o.alto; });
+  } else {
+    // En el ancho, si dos se pisan, la segunda sube (su línea se alarga).
+    pins.sort((a, b) => b.punto - a.punto).forEach((a, i) => { for (let j = 0; j < i; j++) { const b = pins[j];
+      if (a.x < b.x + b.o.ancho + 8 && b.x < a.x + a.o.ancho + 8 && a.y < b.y + b.o.alto + 6 && b.y < a.y + a.o.alto + 6) a.y = b.y - a.o.alto - 6; } });
+    // Y si una tapa la línea de otra, se aparta hacia el lado de su parcela.
+    pins.forEach((a) => pins.forEach((b) => { if (a === b || b.px < a.x - 8 || b.px > a.x + a.o.ancho + 8 || a.y > b.punto || a.y + a.o.alto < b.y + b.o.alto) return;
+      a.x = clamp(a.px >= b.px ? b.px + 8 : b.px - 8 - a.o.ancho, margen, innerWidth - margen - a.o.ancho); }));
+  }
+  // La línea va del centro de la etiqueta a su sitio en el relieve, aunque la etiqueta se haya movido para no pisar otra.
+  pins.forEach((v) => { const { hilo, punto } = v.o;
+    hilo.setAttribute('x1', (v.x + v.o.ancho / 2).toFixed(1)); hilo.setAttribute('y1', (v.y + v.o.alto).toFixed(1));
+    hilo.setAttribute('x2', v.px.toFixed(1)); hilo.setAttribute('y2', v.punto.toFixed(1));
+    punto.setAttribute('cx', v.px.toFixed(1)); punto.setAttribute('cy', v.punto.toFixed(1)); hilo.style.opacity = punto.style.opacity = v.op.toFixed(3); });
   const resto = visibles.filter((v) => !v.o.e.pin).sort((a, b) => a.y - b.y);
   resto.forEach((a, i) => {
     for (let j = 0; j < i; j++) { const b = resto[j], h = b.o.alto || 36;
       if (a.x < b.x + b.o.ancho + 6 && b.x < a.x + a.o.ancho + 6 && a.y < b.y + h + 2 && b.y < a.y + h + 2) a.y = b.y + h + 2; } });
   visibles.forEach((a) => {
-    if (a.o.e.pin) a.o.el.style.setProperty('--l', `${Math.max(0, a.punto - a.y - a.o.alto).toFixed(1)}px`);
     a.o.el.style.opacity = a.op.toFixed(3);
     a.o.el.style.transform = `translate(${a.x.toFixed(1)}px, ${a.y.toFixed(1)}px)`;
   });
