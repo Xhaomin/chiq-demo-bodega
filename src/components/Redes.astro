@@ -1,0 +1,17 @@
+---
+// Iconos de las redes de la bodega (`redes` en bodega.json). Como la bodega es ficticia no tiene perfiles: sin URL, el
+// icono no enlaza y dice «próximamente», como las reservas o la tienda.
+import B from '../data/bodega.json';
+
+const ICONOS: Record<string, string> = {
+  Instagram: '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="3.9"/><circle cx="17.2" cy="6.8" r=".4" fill="currentColor"/>',
+  Facebook: '<path d="M15.5 3.5h-2.4a3.6 3.6 0 0 0-3.6 3.6v2.6H7.2v3.2h2.3v7.6h3.2v-7.6h2.4l.5-3.2h-2.9V7.6c0-.5.4-.9.9-.9h1.9z"/>',
+  YouTube: '<rect x="2.5" y="5.5" width="19" height="13" rx="4"/><path d="M10.3 9.4v5.2l4.4-2.6z"/>',
+};
+const { clase = '' } = Astro.props;
+---
+<nav class={`redes ${clase}`} aria-label="Redes sociales">
+  {B.redes.map((r) => r.url
+    ? <a href={r.url} target="_blank" rel="noopener" aria-label={r.nombre}><svg viewBox="0 0 24 24" aria-hidden="true" set:html={ICONOS[r.nombre]} /></a>
+    : <span role="img" aria-label={`${r.nombre}, próximamente`} title={`${r.nombre} · próximamente`}><svg viewBox="0 0 24 24" aria-hidden="true" set:html={ICONOS[r.nombre]} /></span>)}
+</nav>
