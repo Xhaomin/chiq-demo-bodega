@@ -99,7 +99,7 @@ p.cuerpo{font-size:17px;line-height:1.72;color:var(--tinta2);max-width:34ch}
 .con-etiquetas .datos{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
 /* cifras sobre las formas, proyectadas con la misma cámara que las moléculas */
 .et{position:absolute;left:0;top:0;text-align:center;white-space:nowrap;opacity:0;will-change:transform,opacity}
-.et.izq{text-align:left}
+.et.izq{text-align:left}.et.der{text-align:right}
 .et b,.et span{text-shadow:0 0 10px var(--papel),0 0 3px var(--papel),0 0 1px var(--papel)}
 .et b{display:block;font-family:'Newsreader',serif;font-weight:400;font-style:italic;font-size:clamp(18px,1.6vw,26px);line-height:1;color:#1a1414}
 .et span{display:block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta3);margin-top:5px}
@@ -155,6 +155,9 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
   #tienda p.cuerpo,.tag{display:none}
   .pronto{margin-top:12px;padding:9px 16px}
   .et b{font-size:16px}.et span{font-size:8.5px}
+  /* a los lados de la rueda no cabe «Fruta negra» en una línea: una palabra por línea */
+  .et.lado span{white-space:normal;width:min-content}
+  .et.lado.der span{margin-left:auto}
 }
 </style>
 </head>
@@ -491,7 +494,7 @@ function desdeFoto(img) {
    coloca la forma en el ancho (d) y en el móvil (m): a la derecha del texto o debajo. */
 const BODEGA = bodega();
 const PLAN = [
-  { n: 2, forma: (j) => ladera(j === 1), vista: { d: { x: 2.0, y: -0.3, s: 1.08 }, m: { x: 0, y: -1.35, s: 0.62 } } },
+  { n: 2, forma: (j) => ladera(j === 1), vista: { d: { x: 1.75, y: -0.3, s: 1 }, m: { x: 0, y: -1.35, s: 0.62 } } },
   { n: B.vinos.length, forma: (j) => ruedaVino(j), vista: { d: { x: 2.2, y: 0, s: 1 }, m: { x: 0, y: -1.1, s: 0.5 } } },
   { n: 1, forma: () => BODEGA.pos, color: () => BODEGA.col, vista: { d: { x: 2.05, y: 0, s: 0.98 }, m: { x: 0, y: -1.15, s: 0.56 } } },
   { n: 1, forma: () => botella(), vista: { d: { x: 2.2, y: 0, s: 1 }, m: { x: 0, y: -1.2, s: 0.45 } } },
@@ -504,7 +507,10 @@ PLAN.forEach((e, s) => { inicio.push(formas.length); for (let j = 0; j < e.n; j+
 const NF = formas.length - 1;
 let coloresFoto = new Float32Array(N * 3).fill(0.4), segmento = -1;
 document.fonts.load('italic 500 80px "Newsreader"').then(() => { const s = sello(); formas[inicio[4]] = s.pos; COLORES[inicio[4]] = s.col; segmento = -1; }, () => {});
-const vistaDe = (f, movil) => (escenaDe[f] < 0 ? VISTA_APERTURA[f] : PLAN[escenaDe[f]].vista)[movil ? 'm' : 'd'];
+/* Las vistas del ancho están pensadas para 16:10; en pantallas más cuadradas (1024 × 768) todo se encoge a la par para que
+   la forma siga cabiendo a la derecha del texto. La foto (forma 0) no se toca: sus moléculas están en sus píxeles. */
+const vistaDe = (f, movil) => { const v = (escenaDe[f] < 0 ? VISTA_APERTURA[f] : PLAN[escenaDe[f]].vista)[movil ? 'm' : 'd'];
+  const k = movil || f === 0 ? 1 : clamp(innerWidth / innerHeight / 1.6, 0.7, 1); return { x: v.x * k, y: v.y * k, s: v.s * k }; };
 const motor = crearMotor(document.getElementById('gl'), N);
 const rnd = new Float32Array(N); for (let i = 0; i < N; i++) rnd[i] = R();
 if (motor) {
@@ -525,8 +531,10 @@ document.getElementById('motorKB').textContent = (crearMotor.toString().length /
 /* ---------- cifras sobre la forma: etiquetas HTML proyectadas con la misma cámara que las moléculas ---------- */
 const ETIQ = [];
 ETIQ[inicio[0] + 1] = PARCELAS.map((p) => ({ p: enLadera(p.x, p.z, 0.02), b: p.nombre, s: `${p.variedad} · ${p.plantada} · ${p.altitud} m`, pin: true }));
+// En la rueda, las cifras de los lados salen del borde hacia fuera para no pisarla; las de arriba y abajo, centradas.
 B.vinos.forEach((v, w) => { ETIQ[inicio[1] + w] = B.aromas.map((a, k) => ({ a, k })).filter(({ k }) => v.cata[k] > 0).map(({ a, k }) => {
-  const th = k * SEC - Math.PI / 2 + SEC / 2, r = RM * 1.24; return { p: giroX([Math.cos(th) * r, Math.sin(th) * r, 0], GIRO_RUEDA), b: String(v.cata[k]), s: a }; }); });
+  const th = k * SEC - Math.PI / 2 + SEC / 2, c = Math.cos(th), lado = Math.abs(c) > 0.6, r = RM * (lado ? 1.1 : 1.24);
+  return { p: giroX([c * r, Math.sin(th) * r, 0], GIRO_RUEDA), b: String(v.cata[k]), s: a, lado, izq: lado && c > 0, der: lado && c < 0 }; }); });
 // La visita: las visitas sobre el mirador; los días y el club, bajo el edificio (en el móvil, `pm`, en columna).
 const dias = B.visitas.dias[0].toUpperCase() + B.visitas.dias.slice(1);
 ETIQ[inicio[2]] = [{ p: aMundo([68, 82, 21]), b: miles(B.visitas.al_anio), s: 'visitas al año' }, { p: aMundo([40, -16, 0]), pm: aMundo([85, -16, 0]), b: dias, s: B.visitas.cata },
@@ -535,7 +543,7 @@ ETIQ[inicio[3]] = [{ p: [0.95, 0.95, 0], b: B.vinos[0].precio, s: 'precio', izq:
   { p: [0.95, -0.65, 0], b: B.vinos[0].formato, s: B.vinos[0].nombre, izq: true }];
 const capaEtiq = document.getElementById('etiquetas');
 const elsEtiq = ETIQ.map((grupo) => (grupo || []).map((e) => {
-  const el = document.createElement('div'); el.className = 'et' + (e.izq ? ' izq' : '') + (e.pin ? ' parcela' : '');
+  const el = document.createElement('div'); el.className = 'et' + (e.izq ? ' izq' : '') + (e.der ? ' der' : '') + (e.lado ? ' lado' : '') + (e.pin ? ' parcela' : '');
   el.innerHTML = '<b></b><span></span>'; el.querySelector('b').textContent = e.b; el.querySelector('span').textContent = e.s;
   capaEtiq.appendChild(el); return { e, el, ancho: 0, alto: 0 };
 }));
@@ -554,8 +562,8 @@ function pintarEtiquetas(m, vista, apagar) {
   const g0 = Math.round(m), cerca = 1 - clamp(Math.abs(m - g0) / 0.3), movil = innerWidth <= 860, margen = 10, visibles = [];
   elsEtiq.forEach((grupo, g) => grupo.forEach((o) => {
     const op = g === g0 ? cerca * (1 - apagar) : 0;
-    if (op > 0.01) { const usaPm = movil && o.e.pm, q = proyectar(usaPm ? o.e.pm : o.e.p, vista), alaIzq = !!o.e.izq && !usaPm;
-      const x = alaIzq ? Math.min(q.sx, innerWidth - margen - o.ancho) : clamp(q.sx - o.ancho / 2, margen, innerWidth - margen - o.ancho);
+    if (op > 0.01) { const usaPm = movil && o.e.pm, q = proyectar(usaPm ? o.e.pm : o.e.p, vista), alaIzq = !!o.e.izq && !usaPm, alaDer = !!o.e.der && !usaPm;
+      const x = alaIzq ? Math.min(q.sx, innerWidth - margen - o.ancho) : alaDer ? Math.max(margen, q.sx - o.ancho) : clamp(q.sx - o.ancho / 2, margen, innerWidth - margen - o.ancho);
       // Las de las parcelas (`pin`) van por encima de su sitio y bajan hasta él con una línea.
       visibles.push({ o, op, x, y: o.e.pin ? q.sy - (o.alto || 40) - (movil ? 26 : 44) : q.sy - (o.alto || 36) / 2, punto: q.sy }); return; }
     if (o.el.style.opacity !== '0') o.el.style.opacity = '0';
