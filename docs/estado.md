@@ -57,7 +57,7 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 | 03 | Visita | Ven a vernos | La bodega de hormigón con sus colores (lamas en vino, mirador, portón, cipreses), inventada (`visitas`) |
 | 04 | Llévatelo | Llévatelo a casa | La botella con precio, stock y formato |
 | 05 | Quédate | El sello de la casa | Sello de vino con las iniciales en relieve y en oro (`iniciales`, «CM»), que se ve en 3D al girar |
-| — | Final | Carrusel | Cuatro paneles que llevan a su escena: la ladera, la cata (render de su rueda de moléculas, `public/img/cata-3d.webp`), la bodega y «Tienda y club» (fotos de Unsplash, provisionales y sin personas) |
+| — | Final | Carrusel | Cinco paneles con foto que llevan a su escena: la ladera (la foto que abría la home original), la vendimia, la cata, la bodega y el club del vino (Unsplash, provisionales, sin personas ni marcas) |
 
 ## Pendiente
 
@@ -66,6 +66,8 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 
 ## Historial
 
+- 08/10/2026: las moléculas que salen de la foto ya son del color del vino; carrusel de cinco fotos (ladera, vendimia,
+  cata, bodega y club del vino).
 - 07/10/2026 (noche, 2): el vuelo pasa a una sola foto (una cepa vieja con racimos) con zoom hasta el racimo central y
   desenfoque del borde.
 - 07/10/2026 (noche): primera foto nueva (una vid a contraluz) con el zoom hacia ella; cepas en la ladera; sello «CM»
