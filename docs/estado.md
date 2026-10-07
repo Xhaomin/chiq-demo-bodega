@@ -88,6 +88,8 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 
 ## Historial
 
+- 07/10/2026 (mañana): la precarga termina en cuanto llega la foto, sin el mínimo de 1,6 s (sin caché, 0,4 s en el
+  móvil y 1,5 s en el portátil, antes 2 y 2,5 s). Desplegado.
 - 07/10/2026 (madrugada, 5): iconos de redes en lugar de la nota del motor; publicada en `https://demo.chiq.es` con
   Coolify.
 - 07/10/2026 (madrugada, 4): revisión con el autor. Cifras de la rueda fuera del borde; ladera con margen a 1440 px;
