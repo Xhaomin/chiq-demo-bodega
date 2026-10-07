@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fotos del carrusel · Bodega Ejemplo</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=Inter+Tight:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Candidatas para dos paneles del carrusel final (Unsplash, licencia libre, sin personas ni marcas), con el mismo
+   encuadre, degradado y textos que en la home. */
+:root{--papel:#f2ede5;--tinta:#1a1414;--tinta2:rgba(26,20,20,.7);--tinta3:rgba(26,20,20,.45);--vino:#7a1a3e}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--papel)}
+body{color:var(--tinta);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;padding:48px clamp(16px,4vw,56px) 80px}
+.mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
+h1{font-family:'Newsreader',serif;font-weight:300;font-size:48px;letter-spacing:-.02em;line-height:1;margin:10px 0 14px}
+h2{font-family:'Newsreader',serif;font-weight:300;font-size:32px;letter-spacing:-.02em;margin:52px 0 6px}
+p.nota{color:var(--tinta2);max-width:70ch;line-height:1.6;font-size:15px}
+.fila{display:flex;flex-wrap:wrap;gap:22px;margin-top:22px}
+.op{display:flex;flex-direction:column;gap:8px;width:260px}
+.op>.mono{line-height:1.7;min-height:3.4em}
+.op>.mono{color:var(--tinta3)}.op>.mono b{color:var(--vino);font-weight:500}
+.panel{position:relative;width:260px;height:356px;border-radius:4px;overflow:hidden;color:#f4efe8;background:#1a1210;box-shadow:0 30px 60px -30px rgba(20,16,17,.45);display:flex;flex-direction:column;justify-content:flex-end;padding:24px}
+.panel .ph{position:absolute;inset:0;background-size:cover;background-position:center}
+.panel::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,14,14,.68),rgba(20,14,14,.22) 20%,rgba(20,14,14,0) 36%,rgba(20,14,14,.15) 50%,rgba(20,14,14,.82))}
+.panel>*:not(.ph){position:relative;z-index:1}
+.panel .idx{position:absolute;left:24px;top:24px;color:#f4efe8;text-shadow:0 1px 3px rgba(10,6,6,.55),0 0 14px rgba(10,6,6,.6)}
+.panel h4{font-family:'Newsreader',serif;font-weight:300;font-size:38px;letter-spacing:-.025em;line-height:1;margin-bottom:10px}
+.panel p{font-size:13px;color:rgba(244,239,232,.85);max-width:28ch;line-height:1.5}
+</style>
+</head>
+<body>
+<p class="mono" style="color:var(--tinta3)">Maquetas · Bodega Ejemplo</p>
+<h1>Fotos del carrusel</h1>
+<p class="nota">Candidatas para «La cata» (una copa de tinto sin vino que se escape por abajo) y para «Club del vino» (botellas guardadas tras
+una reja, como la foto de referencia). Cada una, con el encuadre y los textos del panel. Todas de Unsplash con licencia libre.</p>
+
+<h2>La cata</h2>
+<div class="fila" id="cata"></div>
+<h2>Club del vino</h2>
+<div class="fila" id="club"></div>
+
+<script>
+const foto = (id) => `https://images.unsplash.com/photo-${id}?w=900&h=1100&fit=crop&q=70`;
+const CATA = [
+  ['1', '1665567176924-52c7cd5b9393', 'Tinto girando en una copa grande, fondo gris'],
+  ['2', '1604664685265-8f85f5799d39', 'Copa a contraluz sobre negro'],
+  ['3', '1676324558731-019dfc39b394', 'Copa en la mesa, con velas detrás'],
+  ['4', '1722307036188-57649793ddcf', 'Copa en penumbra con luz ámbar'],
+  ['5', '1602800268804-4a850d622360', 'Copa sobre fondo rojo'],
+  ['6', '1612279621492-4f2d14579d19', 'Copa de estudio sobre blanco'],
+];
+const CLUB = [
+  ['A', '1765850258622-9d9afa7cf4e2', 'Botellero de hierro en penumbra, la más parecida a la referencia'],
+  ['B', '1642643307770-1d4455ea41b7', 'Pared de botellas tras una retícula de hierro'],
+  ['C', '1765850258613-9e671f59a9ad', 'Botelleros de hierro bajo una lámpara'],
+  ['D', '1642340828763-822a676c1da3', 'Botellas viejas con polvo, a oscuras'],
+  ['E', '1765850258591-ac294919250b', 'Botellas de 1957 con su pizarra'],
+  ['F', '1764649841527-c8852b63cc53', 'Botellas a oscuras con una etiqueta colgada'],
+];
+const pintar = (lista, sitio, idx, titulo, texto) => document.getElementById(sitio).innerHTML = lista.map(([n, id, desc]) =>
+  `<div class="op"><span class="mono"><b>${n}</b> · ${desc}</span><div class="panel"><div class="ph" style="background-image:url(${foto(id)})"></div>
+   <span class="idx mono">${idx}</span><h4>${titulo}</h4><p>${texto}</p></div></div>`).join('');
+pintar(CATA, 'cata', '/03 · Prueba', 'La cata', 'Tres vinos y lo que hay en cada copa.');
+pintar(CLUB, 'club', '/05 · Quédate', 'Club del vino', 'Cada añada antes que nadie y una visita al año.');
+</script>
+</body>
+</html>
