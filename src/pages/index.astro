@@ -20,8 +20,8 @@ const GALERIA = [
 ];
 // El menú: las secciones de una web de bodega, que llevan a su parte de la home.
 const MENU = [['/', 'Historia'], ['#prueba', 'Los vinos'], ['#visita', 'Visitas'], ['#tienda', 'Tienda'], ['#club', 'Club']];
-// El recorrido del cliente: un paso por escena.
-const PASOS = [['descubre', 'Descubre'], ['prueba', 'Prueba'], ['visita', 'Visita'], ['llevatelo', 'Llévatelo'], ['quedate', 'Quédate']];
+// El recorrido del cliente: un paso por escena, que lleva a su sección.
+const PASOS = [['descubre', 'Descubre', '#descubre'], ['prueba', 'Prueba', '#prueba'], ['visita', 'Visita', '#visita'], ['llevatelo', 'Llévatelo', '#tienda'], ['quedate', 'Quédate', '#club']];
 ---
 <!DOCTYPE html>
 <html lang="es">
@@ -54,8 +54,9 @@ header{position:fixed;top:0;left:0;right:0;z-index:20;display:grid;grid-template
 body:not(.oscuro) header{background:var(--papel);border-color:var(--linea)}
 .logo{font-family:'Newsreader',serif;font-style:italic;font-weight:300;font-size:26px;letter-spacing:-.01em;color:var(--ink);text-decoration:none;transition:color .6s}
 .recorrido{display:flex;gap:28px}
-.recorrido span{color:var(--hud);padding-bottom:4px;border-bottom:1px solid transparent;transition:color .6s,border-color .6s}
-.recorrido span.on{color:var(--vino);border-color:var(--vino)}
+.recorrido a{color:var(--hud);text-decoration:none;padding-bottom:4px;border-bottom:1px solid transparent;transition:color .6s,border-color .6s}
+.recorrido a:hover{color:var(--ink)}
+.recorrido a.on{color:var(--vino);border-color:var(--vino)}
 .burger{justify-self:end;width:42px;height:42px;border-radius:50%;border:1px solid var(--linea);display:grid;place-items:center;cursor:pointer;background:transparent;transition:border-color .6s}
 .burger i{display:block;width:14px;height:1px;background:var(--ink);box-shadow:0 5px 0 var(--ink);transform:translateY(-2px);transition:background .6s,box-shadow .6s}
 .nota{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:22px;color:var(--hud);pointer-events:none;transition:color .6s;white-space:nowrap}
@@ -174,7 +175,7 @@ footer .pie-t{display:block;font-size:14px;line-height:1.5;opacity:.75;max-width
 
 <header>
   <a class="logo" href="/">{B.nombre}</a>
-  <nav class="recorrido mono" aria-label="Tu recorrido">{PASOS.map(([id, nombre]) => <span data-paso={id}>{nombre}</span>)}</nav>
+  <nav class="recorrido mono" aria-label="Tu recorrido">{PASOS.map(([id, nombre, ancla]) => <a data-paso={id} href={ancla}>{nombre}</a>)}</nav>
   <button class="burger" id="burger" aria-label="Abrir menú"><i></i></button>
 </header>
 <div class="nota mono">Demo de chiq.es · Astro y motor propio WebGL2 (<span id="motorKB">…</span>)</div>
@@ -277,7 +278,7 @@ document.querySelectorAll('section.escena .fijo').forEach((s) => io.observe(s));
 const menu = document.getElementById('menu');
 document.getElementById('burger').onclick = () => menu.classList.add('open');
 document.getElementById('close').onclick = () => menu.classList.remove('open');
-// Los enlaces a secciones de la home (menú, carrusel y pie) bajan con el mismo scroll suave; «Historia» vuelve arriba.
+// Los enlaces a secciones de la home (recorrido, menú, carrusel y pie) bajan con el mismo scroll suave; «Historia» vuelve arriba.
 document.querySelectorAll('a[href^="#"], #menu a[href="/"], footer a[href="/"]').forEach((a) => a.addEventListener('click', (e) => {
   const h = a.getAttribute('href'), el = h === '/' ? null : document.querySelector(h); if (h !== '/' && !el) return;
   e.preventDefault(); menu.classList.remove('open');
@@ -598,7 +599,7 @@ function ajustarOrigen() {
 f1.addEventListener('load', ajustarOrigen); addEventListener('resize', ajustarOrigen); if (f1.complete) ajustarOrigen();
 const fotos = document.getElementById('fotos'), escarcha = document.getElementById('escarcha');
 const b1 = document.getElementById('beat1'), b2 = document.getElementById('beat2'), medio = document.getElementById('medio');
-const escenas = [...document.querySelectorAll('section.escena')], pasosNav = [...document.querySelectorAll('.recorrido span')];
+const escenas = [...document.querySelectorAll('section.escena')], pasosNav = [...document.querySelectorAll('.recorrido a')];
 const gal = document.getElementById('gal'), track = document.getElementById('track');
 let raton = [0, 0], ratonS = [0, 0]; addEventListener('pointermove', (e) => { raton = [e.clientX / innerWidth - 0.5, e.clientY / innerHeight - 0.5]; });
 let m = 0, activo = -2, ultimo = scrollY, vel = 0, oscuro = true, uFoto = 1, formaTexto = -1;
