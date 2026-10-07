@@ -52,11 +52,11 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 | # | Paso | Escena | Forma |
 |---|---|---|---|
 | — | Apertura | Vuelo y «Cuatro parcelas, un vino» | La foto se acerca hasta las uvas, que se vuelven el racimo de moléculas |
-| 01 | Descubre | La ladera | Relieve con cepas en hileras (tronco y copa en vaso; `FILA` y `CEPA`); en el segundo paso las cepas de las cuatro parcelas se ven más frondosas (`terruno.parcelas`; su sitio en el relieve, `SITIO`) |
+| 01 | Descubre | La ladera | Relieve con cepas en vaso en hileras (tronco retorcido, tres brazos y hojas; `FILA` y `CEPA`); en el segundo paso las cepas de las cuatro parcelas se ven más frondosas y cada una lleva su etiqueta sobre papel, unida a su sitio por una línea, con variedad, año y altitud (`terruno.parcelas`; su sitio en el relieve, `SITIO`) |
 | 02 | Prueba | Lo que hay en la copa | La rueda de cata de los tres vinos (3 pasos) |
 | 03 | Visita | Ven a vernos | La bodega de hormigón con sus colores (lamas en vino, mirador, portón, cipreses), inventada (`visitas`) |
 | 04 | Llévatelo | Llévatelo a casa | La botella con precio, stock y formato |
-| 05 | Quédate | El sello de la casa | Sello de vino con las iniciales en relieve y en oro (`iniciales`, «CM»), que se ve en 3D al girar |
+| 05 | Quédate | El sello de la casa | Sello con las iniciales en relieve (`iniciales`, «CM») en el rojo de las moléculas sobre una cara clara, que se ve en 3D al girar |
 | — | Final | Carrusel | Cinco paneles con foto que llevan a su escena: la ladera (la foto que abría la home original), la vendimia, la cata, la bodega y el club del vino (Unsplash, provisionales, sin personas ni marcas) |
 
 ## Pendiente
@@ -66,6 +66,8 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 
 ## Historial
 
+- 08/10/2026 (3): etiquetas de las parcelas legibles y con altitud (nueva en `bodega.json`); cepas en vaso; sello «CM»
+  en rojo; vendimia (hilera con racimos al sol) y club (tinto con velas) nuevos; el pie ya no habla de las fotos.
 - 08/10/2026 (2): fotos del carrusel cambiadas (vendimia en cesto, la cata original con el vino saltando en la copa y
   un tinto con vela para el club; la ladera, encuadrada hacia las viñas). El 3D de la cata se queda como está; las
   maquetas alternativas (rosa en relieve, molécula, copa con aromas) están en `docs/maquetas/premium/cata-3d.html`.

@@ -8,10 +8,10 @@
     "altitud_max": 780,
     "suelo": "arcillo-calcáreo",
     "parcelas": [
-      { "nombre": "Los Llanos", "variedad": "Viura", "plantada": 1990 },
-      { "nombre": "La Hoya", "variedad": "Tempranillo", "plantada": 1978 },
-      { "nombre": "La Cuesta", "variedad": "Graciano", "plantada": 2004 },
-      { "nombre": "El Cerro", "variedad": "Garnacha", "plantada": 1952 }
+      { "nombre": "Los Llanos", "variedad": "Viura", "plantada": 1990, "altitud": 655 },
+      { "nombre": "La Hoya", "variedad": "Tempranillo", "plantada": 1978, "altitud": 715 },
+      { "nombre": "La Cuesta", "variedad": "Graciano", "plantada": 2004, "altitud": 700 },
+      { "nombre": "El Cerro", "variedad": "Garnacha", "plantada": 1952, "altitud": 780 }
     ]
   },
   "visitas": { "al_anio": 4200, "dias": "de martes a domingo", "cata": "cata incluida", "socio_uno_de_cada": 8 },
