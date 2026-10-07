@@ -10,13 +10,13 @@ const CUANTAS = enLetra(B.terruno.parcelas.length, true);
 const V = B.vinos[0];
 const DESDE = Math.min(...B.terruno.parcelas.map((p) => p.plantada));
 // El carrusel final: una foto por sección que lleva a su escena (Unsplash, provisionales, sin personas ni marcas).
-const unsplash = (id: string) => `https://images.unsplash.com/photo-${id}?w=900&h=1100&fit=crop&q=70`;
+const unsplash = (id: string, encuadre = '') => `https://images.unsplash.com/photo-${id}?w=900&h=1100&fit=crop&q=70${encuadre}`;
 const GALERIA = [
-  { paso: 'Descubre', titulo: 'La ladera', ancla: '#descubre', imagen: unsplash('1543418219-44e30b057fea'), texto: `${CUANTAS} parcelas al ${B.terruno.orientacion}, entre ${B.terruno.altitud_min} y ${B.terruno.altitud_max} metros.` },
-  { paso: 'Descubre', titulo: 'La vendimia', ancla: '#descubre', imagen: unsplash('1785352213545-1815a146b774'), texto: 'La uva de cada parcela, por separado.' },
-  { paso: 'Prueba', titulo: 'La cata', ancla: '#prueba', imagen: unsplash('1474722883778-792e7990302f'), texto: `${enLetra(B.vinos.length)} vinos y lo que hay en cada copa.` },
+  { paso: 'Descubre', titulo: 'La ladera', ancla: '#descubre', imagen: unsplash('1543418219-44e30b057fea', '&crop=focalpoint&fp-x=0.5&fp-y=0.75'), texto: `${CUANTAS} parcelas al ${B.terruno.orientacion}, entre ${B.terruno.altitud_min} y ${B.terruno.altitud_max} metros.` },
+  { paso: 'Descubre', titulo: 'La vendimia', ancla: '#descubre', imagen: unsplash('1723746547295-2568f1e3096d'), texto: 'La uva de cada parcela, por separado.' },
+  { paso: 'Prueba', titulo: 'La cata', ancla: '#prueba', imagen: unsplash('1630369160812-26c7604cbd8c'), texto: `${enLetra(B.vinos.length)} vinos y lo que hay en cada copa.` },
   { paso: 'Visita', titulo: 'La bodega', ancla: '#visita', imagen: unsplash('1561906814-23da9a8bfee0'), texto: `Visitas ${B.visitas.dias}, con ${B.visitas.cata}.` },
-  { paso: 'Quédate', titulo: 'Club del vino', ancla: '#club', imagen: unsplash('1642501500606-b56852b10732'), texto: 'Cada añada antes que nadie y una visita al año.' },
+  { paso: 'Quédate', titulo: 'Club del vino', ancla: '#club', imagen: unsplash('1676324558731-019dfc39b394'), texto: 'Cada añada antes que nadie y una visita al año.' },
 ];
 // El menú: las secciones de una web de bodega, que llevan a su parte de la home.
 const MENU = [['/', 'Historia'], ['#prueba', 'Los vinos'], ['#visita', 'Visitas'], ['#tienda', 'Tienda'], ['#club', 'Club']];

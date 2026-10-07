@@ -66,6 +66,9 @@ el carrusel de la home anterior. Papel claro, tipografía Newsreader y el recorr
 
 ## Historial
 
+- 08/10/2026 (2): fotos del carrusel cambiadas (vendimia en cesto, la cata original con el vino saltando en la copa y
+  un tinto con vela para el club; la ladera, encuadrada hacia las viñas). El 3D de la cata se queda como está; las
+  maquetas alternativas (rosa en relieve, molécula, copa con aromas) están en `docs/maquetas/premium/cata-3d.html`.
 - 08/10/2026: las moléculas que salen de la foto ya son del color del vino; carrusel de cinco fotos (ladera, vendimia,
   cata, bodega y club del vino).
 - 07/10/2026 (noche, 2): el vuelo pasa a una sola foto (una cepa vieja con racimos) con zoom hasta el racimo central y

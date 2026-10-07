@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquetas de la cata en 3D · Bodega Ejemplo</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&family=Inter+Tight:wght@400;500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--papel:#f2ede5;--tinta:#1a1414;--tinta2:rgba(26,20,20,.7);--tinta3:rgba(26,20,20,.45);--vino:#7a1a3e}
+*{box-sizing:border-box;margin:0;padding:0}
+html{background:var(--papel)}
+body{color:var(--tinta);font-family:'Inter Tight',system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+canvas#gl{position:fixed;inset:0;width:100vw;height:100vh;z-index:1;pointer-events:none}
+#etiquetas{position:fixed;inset:0;z-index:4;pointer-events:none}
+.mono{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase}
+main{position:relative;z-index:10}
+section{position:relative}
+.fijo{position:sticky;top:0;height:100vh;display:flex;align-items:center;padding:0 clamp(30px,8vw,140px)}
+.texto{max-width:30rem}
+.kicker{color:var(--tinta3)}
+h2{font-family:'Newsreader',serif;font-weight:300;letter-spacing:-.025em;line-height:.95;font-size:clamp(46px,5.4vw,92px);margin:16px 0 18px}
+h2 em{font-style:italic;color:var(--vino)}
+p.cuerpo{font-size:16px;line-height:1.7;color:var(--tinta2);max-width:32ch}
+.vino{font-family:'Newsreader',serif;font-style:italic;font-weight:300;font-size:clamp(30px,3vw,46px);color:var(--vino);margin-top:16px}
+.et{position:absolute;left:0;top:0;text-align:center;white-space:nowrap;opacity:0;will-change:transform,opacity}
+.et b,.et span{text-shadow:0 0 10px var(--papel),0 0 3px var(--papel),0 0 1px var(--papel)}
+.et b{display:block;font-family:'Newsreader',serif;font-weight:400;font-style:italic;font-size:22px;line-height:1}
+.et span{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--tinta3);margin-top:4px}
+@media (max-width:860px){.fijo{align-items:flex-start;padding:12vh 24px 0}h2{font-size:42px}.et b{font-size:16px}.et span{font-size:8px}}
+</style>
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div id="etiquetas" aria-hidden="true"></div>
+<main>
+  <section data-n="3" style="height:270vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">Maqueta A · Rosa en relieve</p>
+    <h2>Lo que hay <em>en la copa.</em></h2>
+    <p class="cuerpo">La rueda tumbada en el espacio: cada aroma se levanta tanto como su intensidad. Gira con el ratón.</p>
+    <p class="vino" data-vino>Crianza</p>
+  </div></div></section>
+  <section data-n="3" style="height:270vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">Maqueta B · La molécula del vino</p>
+    <h2>Lo que hay <em>en la copa.</em></h2>
+    <p class="cuerpo">Cada aroma es un átomo, más grande cuanto más intenso, unido al núcleo del vino.</p>
+    <p class="vino" data-vino>Crianza</p>
+  </div></div></section>
+  <section data-n="3" style="height:270vh"><div class="fijo"><div class="texto">
+    <p class="kicker mono">Maqueta C · La copa y sus aromas</p>
+    <h2>Lo que hay <em>en la copa.</em></h2>
+    <p class="cuerpo">Una copa con el vino dentro y una corona de aromas que sube del borde: cada columna, tan alta como su intensidad.</p>
+    <p class="vino" data-vino>Crianza</p>
+  </div></div></section>
+</main>
+<script>
+/* Tres maquetas para el 3D de «Lo que hay en la copa», con el motor de la home (moléculas en 3D que giran con el ratón). */
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const suave = (x) => x * x * (3 - 2 * x);
+let semilla = 5; const R = () => ((semilla = (semilla * 16807) % 2147483647) / 2147483647);
+const N = 16000, U1 = new Float32Array(N), U2 = new Float32Array(N), U3 = new Float32Array(N), U4 = new Float32Array(N);
+for (let i = 0; i < N; i++) { U1[i] = R(); U2[i] = R(); U3[i] = R(); U4[i] = R(); }
+const girar = (q, ry, rx) => { const x1 = q[0] * Math.cos(ry) + q[2] * Math.sin(ry), z1 = -q[0] * Math.sin(ry) + q[2] * Math.cos(ry);
+  return [x1, q[1] * Math.cos(rx) - z1 * Math.sin(rx), q[1] * Math.sin(rx) + z1 * Math.cos(rx)]; };
+const AROMAS = ['Fruta roja', 'Fruta negra', 'Fruta blanca', 'Cítricos', 'Floral', 'Especias', 'Madera', 'Mineral'];
+const VINOS = [{ nombre: 'Crianza', cata: [7, 6, 0, 1, 3, 5, 4, 2] }, { nombre: 'Reserva', cata: [4, 8, 0, 0, 2, 7, 8, 3] }, { nombre: 'Blanco', cata: [0, 0, 8, 7, 6, 1, 1, 5] }];
+const NA = AROMAS.length, SEC = Math.PI * 2 / NA;
+/** Reparte las partículas entre los aromas según un peso: devuelve el aroma de cada partícula. */
+const repartir = (pesos, semillaU) => { const tot = pesos.reduce((s, p) => s + p, 0); let a = 0; const c = pesos.map((p) => (a += p / tot)); return (i) => Math.max(0, c.findIndex((x) => semillaU[i] <= x)); };
+
+/* A · Rosa en relieve: la rueda en un plano horizontal; cada sector es un prisma tan alto como su aroma. */
+const INCL_A = 0.62, RA = 1.5, H_A = 1.0;
+function rosa(w) {
+  const a = new Float32Array(N * 3), cata = VINOS[w].cata, de = repartir(cata.map((c) => c + 0.6), U2);
+  for (let i = 0; i < N; i++) { const g = U1[i]; let q;
+    if (g < 0.1) { const th = U3[i] * Math.PI * 2; q = [Math.cos(th) * RA, 0, Math.sin(th) * RA]; }   // el aro
+    else if (g < 0.15) { const th = Math.floor(U3[i] * NA) * SEC - Math.PI / 2, r = U4[i] * RA; q = [Math.cos(th) * r, 0, Math.sin(th) * r]; }   // los radios
+    else { const k = de(i), h = Math.max(0.02, cata[k] / 10 * H_A), th = k * SEC - Math.PI / 2 + (0.1 + U3[i] * 0.8) * SEC, r = 0.18 + Math.sqrt(U4[i]) * (RA * 0.92 - 0.18), cara = U1[(i * 7) % N];
+      if (cara < 0.55) q = [Math.cos(th) * r, h, Math.sin(th) * r];   // la cara de arriba
+      else if (cara < 0.85) { const re = RA * 0.92; q = [Math.cos(th) * re, U3[(i * 13) % N] * h, Math.sin(th) * re]; }   // la pared de fuera
+      else { const lado = cara < 0.925 ? 0.1 : 0.9, t2 = k * SEC - Math.PI / 2 + lado * SEC; q = [Math.cos(t2) * r, U3[(i * 13) % N] * h, Math.sin(t2) * r]; } }   // las paredes de los lados
+    a.set(girar(q, 0, INCL_A), i * 3); }
+  return a;
+}
+const etiquetasA = (w) => VINOS[w].cata.map((c, k) => ({ c, k })).filter(({ c }) => c > 0).map(({ c, k }) => { const th = k * SEC - Math.PI / 2 + SEC / 2, r = RA * 1.12;
+  return { p: girar([Math.cos(th) * r, c / 10 * H_A + 0.12, Math.sin(th) * r], 0, INCL_A), b: String(c), s: AROMAS[k] }; });
+
+/* B · La molécula del vino: un núcleo (el vino) y un átomo por aroma, de radio según su intensidad, unidos por enlaces. */
+const INCL_B = 0.42, RB = 1.3;
+const sitioB = (k) => { const a = k * SEC; return [Math.cos(a) * RB, (k % 2 ? 0.32 : -0.32), Math.sin(a) * RB]; };
+function molecula(w) {
+  const a = new Float32Array(N * 3), cata = VINOS[w].cata, radio = (c) => 0.05 + c * 0.03, de = repartir(cata.map((c) => radio(c) ** 2 + 0.01), U2);
+  for (let i = 0; i < N; i++) { const g = U1[i], th = U3[i] * Math.PI * 2, ph = Math.acos(2 * U4[i] - 1); let q;
+    if (g < 0.2) { const r = 0.4 * (0.9 + 0.1 * U1[(i * 7) % N]); q = [Math.sin(ph) * Math.cos(th) * r, Math.sin(ph) * Math.sin(th) * r, Math.cos(ph) * r]; }   // el núcleo
+    else if (g < 0.34) { const k = Math.floor(U2[i] * NA), s = sitioB(k), t = 0.32 + U1[(i * 7) % N] * 0.68 * (1 - radio(cata[k]) / RB), j = (U4[i] - 0.5) * 0.012; q = [s[0] * t + j, s[1] * t + j, s[2] * t]; }   // los enlaces
+    else { const k = de(i), s = sitioB(k), r = radio(cata[k]) * (0.92 + 0.08 * U1[(i * 7) % N]); q = [s[0] + Math.sin(ph) * Math.cos(th) * r, s[1] + Math.sin(ph) * Math.sin(th) * r, s[2] + Math.cos(ph) * r]; }   // los átomos
+    a.set(girar(q, 0, INCL_B), i * 3); }
+  return a;
+}
+const etiquetasB = (w) => VINOS[w].cata.map((c, k) => ({ c, k })).filter(({ c }) => c > 0).map(({ c, k }) => { const s = sitioB(k), f = 1 + (0.05 + c * 0.03 + 0.28) / RB;
+  return { p: girar([s[0] * f, s[1] + 0.05, s[2] * f], 0, INCL_B), b: String(c), s: AROMAS[k] }; });
+
+/* C · La copa y sus aromas: el cristal, el vino y una corona de columnas que suben del borde. */
+const COPA = { r: 0.55, alto: 0.95, tallo: 0.7, pie: 0.45, nivel: 0.62, y: 0.1 }, RC = 0.9, H_C = 1.35, INCL_C = 0.3;
+const radioCopa = (u) => u < 0.35 ? COPA.r * (0.86 + 0.14 * u / 0.35) : COPA.r * Math.sqrt(Math.max(0, 1 - ((u - 0.35) / 0.65) ** 2));
+function copa(w) {
+  const a = new Float32Array(N * 3), cata = VINOS[w].cata, de = repartir(cata.map((c) => c + 0.3), U2), y0 = COPA.y - 0.6;
+  for (let i = 0; i < N; i++) { const g = U1[i], th = U3[i] * Math.PI * 2, u = U4[i]; let q;
+    if (g < 0.14) { const v = U1[(i * 7) % N];   // el cristal: cáliz, tallo y pie
+      if (v < 0.7) { const r = radioCopa(u); q = [Math.cos(th) * r, y0 - u * COPA.alto, Math.sin(th) * r]; }
+      else if (v < 0.82) q = [Math.cos(th) * 0.03, y0 - COPA.alto - u * COPA.tallo, Math.sin(th) * 0.03];
+      else { const rr = Math.sqrt(u) * COPA.pie; q = [Math.cos(th) * rr, y0 - COPA.alto - COPA.tallo, Math.sin(th) * rr]; } }
+    else if (g < 0.3) { const uu = COPA.nivel + u * (1 - COPA.nivel), rr = Math.sqrt(U1[(i * 13) % N]) * radioCopa(uu) * 0.92; q = [Math.cos(th) * rr, y0 - uu * COPA.alto, Math.sin(th) * rr]; }   // el vino
+    else { const k = de(i), an = k * SEC - Math.PI / 2, h = Math.max(0.03, cata[k] / 10 * H_C), t = Math.pow(u, 1.5), ond = Math.sin(t * 7 + k * 1.7) * 0.05 * t;   // el aroma sube como un hilo de vapor y se abre
+      const r0 = RC * (0.66 + 0.34 * t), rr = (0.012 + 0.09 * t * t) * Math.sqrt(U1[(i * 13) % N]), a2 = U3[i] * Math.PI * 2;
+      q = [Math.cos(an) * r0 + Math.cos(a2) * rr + ond * Math.sin(an), y0 + 0.05 + t * h, Math.sin(an) * r0 + Math.sin(a2) * rr - ond * Math.cos(an)]; }
+    a.set(girar(q, 0, INCL_C), i * 3); }
+  return a;
+}
+const etiquetasC = (w) => VINOS[w].cata.map((c, k) => ({ c, k })).filter(({ c }) => c > 0).map(({ c, k }) => { const an = k * SEC - Math.PI / 2, h = c / 10 * H_C;
+  return { p: girar([Math.cos(an) * RC * 1.15, COPA.y - 0.58 + h + 0.12, Math.sin(an) * RC * 1.15], 0, INCL_C), b: String(c), s: AROMAS[k] }; });
+
+/* ---------- el motor de la home ---------- */
+const FOV = 34, DIST = 9.5;
+const VERT = `
+  uniform mat4 uProj, uMV; uniform float uT, uTime, uSize, uCalma;
+  attribute vec3 aFrom, aTo; attribute float aRnd; varying float vA, vGlow;
+  void main(){
+    float t = smoothstep(0.0, 1.0, clamp((uT - aRnd * 0.3) / 0.7, 0.0, 1.0));
+    vec3 p = mix(aFrom, aTo, t); float mid = sin(3.14159 * t);
+    vec3 n = vec3(sin(p.y * 2.3 + uTime * 0.9 + aRnd * 6.28), cos(p.x * 1.9 + uTime * 0.7 + aRnd * 3.1), sin(p.z * 2.1 + uTime * 0.8 + aRnd * 1.7));
+    p += n * (0.012 + mid * 0.62 * (1.0 - uCalma));
+    vec4 mv = uMV * vec4(p, 1.0); gl_Position = uProj * mv;
+    gl_PointSize = uSize * (0.55 + aRnd * 0.9) * (1.0 + mid * 0.7 * (1.0 - uCalma)) / -mv.z;
+    vA = 0.45 + 0.55 * aRnd; vGlow = clamp(mid * (1.0 - uCalma * 0.8), 0.0, 1.0);
+  }`;
+const FRAG = `
+  precision highp float; uniform float uAlpha; varying float vA, vGlow;
+  void main(){ float d = length(gl_PointCoord - 0.5); if (d > 0.5) discard; float s = smoothstep(0.5, 0.05, d);
+    vec3 col = mix(vec3(0.40, 0.06, 0.18), vec3(0.86, 0.46, 0.60), vGlow * 0.85 + (1.0 - vA) * 0.25); gl_FragColor = vec4(col, s * vA * uAlpha); }`;
+function crearMotor(canvas) {
+  const gl = canvas.getContext('webgl2', { alpha: true, antialias: false, premultipliedAlpha: true }); if (!gl) return null;
+  const sh = (tipo, src) => { const s = gl.createShader(tipo); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+  const prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG)); gl.linkProgram(prog); gl.useProgram(prog);
+  gl.bindVertexArray(gl.createVertexArray()); const buf = {}, u = {};
+  ['uProj', 'uMV', 'uT', 'uTime', 'uSize', 'uAlpha', 'uCalma'].forEach((k) => { u[k] = gl.getUniformLocation(prog, k); });
+  gl.disable(gl.DEPTH_TEST); gl.enable(gl.BLEND); gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+  return {
+    atributo(n, d, t) { const b = gl.createBuffer(), l = gl.getAttribLocation(prog, n); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, d, gl.DYNAMIC_DRAW); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, t, gl.FLOAT, false, 0, 0); buf[n] = b; },
+    subir(n, d) { gl.bindBuffer(gl.ARRAY_BUFFER, buf[n]); gl.bufferSubData(gl.ARRAY_BUFFER, 0, d); },
+    tamano() { const dpr = Math.min(devicePixelRatio, 2); canvas.width = Math.round(innerWidth * dpr); canvas.height = Math.round(innerHeight * dpr); gl.viewport(0, 0, canvas.width, canvas.height);
+      const f = 1 / Math.tan((FOV * Math.PI / 180) / 2), a = innerWidth / innerHeight; gl.uniformMatrix4fv(u.uProj, false, new Float32Array([f / a, 0, 0, 0, 0, f, 0, 0, 0, 0, -100.1 / 99.9, -1, 0, 0, -20 / 99.9, 0])); gl.uniform1f(u.uSize, 44 * dpr); },
+    dibujar({ x, y, rx, ry, s, t, tiempo, calma }) { const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
+      gl.uniformMatrix4fv(u.uMV, false, new Float32Array([cy * s, sx * sy * s, -cx * sy * s, 0, 0, cx * s, sx * s, 0, sy * s, -sx * cy * s, cx * cy * s, 0, x, y, -DIST, 1]));
+      gl.uniform1f(u.uT, t); gl.uniform1f(u.uTime, tiempo); gl.uniform1f(u.uAlpha, 1); gl.uniform1f(u.uCalma, calma); gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.drawArrays(gl.POINTS, 0, N); },
+  };
+}
+function proyectar(p, { x, y, rx, ry, s }) { const cx = Math.cos(rx), sx = Math.sin(rx), cy = Math.cos(ry), sy = Math.sin(ry);
+  const X = cy * s * p[0] + sy * s * p[2] + x, Y = sx * sy * s * p[0] + cx * s * p[1] - sx * cy * s * p[2] + y, Zc = -cx * sy * s * p[0] + sx * s * p[1] + cx * cy * s * p[2];
+  const f = 1 / Math.tan((FOV * Math.PI / 180) / 2), a = innerWidth / innerHeight, w = DIST - Zc; return { sx: ((f / a) * X / w + 1) / 2 * innerWidth, sy: (1 - f * Y / w) / 2 * innerHeight }; }
+
+const OPCIONES = [{ forma: rosa, etq: etiquetasA }, { forma: molecula, etq: etiquetasB }, { forma: copa, etq: etiquetasC }];
+const formas = [], escenaDe = [], ETIQ = [];
+OPCIONES.forEach((o, s) => VINOS.forEach((_, w) => { formas.push(o.forma(w)); escenaDe.push(s); ETIQ.push(o.etq(w)); }));
+const NF = formas.length - 1, motor = crearMotor(document.getElementById('gl'));
+const rnd = new Float32Array(N); for (let i = 0; i < N; i++) rnd[i] = R();
+motor.atributo('aFrom', formas[0].slice(), 3); motor.atributo('aTo', formas[1].slice(), 3); motor.atributo('aRnd', rnd, 1); motor.tamano(); addEventListener('resize', () => motor.tamano());
+const capa = document.getElementById('etiquetas');
+const els = ETIQ.map((g) => g.map((e) => { const el = document.createElement('div'); el.className = 'et'; el.innerHTML = '<b></b><span></span>'; el.querySelector('b').textContent = e.b; el.querySelector('span').textContent = e.s; capa.appendChild(el); return { e, el }; }));
+const secs = [...document.querySelectorAll('section')];
+let raton = [0, 0], rs = [0, 0], m = 0, seg = -1; addEventListener('pointermove', (e) => { raton = [e.clientX / innerWidth - 0.5, e.clientY / innerHeight - 0.5]; });
+function objetivoM(y) { const anc = []; secs.forEach((sec, s) => { const a = sec.offsetTop, b = a + sec.offsetHeight - innerHeight; for (let j = 0; j < 3; j++) anc.push([a + (b - a) * j / 2, s * 3 + j]); });
+  if (y <= anc[0][0]) return 0; for (let i = 0; i < anc.length - 1; i++) if (y < anc[i + 1][0]) { const p = (y - anc[i][0]) / (anc[i + 1][0] - anc[i][0]), misma = escenaDe[anc[i][1]] === escenaDe[anc[i + 1][1]]; return anc[i][1] + (misma ? Math.round(p) : p); } return NF; }
+function cuadro(t) {
+  m += (objetivoM(scrollY) - m) * 0.07; const i = Math.min(NF - 1, Math.floor(m)), f = m - i;
+  if (i !== seg) { seg = i; motor.subir('aFrom', formas[i]); motor.subir('aTo', formas[i + 1]); }
+  rs = rs.map((v, d) => v + (raton[d] - v) * 0.06);
+  const movil = innerWidth <= 860, vista = { x: movil ? 0 : 2.1, y: movil ? -1.15 : -0.05, s: movil ? 0.5 : 1, ry: Math.sin(t / 4200) * 0.35 + rs[0] * 0.9, rx: rs[1] * 0.35 };
+  motor.dibujar({ ...vista, t: f, tiempo: t / 1000, calma: escenaDe[i] === escenaDe[i + 1] ? 1 : 0 });
+  const g0 = Math.round(m), cerca = 1 - clamp(Math.abs(m - g0) / 0.3);
+  els.forEach((g, gi) => g.forEach((o) => { const op = gi === g0 ? cerca : 0; if (op < 0.01) { o.el.style.opacity = 0; return; }
+    const q = proyectar(o.e.p, vista); o.el.style.opacity = op; o.el.style.transform = `translate(${(q.sx - o.el.offsetWidth / 2).toFixed(1)}px, ${(q.sy - o.el.offsetHeight / 2).toFixed(1)}px)`; }));
+  const v = VINOS[g0 % 3].nombre; document.querySelectorAll('[data-vino]').forEach((el) => { if (el.textContent !== v) el.textContent = v; });
+  requestAnimationFrame(cuadro);
+}
+requestAnimationFrame(cuadro);
+</script>
+</body>
+</html>
